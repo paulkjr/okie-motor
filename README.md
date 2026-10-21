@@ -37,6 +37,19 @@ More screenshots (iPad, iPhone, rooms, energy, light modes) are in [docs/screens
 
 The whole project in one page: [PROJECT.md](PROJECT.md).
 
+## The parts as their own projects
+
+Each screen has its own project page with pictures, design notes and links to its code:
+
+| | |
+|---|---|
+| [**Okie Thermo Dial**](https://github.com/paulkjr/okie-thermo-dial) | A circular thermostat: a wheel you drag and flick, a colour scale, a weekly schedule |
+| [**Okie Calendar**](https://github.com/paulkjr/okie-calendar) | Day, week, month and year, with an endless date strip |
+| [**Okie Weather**](https://github.com/paulkjr/okie-weather) | A drawn sky, the next days and every detail |
+| [**Feed the Beasts**](https://github.com/paulkjr/okie-feed-the-beasts) | A pet feeder card with five designs |
+| [**Okie Home**](https://github.com/paulkjr/okie-home) | The iPhone and iPad app with widgets |
+| [**Okie Search + Assistant**](https://github.com/paulkjr/okie-search-assistant) | One search bar, and a chat with your Assist agent |
+
 ## Quick start on a fresh Home Assistant
 
 The long version with every click is [docs/guides/00-START-HERE.md](docs/guides/00-START-HERE.md). The short one:
