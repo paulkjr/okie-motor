@@ -5,7 +5,7 @@
   "description": "A search-and-control dashboard card for Home Assistant: lock page, status island, search bar with AI, bento start screen, detail views, apps and settings.",
   "license": "GPL-3.0-or-later",
   "scripts": {
-    "test": "node --test \"tests/*.test.js\"",
+    "test": "node --test",
     "build": "python3 tools/build.py",
     "demo": "python3 tools/make-demo.py",
     "serve": "node tools/serve.js"
