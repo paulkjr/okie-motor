@@ -1,0 +1,29 @@
+# A dashboard that is just Okie Motor.
+# Create it:  Settings > Dashboards > Add dashboard > New dashboard from scratch
+#             Title "Okie", URL "okie-tablet"   (the Okie Home iOS app opens /okie-tablet/home)
+# then open it > pencil > three dots > Raw configuration editor > select all > paste this > Save.
+title: Okie
+
+# Recommended on a wall tablet and in the Okie Home app: hides Home Assistant's own top bar and sidebar.
+# Needs the "kiosk-mode" plugin from HACS (without it this key is ignored). Remove the # signs to use it.
+# kiosk_mode:
+#   hide_header: true
+#   hide_sidebar: true
+
+views:
+  - title: Home
+    path: home                        # the app opens /okie-tablet/home
+    type: panel                       # a panel view gives the card the whole screen
+    cards:
+      - type: custom:okie-motor-card
+        start: bento                  # bento = the start screen | browse = open with the search panel expanded
+        language: auto                # auto | en | de
+        squircle: standard            # card corner shape: none (Standard) | strong (Prominent) | standard (Balanced) | soft (Subtle)
+        weather_entity: weather.home  # leave out to use the first weather entity
+        # power_entity: sensor.grid_power     # optional; empty picks the strongest power sensor
+        # wallpaper: /local/okie/wallpaper.jpg   # a picture in /config/www/okie/
+        # videos:
+        #   enabled: true
+        #   path: /local/okie-videos            # .mp4 clips in /config/www/okie-videos/ (light_on.mp4, default_1.mp4 ...)
+        zen:
+          enabled: true               # the lock page with the big clock

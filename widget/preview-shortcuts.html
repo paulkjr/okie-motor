@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Okie shortcuts widget, preview</title>
+<style>
+  body{margin:0;padding:18px;background:#b78f7f;font:13px -apple-system,system-ui,sans-serif;color:#222;}
+  h1{font-size:15px;margin:0 0 12px;}
+  .grid{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;}
+  .cell{display:flex;flex-direction:column;gap:6px;}
+  .cell canvas{border-radius:22px;display:block;box-shadow:0 2px 10px rgba(0,0,0,.25);}
+  .cell{position:relative;}.tapbox{position:absolute;border:1px dashed rgba(0,255,120,.8);border-radius:6px;pointer-events:none;box-sizing:border-box;}
+  .small canvas{width:158px;height:158px;}.large canvas{width:338px;height:354px;}.medium canvas{width:338px;height:158px;}
+  .lock{display:inline-flex;flex-direction:column;gap:2px;padding:10px 14px;border-radius:18px;background:rgba(0,0,0,.35);color:#fff;min-width:120px;}
+</style></head>
+<body>
+<h1>Preview: the shortcuts widget script run against a canvas stand-in for Scriptable (dev only, not shipped)</h1>
+<div class="grid" id="grid"></div>
+<script>
+// ---- a small stand-in for the parts of Scriptable the widget uses ----
+function rgba(hex, a) { var n = parseInt(String(hex).replace('#', ''), 16); return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + (a == null ? 1 : a) + ')'; }
+function Color(hex, a) { this.css = rgba(hex, a); }
+Color.white = function () { return new Color('#ffffff'); };
+function Point(x, y) { this.x = x; this.y = y; }
+function Size(w, h) { this.width = w; this.height = h; }
+function Rect(x, y, w, h) { this.x = x; this.y = y; this.width = w; this.height = h; }
+function Font(size, weight) { this.size = size; this.weight = weight; }
+['system:400', 'semiboldSystem:600', 'boldSystem:700', 'heavySystem:900'].forEach(function (d) { var p = d.split(':'); Font[p[0] + 'Font'] = function (s) { return new Font(s, +p[1]); }; });
+Font.systemFont = Font.systemFont || function (s) { return new Font(s, 400); };
+function Path() { this.ops = []; }
+Path.prototype.move = function (p) { this.ops.push(['m', p]); };
+Path.prototype.addLine = function (p) { this.ops.push(['l', p]); };
+Path.prototype.closeSubpath = function () { this.ops.push(['z']); };
+Path.prototype.addCurve = function (p, c1, c2) { this.ops.push(['c', p, c1, c2]); };
+function DrawContext() { this.align = 'left'; this.respectScreenScale = true; }
+Object.defineProperty(DrawContext.prototype, 'size', { set: function (s) { this._size = s; } });
+// the canvas is made at the first drawing call, at the screen's scale (3) when respectScreenScale is on, like Scriptable
+Object.defineProperty(DrawContext.prototype, 'c', { get: function () {
+  if (!this._c) { var sc = this.respectScreenScale ? 3 : 1; this.canvas = document.createElement('canvas'); this.canvas.width = this._size.width * sc; this.canvas.height = this._size.height * sc; this._c = this.canvas.getContext('2d'); this._c.scale(sc, sc); }
+  return this._c; } });
+var Device = { screenSize: function () { return { width: 393, height: 852 }; }, screenScale: function () { return 3; } };
+DrawContext.prototype.setFillColor = function (c) { this.c.fillStyle = c.css; };
+DrawContext.prototype.setStrokeColor = function (c) { this.c.strokeStyle = c.css; };
+DrawContext.prototype.setLineWidth = function (n) { this.c.lineWidth = n; };
+DrawContext.prototype.fillRect = function (r) { this.c.fillRect(r.x, r.y, r.width, r.height); };
+DrawContext.prototype.fillEllipse = function (r) { this.c.beginPath(); this.c.ellipse(r.x + r.width / 2, r.y + r.height / 2, r.width / 2, r.height / 2, 0, 0, 7); this.c.fill(); };
+DrawContext.prototype.strokeEllipse = function (r) { this.c.beginPath(); this.c.ellipse(r.x + r.width / 2, r.y + r.height / 2, r.width / 2, r.height / 2, 0, 0, 7); this.c.stroke(); };
+DrawContext.prototype.addPath = function (p) { this.path = p; };
+DrawContext.prototype.fillPath = function () { var c = this.c; c.beginPath(); this.path.ops.forEach(function (o) { if (o[0] === 'm') c.moveTo(o[1].x, o[1].y); else if (o[0] === 'l') c.lineTo(o[1].x, o[1].y); else if (o[0] === 'c') c.bezierCurveTo(o[2].x, o[2].y, o[3].x, o[3].y, o[1].x, o[1].y); else c.closePath(); }); c.fill(); };
+DrawContext.prototype.strokePath = function () { var c = this.c; c.beginPath(); this.path.ops.forEach(function (o) { if (o[0] === 'm') c.moveTo(o[1].x, o[1].y); else if (o[0] === 'c') c.bezierCurveTo(o[2].x, o[2].y, o[3].x, o[3].y, o[1].x, o[1].y); else c.lineTo(o[1].x, o[1].y); }); c.lineCap = 'round'; c.lineJoin = 'round'; c.stroke(); };
+DrawContext.prototype.setFont = function (f) { this.font = f; };
+DrawContext.prototype.setTextColor = function (c) { this.textCss = c.css; };
+DrawContext.prototype.setTextAlignedLeft = function () { this.align = 'left'; };
+DrawContext.prototype.setTextAlignedRight = function () { this.align = 'right'; };
+DrawContext.prototype.drawText = function (t, p) { var c = this.c; c.font = this.font.weight + ' ' + this.font.size + 'px -apple-system,system-ui,sans-serif'; c.fillStyle = this.textCss; c.textBaseline = 'top'; c.textAlign = 'left'; c.fillText(t, p.x, p.y); };
+DrawContext.prototype.drawTextInRect = function (t, r) { var c = this.c; c.font = this.font.weight + ' ' + this.font.size + 'px -apple-system,system-ui,sans-serif'; c.fillStyle = this.textCss; c.textBaseline = 'top'; c.textAlign = this.align; c.fillText(t, this.align === 'right' ? r.x + r.width : r.x, r.y); };
+DrawContext.prototype.drawImageInRect = function (img, r) { var c = this.c, im = img.img; var go = function () { c.drawImage(im, r.x, r.y, r.width, r.height); }; if (im.complete && im.naturalWidth) go(); else im.addEventListener('load', go); };
+DrawContext.prototype.getImage = function () { this.c; return { canvas: this.canvas }; };
+function Stack(kind) { this.kind = kind || 'v'; this.kids = []; this.url = null; }
+Stack.prototype.layoutVertically = function () { this.kind = 'v'; }; Stack.prototype.layoutHorizontally = function () { this.kind = 'h'; };
+Stack.prototype.addSpacer = function (n) { this.kids.push({ spacer: n }); };
+Stack.prototype.addStack = function () { var s = new Stack(); this.kids.push(s); return s; };
+function ListWidget() { this.lines = []; this.kids = []; this.url = null; }
+ListWidget.prototype.setPadding = function () {};
+ListWidget.prototype.addText = function (t) { var x = { text: t, centerAlignText: function () {} }; this.lines.push(x); return x; };
+ListWidget.prototype.addStack = function () { var s = new Stack(); this.kids.push(s); return s; };
+/* where the tap boxes end up: a vertical stack runs top to bottom, a horizontal one left to right; spacers move on */
+function boxes(w) {
+  var out = [];
+  function walk(st, x, y) {
+    var cx = x, cy = y;
+    st.kids.forEach(function (k) {
+      if (k.spacer != null) { if (st.kind === 'v') cy += k.spacer; else cx += k.spacer; return; }
+      var sz = k.size || { width: 0, height: 0 };
+      if (k.url) out.push({ x: cx, y: cy, w: sz.width, h: sz.height, url: k.url });
+      walk(k, cx, cy);
+      if (st.kind === 'v') cy += sz.height; else cx += sz.width;
+    });
+  }
+  w.kids.forEach(function (k) { walk({ kind: 'v', kids: [k] }, 0, 0); });
+  return out;
+}
+function WebView() {}
+WebView.prototype.loadHTML = function (html) { var f = document.createElement('iframe'); f.style.cssText = 'position:absolute;left:-9999px;width:10px;height:10px'; document.body.appendChild(f); this.f = f; f.srcdoc = html; return new Promise(function (r) { f.onload = function () { r(); }; }); };
+WebView.prototype.evaluateJavaScript = function (js, cb) { var w = this.f.contentWindow; return new Promise(function (resolve) { w.eval('(function (completion) {' + js + '})').call(w, resolve); }); };
+var Data = { fromBase64String: function (b) { return 'data:image/png;base64,' + b; } };
+var Image = { fromData: function (u) { var im = document.createElement('img'); im.src = u; return { img: im }; } };
+var STORE = { okie_ha_token: 'preview', okie_ha_unit: 'x' };
+var Keychain = { contains: function (k) { return k in STORE; }, get: function (k) { return STORE[k]; }, set: function (k, v) { STORE[k] = v; } };
+var args = {};
+var scenario = null;
+function Request(url) { this.url = url; }
+Request.prototype.loadJSON = function () { var s = scenario; if (s.down) return Promise.reject(new Error('Could not connect to the server')); return Promise.resolve({ entity_id: 'switch.bedlight', state: s.bed, attributes: { friendly_name: 'bedLight' } }); };
+var result = null;
+var Script = { setWidget: function (w) { result = w; }, complete: function () {}, name: function () { return 'Okie Thermostat'; } };
+
+var AF = Object.getPrototypeOf(async function () {}).constructor;
+var SCEN = {
+  'bed light on':  { bed: 'on' },
+  'bed light off': { bed: 'off' },
+  'not reachable': { bed: 'unavailable', down: true },
+};
+async function run(family, st) {
+  scenario = st; result = null;
+  var cfg = { runsInWidget: true, widgetFamily: family };
+  var code = await (await fetch('okie-shortcuts-widget.js?' + Date.now(), { cache: 'no-store' })).text();
+  await new AF('Script', 'config', 'Keychain', 'Request', 'ListWidget', 'DrawContext', 'Color', 'Font', 'Path', 'Point', 'Rect', 'Size', 'args', 'Alert', 'Notification', 'Device', 'WebView', 'Image', 'Data', code)(Script, cfg, Keychain, Request, ListWidget, DrawContext, Color, Font, Path, Point, Rect, Size, args, null, null, Device, WebView, Image, Data);
+  await new Promise(function (r) { setTimeout(r, 200); });
+  return result;
+}
+(async function () {
+  var grid = document.getElementById('grid'); window.__done = false; window.__errors = [];
+  for (var name in SCEN) {
+    for (var fam of ['small', 'medium', 'large']) {
+      try {
+        var w = await run(fam, SCEN[name]); var cell = document.createElement('div'); cell.className = 'cell ' + fam; cell.appendChild(w.backgroundImage.canvas);
+        boxes(w).forEach(function (bx) { var d = document.createElement('div'); d.className = 'tapbox'; d.style.cssText = 'left:' + bx.x + 'px;top:' + bx.y + 'px;width:' + bx.w + 'px;height:' + bx.h + 'px'; cell.appendChild(d); });
+        var cap = document.createElement('div'); cap.textContent = fam + ': ' + name + (w.url ? ' (one tap: ' + decodeURIComponent(w.url.split('tile=')[1] || '') + ')' : ' (' + boxes(w).length + ' taps)'); var wrap = document.createElement('div'); wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px'; wrap.appendChild(cell); wrap.appendChild(cap); grid.appendChild(wrap);
+      } catch (e) { window.__errors.push(name + '/' + fam + ': ' + e.message); }
+    }
+  }
+  window.__done = true;
+})();
+</script></body></html>

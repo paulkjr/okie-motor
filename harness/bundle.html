@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Okie Motor harness (bundle)</title>
+<style>
+  html,body{margin:0;height:100%;background:#1b1916;font-family:Inter,system-ui,sans-serif;}
+  #bg{position:fixed;inset:0;background:url('assets/room.jpg') center/cover;filter:brightness(.78) saturate(1.05);}
+  #wrap{position:relative;min-height:100%;display:flex;justify-content:center;padding-top:56px;box-sizing:border-box;}
+  okie-motor-card{width:100%;}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div id="wrap"><okie-motor-card id="card"></okie-motor-card></div>
+<script>
+// dev: ?touch=1 makes the page answer (pointer:coarse) like an iPad does, so the tablet layout is used in a desktop browser
+if (/[?&]touch=1/.test(location.search)) { var mm = window.matchMedia.bind(window); window.matchMedia = function (q) { var r = mm(q); if (/pointer:\s*coarse/.test(q)) return { matches: true, media: q, onchange: null, addEventListener: function () {}, removeEventListener: function () {}, addListener: function () {}, removeListener: function () {}, dispatchEvent: function () { return false; } }; return r; }; }
+</script>
+<script>
+// dev: ?fakevoice=1 gives the page a SpeechRecognition that "hears" a sentence and then goes quiet without ending, like the real one does
+if (/[?&]fakevoice=1/.test(location.search)) {
+  window.SpeechRecognition = window.webkitSpeechRecognition = function () { this.lang = 'en-US'; this.interimResults = false; };
+  window.SpeechRecognition.prototype.start = function () { var me = this; this._on = true; setTimeout(function () { if (me.onstart) me.onstart({}); }, 50); [['turn on', 700], ['turn on the bed', 1300], ['turn on the bed light', 1900]].forEach(function (w) { setTimeout(function () { if (me._on && me.onresult) { var it = [{ transcript: w[0] }]; it.isFinal = false; me.onresult({ resultIndex: 0, results: [it] }); } }, w[1]); }); };
+  window.SpeechRecognition.prototype.stop = function () { var me = this; if (!this._on) return; this._on = false; setTimeout(function () { if (me.onend) me.onend({}); }, 30); };
+}
+</script>
+<script>
+// dev: ?now=2191-10-21T10:00:00 moves the page's clock to that moment (screenshots and demos with a made-up date)
+(function () { var m = location.search.match(/[?&]now=([^&]+)/); if (!m) return; var D = Date, off = D.parse(decodeURIComponent(m[1])) - D.now(); if (isNaN(off)) return;
+  function F() { if (!(this instanceof F)) return new D(D.now() + off).toString(); if (!arguments.length) return new D(D.now() + off); return new (Function.prototype.bind.apply(D, [null].concat([].slice.call(arguments))))(); }
+  F.prototype = D.prototype; F.now = function () { return D.now() + off; }; F.parse = D.parse; F.UTC = D.UTC; window.Date = F; })();
+</script>
+<script>if (/[?&]bridge=1/.test(location.search)) window.__okieBridge = {};  // dev: acts like the Okie Home app (the page keeps where you were)</script>
+<script src="../dist/okie-motor.js"></script>
+<script src="mock-hass.js"></script>
+<script>
+  var q = new URLSearchParams(location.search); window.__lang = q.get('lang') || 'en';
+  try { localStorage.clear(); } catch (e) {}
+  var card = document.getElementById('card');
+  var m = makeMockHass(function (h) { card.hass = h; });
+  window.mock = m;
+  card.setConfig({
+    squircle: q.get('squircle') || 'none',
+    start: q.get('start') || 'bento',
+    zen: { enabled: q.get('zen') === '1' },
+    language: q.get('lang') || 'en',
+    splash: q.get('splash') || 'none',
+    power_entity: 'sensor.house_power',
+    videos: { enabled: true, path: '/okie-videos' },
+    weather_entity: 'weather.home',
+    rest: q.get('rest') ? { enabled: true, saverAfterSec: 5, deepAfterSec: 5 } : undefined
+  });
+  // dev: ?favs=1 gives the start screen 14 favorites, so the left list is longer than its box (to try scrolling it)
+  if (q.get('favs')) card.setConfig(Object.assign({}, card._config || {}, { favorites: ['light.kitchen_ceiling','light.living_room_lamp','climate.living_room','cover.living_room_blinds','media_player.living_room_tv','light.anziehraum_deckenleuchte','cover.anziehraum_rollade','cover.arbeitszimmer_rollade','light.kitchen_counter','switch.coffee_machine','light.living_room_strip','fan.arbeitszimmer_klima','vacuum.robo','script.govee_cozy_lights'], bento: { w1mode: 'favorites', w1layout: 'list' }, start: q.get('start') || 'bento', zen: { enabled: q.get('zen') === '1' }, splash: 'none', language: q.get('lang') || 'en', weather_entity: 'weather.home', power_entity: 'sensor.house_power' }));
+  card.hass = m.hass;
+  var hh = m.hass; hh.language = q.get('lang') || 'en'; hh.locale = { language: hh.language };
+  // dev: ?feeder=peek (compact, classic, peek, leaves, neon, bowl) sets the look of the feeder card
+  if (q.get('feeder')) setTimeout(function () { try { card._settings.set({ bento: { feederDesign: q.get('feeder') } }); } catch (e) { /* not there */ } }, 600);
+  // dev: ?feederpick=Neon%20bowl&arrange=1 opens the pencil of the feeder card, taps that look in the picker, closes the picker and writes what happened over the page
+  if (q.get('feederpick')) setTimeout(function () { try { var sr = card.shadowRoot, log = []; sr.querySelector('.fdc .fv-edit').click(); setTimeout(function () { var o = [].filter.call(sr.querySelectorAll('.fd-opt'), function (b) { return b.textContent.indexOf(q.get('feederpick')) >= 0; })[0]; log.push('options ' + sr.querySelectorAll('.fd-opt').length + ', found ' + !!o); if (o) o.click(); setTimeout(function () { log.push('design ' + sr.querySelector('.fdc').dataset.design + ', height ' + getComputedStyle(sr.querySelector('.fdc')).height + ', marked ' + [].map.call(sr.querySelectorAll('.fd-opt.on .fd-name'), function (n) { return n.textContent; }).join(',')); var d = document.createElement('pre'); d.style.cssText = 'position:fixed;left:0;top:0;z-index:99999;background:#fff;color:#000;font:16px monospace;padding:8px;margin:0'; d.textContent = log.join('\n'); document.body.appendChild(d); var x = sr.querySelector('.ov-close'); if (x) x.click(); }, 700); }, 900); } catch (e) { document.title = 'feederpick failed ' + e; } }, 3500);
+  // dev: ?probe=1 writes the sizes of the feeder card's parts over the page (to read them in a browser that cannot be scripted, like the iPad simulator)
+  if (q.get('probe')) setTimeout(function () { try { var sr = card.shadowRoot, e = sr.querySelector('.fdc'), out = []; var r = function (n) { var b = n.getBoundingClientRect(), c = getComputedStyle(n); return n.className + ' ' + Math.round(b.width) + 'x' + Math.round(b.height) + ' fs=' + c.fontSize + ' ff=' + c.fontFamily.slice(0, 22) + ' w=' + c.width + ' ls=' + c.letterSpacing + ' tsa=' + (c.webkitTextSizeAdjust || ''); }; out.push('win ' + innerWidth + 'x' + innerHeight + ' dpr ' + devicePixelRatio, 'zoom ' + (sr.querySelector('.main-container') || {}).style.zoom, r(e)); [].forEach.call(e.querySelectorAll('.fdi-t,.fdi-l,.fdi-art'), function (n) { out.push(r(n)); }); out.push('font Okie Manrope: ' + document.fonts.check('800 20px "Okie Manrope"') + ' sora ' + document.fonts.check('600 20px "Okie Sora"')); var d = document.createElement('pre'); d.style.cssText = 'position:fixed;left:0;top:0;z-index:99999;background:#fff;color:#000;font:14px monospace;padding:8px;margin:0;max-width:100%;white-space:pre-wrap'; d.textContent = out.join('\n'); document.body.appendChild(d); } catch (e) { var d2 = document.createElement('pre'); d2.textContent = String(e); d2.style.cssText = 'position:fixed;left:0;top:0;z-index:99999;background:#fff;color:#000'; document.body.appendChild(d2); } }, 3500);
+  // dev: ?openapp=server opens one of the card's own screens a moment after the start (to look at it in a browser where the page cannot be clicked, like the iPad simulator)
+  // dev: ?music=1 puts the Spotify player among the favorites, in the right column
+  if (q.get('music')) setTimeout(function () { try { var f = (card._ctx.settings.get().favorites || []).slice(); if (f.indexOf('media_player.spotify_alex') < 0) f.push('media_player.spotify_alex'); card._ctx.settings.set({ favorites: f, bento: { rightCards: ['media_player.spotify_alex'], rightOrder: ['w:slider', 'media_player.spotify_alex', 'w:feeder'] }, cardStyle: q.get('music') === 'large' ? { 'media_player.spotify_alex': 'large' } : {} }); } catch (e) { /* not there */ } }, 1500);
+  // dev: ?arrange=1 opens the arrangement (the pencil) a moment after the start
+  if (q.get('arrange')) setTimeout(function () { try { var f = function (root) { var r = root.querySelector('.w1-edit'); if (r) return r; var a = root.querySelectorAll('*'); for (var i = 0; i < a.length; i++) if (a[i].shadowRoot) { var x = f(a[i].shadowRoot); if (x) return x; } return null; }; f(document).click(); } catch (e) { /* not there */ } }, 3200);
+  if (q.get('openapp')) setTimeout(function () { try { card._openApp(q.get('openapp')); } catch (e) { /* not there */ } }, 1800);
+  // dev: ?diag=1 prints what the card measures (zoom, the sizes of the big numbers ...) over the page, for a browser where the console is out of reach (the iPad simulator)
+  if (q.get('diag')) {
+    var box = document.createElement('pre'); box.style.cssText = 'position:fixed;left:6px;top:6px;z-index:99999;margin:0;padding:6px 8px;background:rgba(0,0,0,.8);color:#9f9;font:11px/1.3 monospace;max-width:96vw;white-space:pre-wrap;pointer-events:none;';
+    document.body.appendChild(box);
+    var deepq = function (root, sel) { var out = []; (function walk(n) { if (n.querySelectorAll) { out.push.apply(out, n.querySelectorAll(sel)); n.querySelectorAll('*').forEach(function (e) { if (e.shadowRoot) walk(e.shadowRoot); }); } })(root); return out; };
+    setInterval(function () {
+      try {
+        var dt = deepq(document, '.dt')[0], th = dt && dt.querySelector('.th-num') || deepq(document, '.th-num')[0], thEl = dt && dt.querySelector('.th') || deepq(document, '.th')[0], mc = deepq(document, '.main-container')[0], st = deepq(document, '.stage')[0];
+        var cs = function (e, p) { return e ? getComputedStyle(e).getPropertyValue(p) : '-'; };
+        var o = { zoom: card._zoom, avail: card._avail, inner: [innerWidth, innerHeight], dpr: devicePixelRatio, mcZoom: mc && mc.style.zoom, mcCss: cs(mc, 'zoom'),
+          fs: cs(st, '--okie-fs'), fz: cs(mc, '--okie-fz'), thNumFont: cs(th, 'font-size'), thNumVar: cs(thEl, '--th-num'), thCh: cs(thEl, '--th-ch'), thH: thEl && thEl.offsetHeight, thW: thEl && thEl.offsetWidth,
+          dtOff: dt && [dt.offsetWidth, dt.offsetHeight], dtRect: dt && [Math.round(dt.getBoundingClientRect().width), Math.round(dt.getBoundingClientRect().height)], gridCols: dt && cs(dt, 'grid-template-columns'), vh: cs(thEl, 'font-size') };
+        var sel = q.get('diag') !== '1' ? q.get('diag') : ''; if (sel) { var xe = deepq(document, sel)[0]; o.sel = xe && { font: cs(xe, 'font-size'), off: [xe.offsetWidth, xe.offsetHeight], parentOff: xe.parentElement && [xe.parentElement.offsetWidth, xe.parentElement.offsetHeight], fs: cs(xe, '--okie-fs'), minFs: cs(xe, '-webkit-text-size-adjust') }; }
+        box.textContent = JSON.stringify(o).replace(/,"/g, '\n"');
+      } catch (e) { box.textContent = 'diag error ' + e; }
+    }, 1000);
+  }
+</script>
+</body>
+</html>

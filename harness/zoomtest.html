@@ -1,0 +1,21 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{margin:0;background:#222;color:#fff;font:14px system-ui}
+.z{zoom:.5738;width:1200px;background:#345;margin-bottom:6px}
+.t{transform:scale(.5738);transform-origin:0 0;width:1200px;background:#354;margin-bottom:6px;height:60px}
+.n{-webkit-text-size-adjust:none;text-size-adjust:none}
+.p{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+span{display:inline-block;background:#843;font-size:26px;white-space:nowrap}
+#out{position:fixed;left:0;bottom:0;right:0;background:#000;color:#9f9;font:12px monospace;white-space:pre;padding:6px}
+</style>
+<div class="z"><span id="s1">8% abc</span></div>
+<div class="z n"><span id="s2">8% abc</span></div>
+<div class="z p"><span id="s3">8% abc</span></div>
+<div class="t"><span id="s4">8% abc</span></div>
+<div style="zoom:1"><span id="s5">8% abc</span></div>
+<pre id="out"></pre>
+<script>
+var o = {};
+['s1','s2','s3','s4','s5'].forEach(function (k) { var e = document.getElementById(k), cs = getComputedStyle(e), r = e.getBoundingClientRect(); o[k] = [cs.fontSize, e.offsetWidth, Math.round(r.width), cs.webkitTextSizeAdjust]; });
+document.getElementById('out').textContent = JSON.stringify(o) + '\n' + navigator.userAgent.slice(-45) + ' dpr ' + devicePixelRatio + ' inner ' + innerWidth + 'x' + innerHeight;
+</script>

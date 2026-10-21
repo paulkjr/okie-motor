@@ -1,0 +1,711 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- The big thermostat of the Okie Motor widget (widget/okie-thermostat-widget.js). tools/make-widget.py puts this file, the card's fonts and the card's own history code into the
+     widget script; the script fills the four /*@...@*/ marks. One page, five tabs like the card's detail view: Controls, Context, History, Schedule, Settings. -->
+<style>
+/*@FONTS@*/
+:root{--acc:150,150,150;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+html,body{margin:0;height:100%;overflow:hidden;color:#f6f5f7;font:500 16px "Okie Manrope",-apple-system,system-ui,sans-serif;background:#120e0b;}
+body{background:radial-gradient(120% 70% at 85% 12%,#4d392b 0%,#271c15 48%,#120e0b 100%);}
+button{font:inherit;color:inherit;cursor:pointer;}
+.app{height:100%;display:flex;flex-direction:column;padding:max(env(safe-area-inset-top),10px) 0 max(env(safe-area-inset-bottom),12px);}
+.top{padding:16px 26px 0;display:flex;flex-direction:column;align-items:flex-start;gap:7px;}
+.name{font-size:14px;font-weight:700;letter-spacing:2.4px;color:rgba(255,255,255,.7);}
+.state{font-size:17px;font-weight:700;color:rgb(var(--acc));line-height:1.1;}
+/* the menu: a round bubble with the icon of the open tab; a tap opens it into the row of five and a choice (or a tap elsewhere) closes it again */
+.menu{position:relative;align-self:center;width:186px;height:36px;margin:4px 0 0;flex:none;}
+.bubble{position:absolute;left:50%;top:1px;width:34px;height:34px;margin-left:-17px;border-radius:50%;border:0;padding:0;display:grid;place-items:center;background:#fff;color:#1d1b19;box-shadow:0 3px 12px rgba(0,0,0,.35);transition:opacity .16s ease,transform .26s cubic-bezier(.2,.8,.2,1);}
+.bubble svg{width:17px;height:17px;}
+.tabs{position:absolute;left:0;right:0;top:-3px;height:42px;display:flex;justify-content:center;align-items:center;gap:2px;padding:4px;border-radius:999px;background:rgba(255,255,255,.14);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);opacity:0;pointer-events:none;-webkit-clip-path:inset(4px 76px 4px 76px round 17px);clip-path:inset(4px 76px 4px 76px round 17px);transition:opacity .2s ease,clip-path .32s cubic-bezier(.2,.8,.2,1),-webkit-clip-path .32s cubic-bezier(.2,.8,.2,1);}
+.menu.open .tabs{opacity:1;pointer-events:auto;-webkit-clip-path:inset(0 0 0 0 round 21px);clip-path:inset(0 0 0 0 round 21px);}
+.menu.open .bubble{opacity:0;transform:scale(.55);pointer-events:none;}
+.tabs button{width:34px;height:34px;border-radius:50%;border:0;padding:0;display:grid;place-items:center;background:none;color:rgba(255,255,255,.78);flex:none;transition:background .2s ease,color .2s ease;}
+.tabs button svg{width:17px;height:17px;}
+.tabs button.on{background:#fff;color:#1d1b19;}
+.panes{position:relative;flex:1;min-height:0;}
+.pane{position:absolute;inset:0;display:none;}.pane.on{display:block;}
+.scroll{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 22px 28px;display:flex;flex-direction:column;gap:12px;}
+.stage{position:absolute;inset:0;}
+#wheel{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;opacity:0;}
+.zone{position:absolute;top:0;bottom:0;right:0;width:46%;touch-action:none;}
+.left{position:absolute;left:26px;top:19%;width:60%;pointer-events:none;}
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:2.2px;color:rgba(255,255,255,.62);margin-bottom:10px;}
+.num{font-family:"Okie Sora",-apple-system,sans-serif;font-size:min(31vw,17vh);font-weight:800;line-height:.92;letter-spacing:-.03em;font-variant-numeric:tabular-nums;text-shadow:0 0 36px rgba(var(--acc),.3);}
+.now{margin-top:10px;font-family:"Okie Sora",-apple-system,sans-serif;font-size:14px;font-weight:600;color:rgba(255,255,255,.62);}
+.num.buzz{animation:thBuzz .14s ease;}@keyframes thBuzz{0%{transform:translateX(0)}30%{transform:translateX(-2px)}60%{transform:translateX(2px)}100%{transform:translateX(0)}}
+.pm{display:flex;gap:12px;margin-top:18px;pointer-events:auto;}
+.pm button{width:53px;height:53px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-size:30px;font-weight:500;line-height:1;padding:0;}
+.pm button:active{background:rgba(255,255,255,.22);}
+.bottom{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:18px;align-items:flex-start;padding:0 26px;}
+.sched{display:flex;align-items:center;gap:10px;border:0;background:none;padding:2px 0;color:rgb(var(--acc));font-size:11px;font-weight:700;letter-spacing:-.015em;}.sched svg{width:21px;height:21px;flex:none;}.sched .chev{color:rgba(255,255,255,.65);margin-left:4px;display:grid;}.sched .chev svg{width:12px;height:12px;}
+.modes{display:flex;gap:14px;}
+.mode{display:flex;flex-direction:column;align-items:center;gap:8px;background:none;border:0;color:rgba(255,255,255,.62);font-size:10px;font-weight:600;padding:0;}
+.mode i{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);}
+.mode svg{width:20px;height:20px;}
+.mode.on{color:#fff;}.mode.on i{background:rgb(var(--acc));border:2px solid rgba(var(--acc),.85);box-shadow:0 0 0 3px rgba(20,18,16,.5),0 0 0 5px rgba(var(--acc),.5);}
+.power{align-self:center;position:relative;display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:999px;border:0;background:none;color:rgba(255,255,255,.9);font-size:12px;font-weight:700;touch-action:none;}
+.power{gap:9px;}
+/* the card's own hold-to-turn-off: a circle around the power icon fills in 3 seconds */
+.ring{position:relative;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:rgb(var(--acc));flex:none;}
+.pic{position:relative;z-index:1;display:grid;place-items:center;}.pic svg{width:12px;height:12px;}
+.prog{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);}.prog circle{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-dasharray:107px;stroke-dashoffset:107px;}
+.off .num{opacity:.4;}.off .zone{pointer-events:none;}
+.toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);padding:10px 16px;border-radius:14px;background:rgba(0,0,0,.65);font-size:14px;font-weight:600;display:none;z-index:9;}
+@media (max-height:700px){.left{top:2%}.num{font-size:min(28vw,15vh)}.pm{margin-top:12px}.pm button{width:50px;height:50px}.bottom{gap:12px}}
+/* the other tabs */
+.lbl{font-size:12px;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.08em;margin-top:6px;}
+.note{font-size:14px;color:rgba(255,255,255,.62);text-align:center;padding:18px 8px;}.note.warn{background:rgba(255,200,80,.14);color:#ffd98a;border-radius:16px;}
+.seg{display:inline-flex;align-self:flex-start;padding:4px;gap:2px;border-radius:999px;background:rgba(255,255,255,.1);}
+.seg button{border:0;border-radius:999px;padding:11px 20px;background:none;font-size:15px;font-weight:500;color:rgba(255,255,255,.85);}.seg button.on{background:#fff;color:#1d1b19;}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.stat{padding:14px;border-radius:18px;background:rgba(255,255,255,.08);}.stat b{display:block;font:600 24px "Okie Sora",sans-serif;}.stat span{display:block;margin-top:4px;font-size:11px;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.06em;}
+.timeline{display:flex;height:34px;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.05);}.timeline i{display:block;height:100%;}
+.kv{display:flex;flex-direction:column;gap:6px;}.kvr{display:flex;justify-content:space-between;gap:12px;padding:9px 14px;border-radius:12px;background:rgba(255,255,255,.07);font-size:14px;}
+.kvr span{color:rgba(255,255,255,.55);text-transform:capitalize;}.kvr b{font-weight:600;text-align:right;word-break:break-word;}
+.hours{display:flex;align-items:flex-end;gap:3px;height:92px;margin-bottom:22px;}.hr{position:relative;flex:1;height:100%;display:flex;align-items:flex-end;}.hr i{display:block;width:100%;border-radius:4px 4px 0 0;background:#7de4ff;opacity:.85;}.hr span{position:absolute;bottom:-19px;left:50%;transform:translateX(-50%);font-size:11px;color:rgba(255,255,255,.55);}
+.row{display:flex;align-items:center;gap:12px;padding:11px 12px 11px 16px;border-radius:18px;background:rgba(255,255,255,.08);}.row .nm{flex:1;min-width:0;font-weight:600;}.row .sub{font-size:13px;color:rgba(255,255,255,.55);font-weight:500;}
+.act{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:10px 16px;background:rgba(255,255,255,.14);font-size:14px;font-weight:600;}.act.primary{background:#fff;color:#1d1b19;align-self:flex-start;padding:13px 26px;font-size:16px;}
+.mini{width:38px;height:38px;border-radius:50%;border:0;padding:0;display:grid;place-items:center;background:rgba(255,255,255,.12);}.mini svg{width:18px;height:18px;}
+.sw{position:relative;width:48px;height:28px;border-radius:999px;border:0;padding:0;background:rgba(255,255,255,.2);flex:none;transition:background .2s;}.sw i{position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s;}.sw.on{background:#34c759;}.sw.on i{transform:translateX(20px);}
+.wheels{display:flex;align-items:center;gap:6px;padding:6px 18px;border-radius:22px;background:rgba(255,255,255,.08);align-self:flex-start;}.colon{font-size:28px;font-weight:300;}
+.wheel{height:132px;width:76px;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;padding:44px 0;-webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);}.wheel::-webkit-scrollbar{display:none;}
+.wi{height:44px;display:grid;place-items:center;font-size:26px;font-weight:300;scroll-snap-align:center;color:rgba(255,255,255,.55);}.wi.sel{color:#f6f5f7;font-weight:500;}
+.chips{display:flex;gap:8px;flex-wrap:wrap;}.chip{border:0;border-radius:999px;padding:10px 18px;background:rgba(255,255,255,.1);font-size:14px;font-weight:500;}.chip.on{background:#fff;color:#1d1b19;}
+/* the weekly thermostat schedule (the card's Schedule tab) */
+.ts-days{display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.16);margin:0 -2px 14px;}
+.ts-day{position:relative;flex:1;border:0;background:none;padding:12px 0 14px;font-size:15px;font-weight:500;color:rgba(255,255,255,.55);min-width:0;}.ts-day.on{color:#fff;font-weight:700;}
+.ts-day.on::after{content:"";position:absolute;left:16%;right:16%;bottom:-1px;height:3px;border-radius:3px 3px 0 0;background:#fff;}
+.ts-day i{position:absolute;top:7px;left:calc(50% + 12px);width:6px;height:6px;border-radius:50%;background:#ffb04a;}
+.ts-list{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
+.ts-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:20px;background:rgba(255,255,255,.09);}.ts-row:active{background:rgba(255,255,255,.16);}.ts-row.off{opacity:.55;}
+.ts-ic{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.12);flex:none;}.ts-ic svg{width:20px;height:20px;}
+.ts-main{flex:1;min-width:0;}.ts-nm{font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.ts-chips{display:flex;gap:6px;margin-top:6px;}
+.ts-chip{padding:3px 12px;border-radius:999px;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;}.ts-chip.heat{background:rgba(255,128,84,.3);color:#ffd5c4;}.ts-chip.cool{background:rgba(104,158,255,.3);color:#d3e3ff;}.ts-chip.neutral{background:rgba(255,255,255,.16);color:#fff;}
+.ts-time{flex:none;font-size:15px;font-variant-numeric:tabular-nums;color:rgba(255,255,255,.82);text-align:right;white-space:nowrap;}
+.ts-add{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:999px;border:1.5px solid rgba(255,255,255,.34);background:none;font-size:15px;font-weight:600;color:#fff;margin-bottom:14px;}.ts-add:active{background:rgba(255,255,255,.12);}
+.ts-prof{border-radius:20px;background:rgba(255,255,255,.06);overflow:hidden;margin-bottom:24px;}
+.ts-prof-h{display:flex;align-items:center;justify-content:space-between;width:100%;padding:14px 16px;border:0;background:none;font-size:14px;font-weight:600;color:rgba(255,255,255,.88);text-align:left;}.ts-chev{display:grid;transition:transform .2s ease;}.ts-prof.open .ts-chev{transform:rotate(180deg);}
+.ts-prof-hint{padding:0 16px 8px;font-size:12.5px;line-height:1.4;color:rgba(255,255,255,.55);}
+.ts-prow{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:10px 16px 14px;border-top:1px solid rgba(255,255,255,.08);}.ts-pn{font-weight:600;flex:1 1 90px;min-width:70px;}
+.ts-upd{flex:1 1 100%;padding:9px 14px;border:0;border-radius:999px;background:#fff;color:#1d1b19;font-size:13.5px;font-weight:700;}
+.ts-st{display:flex;align-items:center;gap:12px;}.ts-stl{flex:none;width:76px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.55);}
+.ts-stv{min-width:92px;text-align:center;font-size:36px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.02em;}
+.ts-stb{width:46px;height:46px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:26px;line-height:1;display:grid;place-items:center;padding:0;touch-action:manipulation;}.ts-stb:active{background:rgba(255,255,255,.26);}
+.ts-st.heat .ts-stv{color:#ffb090;}.ts-st.cool .ts-stv{color:#a9c6ff;}
+.ts-st.sm{gap:6px;}.ts-st.sm .ts-stl{width:auto;font-size:11px;}.ts-st.sm .ts-stv{min-width:46px;font-size:20px;}.ts-st.sm .ts-stb{width:32px;height:32px;font-size:19px;}
+.ts-eh{display:flex;align-items:center;gap:10px;margin-bottom:6px;}.ts-back{display:inline-flex;align-items:center;gap:4px;padding:8px 14px 8px 8px;border:0;border-radius:999px;background:rgba(255,255,255,.12);font-size:14px;font-weight:600;}.ts-et{font-size:20px;font-weight:700;}
+.ts-name{width:100%;padding:13px 16px;border-radius:16px;border:0;background:rgba(255,255,255,.1);color:#fff;font:inherit;font-size:16px;outline:none;margin-top:8px;}.ts-name::placeholder{color:rgba(255,255,255,.55);}.ts-name:focus{background:rgba(255,255,255,.16);}
+.ts-temps{display:flex;flex-direction:column;gap:12px;margin:10px 0 18px;}.ts-hint{font-size:13px;color:rgba(255,255,255,.55);}
+.chip.ghost{background:rgba(255,255,255,.06);font-size:13px;}.ts-quick{margin-top:8px;}
+.act.danger{background:rgba(239,77,58,.28);margin:10px 0 24px;align-self:flex-start;}
+.ts-eh+.lbl,#sbody>.lbl{margin-top:16px;}
+/* the Settings tab: groups of rows in rounded cards, like the card's own settings */
+.sg{display:flex;flex-direction:column;gap:7px;margin-top:6px;}
+.sg-h{padding:0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);}
+.sg-note{padding:0 6px;font-size:12px;line-height:1.4;color:rgba(255,255,255,.45);}
+.sg-card{border-radius:20px;background:rgba(255,255,255,.07);overflow:hidden;}
+.sg-row{padding:14px 16px;border-top:1px solid rgba(255,255,255,.08);}.sg-row:first-child{border-top:0;}
+.sg-top{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:16px;}.sg-v{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.65);font-size:15px;font-variant-numeric:tabular-nums;}
+.sg-row .chips{margin-top:12px;}
+.sg-undo{width:26px;height:26px;border:0;border-radius:50%;padding:0;display:grid;place-items:center;background:rgba(255,255,255,.14);color:#fff;}.sg-undo[hidden]{display:none;}.sg-undo svg{width:14px;height:14px;}
+.sg-kv{display:flex;justify-content:space-between;gap:12px;font-size:15px;}.sg-kv span{color:rgba(255,255,255,.55);text-transform:capitalize;}.sg-kv b{font-weight:600;text-align:right;word-break:break-word;}
+.sg-more>summary{list-style:none;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;font-size:16px;border-top:1px solid rgba(255,255,255,.08);}.sg-more>summary::-webkit-details-marker{display:none;}
+.sg-more>summary::after{content:"";width:8px;height:8px;border-right:2px solid rgba(255,255,255,.5);border-bottom:2px solid rgba(255,255,255,.5);transform:rotate(45deg);transition:transform .2s;margin-right:4px;}
+.sg-more[open]>summary::after{transform:rotate(-135deg);}
+.sg-btn{display:block;width:100%;border:0;border-top:1px solid rgba(255,255,255,.08);background:none;padding:14px 16px;text-align:left;font-size:16px;color:#ff6b5e;}
+.thl-r{-webkit-appearance:none;appearance:none;width:100%;height:32px;margin:6px 0 0;background:transparent;-webkit-user-select:auto;}
+.thl-r::-webkit-slider-runnable-track{height:8px;border-radius:999px;background:rgba(255,255,255,.2);}
+.thl-r::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;margin-top:-10px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.4);}
+.thl-bar{height:14px;border-radius:999px;margin:4px 0 14px;}.thl-cols{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:6px;}.thl-c{display:flex;align-items:center;gap:8px;font-size:14px;}
+.thl-color{width:34px;height:34px;padding:0;border:0;border-radius:50%;background:none;}.thl-color::-webkit-color-swatch-wrapper{padding:0;}.thl-color::-webkit-color-swatch{border:2px solid rgba(255,255,255,.45);border-radius:50%;}
+details summary{padding:10px 4px;font-size:14px;color:rgba(255,255,255,.7);}
+</style></head><body>
+<div class="app" id="app">
+  <div class="menu" id="menu"><button class="bubble" id="bubble" aria-label="Menu" aria-haspopup="true" aria-expanded="false"></button><nav class="tabs" id="tabs" role="tablist"></nav></div>
+  <div class="top"><div class="name" id="name">THERMOSTAT</div><div class="state" id="state">&nbsp;</div></div>
+  <div class="panes">
+    <section class="pane on" id="p-controls">
+      <div class="stage" id="stage">
+        <svg id="wheel" aria-hidden="true"></svg>
+        <div class="zone" id="zone"></div>
+        <div class="left"><div class="eyebrow" id="eyebrow">TEMPERATURE</div><div class="num" id="num">–</div><div class="now" id="now"></div>
+          <div class="pm"><button id="minus" aria-label="Lower">&minus;</button><button id="plus" aria-label="Raise">+</button></div></div>
+        <div class="bottom"><button class="sched" id="sched"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Set smart schedule</span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span></button><div class="modes" id="modes"></div>
+          <button class="power" id="power"><span class="ring"><svg class="prog" viewBox="0 0 38 38"><circle cx="19" cy="19" r="17"/></svg><span class="pic"><svg viewBox="0 0 15 15" fill="none"><path d="M7.5 1.5v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M4.3 3.3a5.6 5.6 0 1 0 6.4 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span></span><span id="plabel">Hold to turn off</span></button></div>
+      </div>
+    </section>
+    <section class="pane" id="p-context"><div class="scroll" id="ctxbody"></div></section>
+    <section class="pane" id="p-history"><div class="scroll"><div class="seg" id="range"></div><div id="hbody" style="display:flex;flex-direction:column;gap:12px"></div></div></section>
+    <section class="pane" id="p-schedule"><div class="scroll" id="sbody"></div></section>
+    <section class="pane" id="p-settings"><div class="scroll" id="setbody"></div></section>
+  </div>
+</div><div class="toast" id="toast"></div>
+<script>
+/*@BOOT@*/
+/*@SHARED@*/
+/*@LOGIC@*/
+/*@SCHED@*/
+/*@LOOKSRC@*/
+/** The look of the dial: the card's defaults, the colours in the script, what was saved on this iPhone. Every change goes back to the Keychain through the script (saveStore). */
+var LK = normalizeLook(Object.assign({}, DEFAULT_LOOK, LOOK, (STORE && STORE.look) || {}));
+function syncLook() { ['c0', 'c1', 'c2', 'c3', 'cool', 'warm'].forEach(function (k) { LOOK[k] = LK[k]; }); }
+syncLook();
+/** The page cannot write to the Keychain itself: it asks the script with a request to okie-save://<what>?<json> (a hidden frame), which the script catches. Also kept in the page's own storage. */
+function saveStore(key, obj) {
+  try { localStorage.setItem('okie_' + key, JSON.stringify(obj)); } catch (e) { /* no page storage */ }
+  try { var f = document.createElement('iframe'); f.style.display = 'none'; f.src = 'okie-save://' + key + '?' + encodeURIComponent(JSON.stringify(obj)); document.body.appendChild(f); setTimeout(function () { if (f.parentNode) f.parentNode.removeChild(f); }, 900); } catch (e) { /* not in the widget */ }
+}
+var ICON = {
+  heat: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 3C14.2 7.2 17.75 9.6 17.75 15.25A5.75 5.75 0 1 1 6.25 15.25C6.25 9.6 9.8 7.2 12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+  cool: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 2v20M4.5 6l15 12M19.5 6l-15 12M2 12h20M6 4.5l12 15M18 4.5L6 19.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  heat_cool: '<svg viewBox="0 0 24 24" fill="none"><circle cx="7" cy="7" r="2.2" stroke="currentColor" stroke-width="1.4"/><path d="M7 1.8v1.4M7 10.8v1.4M1.8 7h1.4M10.8 7h1.4M3.3 3.3l1 1M9.7 9.7l1 1M3.3 10.7l1-1M9.7 4.3l1-1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M17 11.5v11M12.3 14.2l9.4 5.6M21.7 14.2l-9.4 5.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>'
+};
+function line(d) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>'; }
+var TABICON = {
+  controls: line('<path d="M5 4v16M12 4v16M19 4v16"/><circle cx="5" cy="14" r="2"/><circle cx="12" cy="8" r="2"/><circle cx="19" cy="16" r="2"/>'),
+  context: line('<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>'),
+  history: line('<path d="M4 20V4M4 20h16M8 15l3-4 3 2 4-6"/>'),
+  schedule: line('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
+  settings: line('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>')
+};
+var TABS = ['controls', 'context', 'history', 'schedule', 'settings'], TABNAME = { controls: 'Controls', context: 'Context', history: 'History', schedule: 'Schedule', settings: 'Settings' };
+var LABEL = { heat: 'Heating', cool: 'Cooling', heat_cool: 'Heat/Cool' };
+function $(id) { return document.getElementById(id); }
+/** h('div.cls', { onclick: fn, html: '<b>x</b>', any: 'attribute' }, child, 'text', [more]) */
+function h(tag, at) {
+  var parts = tag.split('.'), e = document.createElement(parts[0] || 'div'); if (parts.length > 1) e.className = parts.slice(1).join(' ');
+  Object.keys(at || {}).forEach(function (k) { var v = at[k]; if (k === 'html') e.innerHTML = v; else if (k === 'text') e.textContent = v; else if (k.indexOf('on') === 0 && typeof v === 'function') e.addEventListener(k.slice(2), v); else if (v != null) e.setAttribute(k, v); });
+  (function add(list) { list.forEach(function (c) { if (c == null || c === false) return; if (Array.isArray(c)) return add(c); e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); }); })(Array.prototype.slice.call(arguments, 2));
+  return e;
+}
+/** Haptics: iOS has no vibration call for web pages, but WebKit gives a light tick when a switch control is toggled (iOS 17.4 and newer), so a hidden switch is clicked on every tick. */
+var hxLabel = (function () {
+  try { var l = document.createElement('label'), i = document.createElement('input'); i.type = 'checkbox'; i.setAttribute('switch', ''); l.appendChild(i); l.setAttribute('aria-hidden', 'true'); l.style.display = 'none'; (document.head || document.body).appendChild(l); return l; } catch (e) { return null; }
+})();
+function haptic(n) {
+  if (CFG.haptics === false) return;
+  var k = n || 1;
+  for (var i = 0; i < k; i++) setTimeout(function () { try { if (hxLabel) hxLabel.click(); } catch (e) { /* no haptics here */ } try { if (navigator.vibrate) navigator.vibrate(6); } catch (e) { /* not on iOS */ } }, i * 70);
+}
+var spin = 0, introDone = false, vel = 0, lastMove = 0, coastRAF = 0, curTab = 'controls';
+var server = null, info = null, target = null, raw = 0, step = 1, pendingAt = 0, pendingVal = null, sendT = 0, dragging = false, wheel = null, lastMode = 'cool', modeKey = '';
+try { lastMode = localStorage.getItem('okie_lastmode') || 'cool'; } catch (e) {}
+
+// ---------------------------------------------------------------- Home Assistant ----
+function api(path, method, body, text) {
+  var o = { method: method || 'GET', headers: { Authorization: 'Bearer ' + CFG.token, 'Content-Type': 'application/json' } };
+  if (body) o.body = JSON.stringify(body);
+  return fetch(CFG.url + path, o).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return text ? r.text() : r.json(); });
+}
+function toast(t, ms) { var e = $('toast'); e.textContent = t; e.style.display = t ? 'block' : 'none'; if (t && ms) setTimeout(function () { if (e.textContent === t) e.style.display = 'none'; }, ms); }
+function service(domain, name, data, quiet) {
+  return api('/api/services/' + domain + '/' + name, 'POST', data).then(function (r) { return r; }, function (e) { if (!quiet) toast('Could not reach ' + domain + '.' + name); throw e; });
+}
+function call(name, data) { return service('climate', name, Object.assign({ entity_id: CFG.entity }, data)).then(function () { setTimeout(load, 500); }, function () {}); }
+function load() { return api('/api/states/' + CFG.entity).then(function (st) { server = st; toast(''); render(); }, function () { toast('Not reachable right now'); }); }
+function pendingActive() { return pendingAt && Date.now() - pendingAt < 15000 && info && info.tgt != null && Math.abs(info.tgt - pendingVal) > 0.001; }
+
+// ---------------------------------------------------------------- the wheel ----
+function build() {
+  var st = $('stage'), W = st.clientWidth, H = st.clientHeight; if (!W || !H) return;
+  // The wheel's left edge is at 60 % of the width and the screen edge cuts it. The arc it shows at the right edge runs from the top of this area (just under the name and
+  // state, where "Cooling" is) down to where a wheel of 43 % of the height would end: the bottom stays, the top reaches up. Circle through those two points with its left edge at 0.6 W:
+  var R0 = H * 0.43, h0 = Math.sqrt(Math.max(0, 0.8 * W * R0 - 0.16 * W * W)), yBot = H * 0.5 + h0, yTop = 0;
+  var hh = (yBot - yTop) / 2, R = (hh * hh + 0.16 * W * W) / (0.8 * W), cx = W * 0.6 + R, cy = (yTop + yBot) / 2;
+  wheel = drawWheelSvg($('wheel'), W, H, R, cx, cy);
+}
+/** The wheel into an svg: R is 150 scene units of the card's wheel, so the glow (blur, spread, strength) and the tick count of the Dial look mean the same here. */
+function drawWheelSvg(svg, W, H, R, cx, cy) {
+  var ns = 'http://www.w3.org/2000/svg';
+  function el(n, at) { var e = document.createElementNS(ns, n); Object.keys(at || {}).forEach(function (k) { e.setAttribute(k, at[k]); }); return e; }
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.innerHTML = '';
+  var u = R / 150, reachU = glowReach(LK), reach = Math.ceil(reachU * u), rr = R * 1.014, rg = rr + reach, stops = [];
+  var id = 'gg' + Math.floor(Math.random() * 1e6), defs = el('defs'), gr = el('radialGradient', { id: id, gradientUnits: 'userSpaceOnUse', cx: cx, cy: cy, r: rg });
+  for (var k = -6; k <= 6; k++) { var du = reachU * k / 6, s0 = el('stop', { offset: Math.max(0, Math.min(1, (rr + du * u) / rg)).toFixed(4), 'stop-color': '#999', 'stop-opacity': glowAlpha(du, LK).toFixed(4) }); gr.appendChild(s0); stops.push(s0); }
+  defs.appendChild(gr); svg.appendChild(defs);
+  svg.appendChild(el('circle', { cx: cx, cy: cy, r: rg, fill: 'url(#' + id + ')' }));
+  svg.appendChild(el('circle', { cx: cx, cy: cy, r: R, fill: 'rgba(11,9,8,.28)' }));
+  var ticks = el('g'), n = tickCount(LK);
+  for (var i = 0; i < n; i++) {
+    var major = i % 5 === 0, a = i * 2 * Math.PI / n, r1 = R * (major ? 0.847 : 0.9), r2 = R * 0.987;
+    ticks.appendChild(el('line', { x1: (cx + r1 * Math.cos(a)).toFixed(1), y1: (cy + r1 * Math.sin(a)).toFixed(1), x2: (cx + r2 * Math.cos(a)).toFixed(1), y2: (cy + r2 * Math.sin(a)).toFixed(1), stroke: 'rgba(235,200,208,.6)', 'stroke-width': (major ? 2.4 : 1.8) * Math.max(.45, R / 200), 'stroke-linecap': 'round' }));
+  }
+  svg.appendChild(ticks);
+  var rim = el('circle', { cx: cx, cy: cy, r: rr, fill: 'none', 'stroke-width': 3.6 * Math.max(.45, R / 200), stroke: '#999' }); svg.appendChild(rim);
+  return { cx: cx, cy: cy, ticks: ticks, rim: rim, stops: stops };
+}
+function paint() {
+  if (!info) return;
+  var t = target == null ? info.tgt : target;
+  var rgb = (info.off || info.unavailable || t == null) ? { r: 150, g: 150, b: 150 } : colorFor(t, info.min, info.max, info.unit), c = rgb.r + ',' + rgb.g + ',' + rgb.b;
+  document.documentElement.style.setProperty('--acc', c);
+  $('num').textContent = t == null ? '–' : fmtTemp(t);
+  $('now').textContent = info.cur != null ? 'Now ' + fmtTemp(info.cur) + info.unit : '';
+  $('name').textContent = String(info.name).toUpperCase();
+  $('state').textContent = info.status;
+  $('eyebrow').textContent = 'TEMPERATURE, ' + info.unit;
+  $('stage').classList.toggle('off', !!(info.off || info.unavailable));
+  $('plabel').textContent = info.off ? 'Turn on' : 'Hold to turn off';
+  if (wheel) {
+    var rot = t == null ? 0 : (t - info.min) * (236 / 69) * (info.unit === '°C' ? 1.8 : 1);
+    wheel.ticks.setAttribute('transform', 'rotate(' + (rot + spin).toFixed(2) + ' ' + wheel.cx + ' ' + wheel.cy + ')');
+    wheel.rim.setAttribute('stroke', 'rgb(' + c + ')');
+    wheel.stops.forEach(function (s) { s.setAttribute('stop-color', 'rgb(' + c + ')'); });
+  }
+}
+function buzz() { var n = $('num'); n.classList.remove('buzz'); void n.offsetWidth; n.classList.add('buzz'); haptic(); }      // the number shakes and the wheel ticks, a degree at a time
+/** The wheel slides in from the right while it turns, the way the card's does when it opens; rollOut() is the same backwards (when another tab is chosen). */
+function animateWheel(from, to, dur, done) {
+  var box = $('wheel'), t0 = performance.now();
+  (function f(now) {
+    var p = Math.min(1, (now - t0) / dur), e = to > from ? 1 - Math.pow(1 - p, 3) : p * p * p, v = from + (to - from) * e;
+    box.style.opacity = String(v); box.style.transform = 'translateX(' + (60 * (1 - v)).toFixed(1) + 'px)'; spin = 90 * (1 - v); paint();
+    if (p < 1) setTimeout(function () { f(performance.now()); }, 16); else { box.style.opacity = String(to); box.style.transform = to === 1 ? '' : 'translateX(60px)'; spin = to === 1 ? 0 : 90; paint(); if (done) done(); }
+  })(t0);
+}
+function intro() { if (introDone || !wheel) return; introDone = true; animateWheel(0, 1, 700); }
+function drawModes() {
+  var icons = modeIcons(info), key = icons.map(function (m) { return m.id + (m.active ? '*' : ''); }).join();
+  if (key === modeKey) return; modeKey = key;
+  var box = $('modes'); box.innerHTML = '';
+  icons.forEach(function (m) {
+    var b = h('button.mode' + (m.active ? '.on' : ''), { 'aria-label': LABEL[m.id], html: '<i>' + ICON[m.id] + '</i><span>' + LABEL[m.id] + '</span>' });
+    b.addEventListener('click', function () { haptic(); var id = m.id === 'heat_cool' && info.hvacModes && info.hvacModes.indexOf('heat_cool') < 0 && info.hvacModes.indexOf('auto') >= 0 ? 'auto' : m.id; call('set_hvac_mode', { hvac_mode: id }); });
+    box.appendChild(b);
+  });
+}
+function render() {
+  info = summarize(server, CFG.unit);
+  var a = (server && server.attributes) || {};
+  step = +a.target_temp_step || (info.unit === '°F' ? 1 : 0.5);
+  if (!dragging && !pendingActive()) { target = info.tgt; raw = target == null ? 0 : target; if (pendingAt && info.tgt === pendingVal) pendingAt = 0; }
+  if (!info.off && !info.unavailable && server && server.state) { lastMode = server.state; try { localStorage.setItem('okie_lastmode', lastMode); } catch (e) {} }
+  if (!wheel) build();
+  paint(); drawModes(); intro();
+  if (curTab === 'settings') drawSettingsLive();
+}
+function setTarget(v) {
+  if (!info || info.tgt == null) return;
+  v = clamp(Math.round(v / step) * step, info.min, info.max); v = +v.toFixed(2);
+  if (v === target) return;
+  target = v; pendingAt = Date.now(); pendingVal = v; paint(); buzz();      // the change is the user's from now on: an update from the thermostat before the send still carries the old target and must not paint over it
+  clearTimeout(sendT);
+  sendT = setTimeout(function () { pendingAt = Date.now(); pendingVal = target; call('set_temperature', { temperature: target }); }, 450);
+}
+var dragY = 0, K = 1;
+function stopCoast() { if (coastRAF) { clearTimeout(coastRAF); coastRAF = 0; } }
+function coast() {
+  if (Math.abs(vel) < 0.006) { vel = 0; dragging = false; return; }
+  var last = performance.now();
+  (function frame(now) {
+    var dt = Math.min(48, Math.max(0, now - last)); last = now;
+    raw += vel * dt; vel = vel * Math.pow(0.0000033, dt / 1000);
+    var edge = raw <= info.min || raw >= info.max; setTarget(raw);
+    if (edge || Math.abs(vel) < 0.006) { vel = 0; coastRAF = 0; dragging = false; return; }
+    coastRAF = setTimeout(function () { frame(performance.now()); }, 16);
+  })(last);
+}
+$('zone').addEventListener('pointerdown', function (e) { if (!info || info.off || info.unavailable || info.tgt == null) return; stopCoast(); dragging = true; dragY = e.clientY; lastMove = performance.now(); vel = 0; raw = target == null ? info.tgt : target; K = info.unit === '°C' ? 0.56 : 1; try { $('zone').setPointerCapture(e.pointerId); } catch (x) {} });
+$('zone').addEventListener('pointermove', function (e) {
+  if (!dragging) return;
+  var now = performance.now(), dy = e.clientY - dragY, dt = now - lastMove, delta = -dy * 0.05 * K; dragY = e.clientY; lastMove = now;
+  raw += delta; setTarget(raw); vel = (dt > 0 && dt < 200) ? vel * 0.45 + (delta / dt) * 0.55 : 0;
+});
+['pointerup', 'pointercancel'].forEach(function (ev) { $('zone').addEventListener(ev, function () { if (dragging) coast(); }); });
+$('sched').addEventListener('click', function () { selectTab('schedule'); });
+$('minus').addEventListener('click', function () { if (info && info.tgt != null && !info.off) setTarget((target == null ? info.tgt : target) - step); });
+$('plus').addEventListener('click', function () { if (info && info.tgt != null && !info.off) setTarget((target == null ? info.tgt : target) + step); });
+var holdT = 0, holdTick = 0;
+/** The circle around the power icon fills in the 3 seconds of the hold (driven by a timer, like the card's CSS animation but the same on every page). */
+function setRing(p) { $('power').querySelector('.prog circle').style.strokeDashoffset = (107 * (1 - p)).toFixed(2) + 'px'; }
+function cancelHold() { clearTimeout(holdT); holdT = 0; clearTimeout(holdTick); holdTick = 0; $('power').classList.remove('holding'); setRing(0); }
+$('power').addEventListener('pointerdown', function () {
+  if (!info || info.unavailable) return;
+  if (info.off) { haptic(2); call('set_hvac_mode', { hvac_mode: lastMode }); return; }
+  haptic(); var t0 = performance.now(); $('power').classList.add('holding');
+  holdT = setTimeout(function () { cancelHold(); haptic(3); call('set_hvac_mode', { hvac_mode: 'off' }); }, 3000);
+  (function tick() { var p = Math.min(1, (performance.now() - t0) / 3000); setRing(p); if (p < 1 && holdT) holdTick = setTimeout(tick, 16); })();
+});
+['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) { $('power').addEventListener(ev, cancelHold); });
+
+// ---------------------------------------------------------------- the tabs ----
+TABS.forEach(function (id) { $('tabs').appendChild(h('button' + (id === 'controls' ? '.on' : ''), { role: 'tab', 'data-tab': id, 'aria-label': TABNAME[id], 'aria-selected': id === 'controls' ? 'true' : 'false', html: TABICON[id], onclick: function () { haptic(); closeMenu(); selectTab(id); } })); });
+function markTab(id) {
+  Array.prototype.forEach.call($('tabs').children, function (b) { var on = b.getAttribute('data-tab') === id; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
+  $('bubble').innerHTML = TABICON[id]; $('bubble').setAttribute('aria-label', TABNAME[id] + ' (menu)');
+}
+function openMenu() { $('menu').classList.add('open'); $('bubble').setAttribute('aria-expanded', 'true'); }
+function closeMenu() { $('menu').classList.remove('open'); $('bubble').setAttribute('aria-expanded', 'false'); }
+$('bubble').addEventListener('click', function (e) { e.stopPropagation(); haptic(); openMenu(); });
+document.addEventListener('pointerdown', function (e) { if ($('menu').classList.contains('open') && !$('menu').contains(e.target)) closeMenu(); });
+markTab('controls');
+function showTab(id) {
+  curTab = id; markTab(id);
+  TABS.forEach(function (t) { $('p-' + t).classList.toggle('on', t === id); });
+  if (id === 'controls') { wheel = null; build(); paint(); animateWheel(0, 1, 700); }
+  else if (id === 'context') drawContext();
+  else if (id === 'history') drawHistory();
+  else if (id === 'schedule') drawSchedule();
+  else if (id === 'settings') drawSettings();
+}
+/** Leaving the controls: the wheel rolls out to the right first (the way it rolled in), then the next tab shows; the last tap wins. */
+var pendingTab = null;
+function selectTab(id) {
+  if (curTab === 'leaving') { pendingTab = id; markTab(id); return; }
+  if (id === curTab) return;
+  if (curTab === 'controls') { pendingTab = id; markTab(id); curTab = 'leaving'; animateWheel(1, 0, 420, function () { var t = pendingTab; pendingTab = null; showTab(t); }); return; }
+  showTab(id);
+}
+
+// -- History (the card's own numbers: changes, average run, active share, the timeline, time per state, activity by hour)
+var range = '24h';
+function loadHistory() {
+  var body = $('hbody'), my = loadHistory.n = (loadHistory.n || 0) + 1;
+  body.innerHTML = ''; body.appendChild(h('div.note', { text: 'Loading…' }));
+  var to = Date.now(), from = to - RANGES[range];
+  api('/api/history/period/' + new Date(from).toISOString() + '?filter_entity_id=' + encodeURIComponent(CFG.entity) + '&end_time=' + encodeURIComponent(new Date(to).toISOString()) + '&minimal_response&no_attributes').then(function (res) {
+    if (my !== loadHistory.n) return;
+    body.innerHTML = '';
+    var segs = toSegments((res && res[0]) || [], from, to);
+    if (!segs.length) { body.appendChild(h('div.note', { text: 'No history for this time.' })); return; }
+    var st = historyStats(segs);
+    body.appendChild(h('div.cards', {}, stat('Changes', String(st.changes)), stat('Avg. run', st.runs ? fmtDuration(st.avgActiveRunMs) : '–'), stat('Active', Math.round(st.activePct * 100) + '%')));
+    var tl = h('div.timeline'), total = to - from;
+    segs.forEach(function (s) { tl.appendChild(h('i', { style: 'width:' + ((s.to - s.from) / total * 100) + '%;background:' + stateColor(s.state), title: s.state + ' · ' + fmtDuration(s.to - s.from) })); });
+    body.appendChild(tl);
+    var dur = durationsByState(segs), list = h('div.kv');
+    Object.keys(dur).sort(function (a, b) { return dur[b] - dur[a]; }).forEach(function (k) { list.appendChild(h('div.kvr', {}, h('span', { text: stateLabel(k, 'en') }), h('b', { text: fmtDuration(dur[k]) }))); });
+    body.appendChild(h('div.lbl', { text: 'Time in each state' })); body.appendChild(list);
+    var hrs = hourlyActivity(segs), mx = Math.max.apply(null, hrs) || 1, bars = h('div.hours');
+    hrs.forEach(function (m, i) { bars.appendChild(h('div.hr', { title: i + ':00 · ' + Math.round(m) + ' min' }, h('i', { style: 'height:' + Math.max(2, m / mx * 100) + '%' }), i % 6 === 0 ? h('span', { text: String(i) }) : null)); });
+    body.appendChild(h('div.lbl', { text: 'Time of day' })); body.appendChild(bars);
+  }, function () { if (my === loadHistory.n) { body.innerHTML = ''; body.appendChild(h('div.note', { text: 'Could not load the history.' })); } });
+}
+function stat(label, value) { return h('div.stat', {}, h('b', { text: value }), h('span', { text: label })); }
+function stateColor(s) { return isActive(s) ? '#2fa35c' : (s === 'unavailable' || s === 'unknown' ? '#8a4a4a' : 'rgba(255,255,255,.22)'); }
+function drawHistory() {
+  var box = $('range'); box.innerHTML = '';
+  ['24h', '7d', '30d'].forEach(function (r) { box.appendChild(h('button' + (r === range ? '.on' : ''), { text: r === '24h' ? '24 hours' : r === '7d' ? '7 days' : '30 days', onclick: function () { range = r; drawHistory(); } })); });
+  loadHistory();
+}
+
+// -- Context (scenes, scripts and automations that use this thermostat, and the ones in its room)
+/** One request over Home Assistant's websocket (the REST API has no "what uses this entity"). */
+function wsCall(msg) {
+  return new Promise(function (resolve, reject) {
+    var ws, done = false, timer = setTimeout(function () { end(reject, new Error('timeout')); }, 9000);
+    function end(fn, v) { if (done) return; done = true; clearTimeout(timer); try { ws.close(); } catch (e) { /* closed */ } fn(v); }
+    try { ws = new WebSocket(CFG.url.replace(/^http/, 'ws') + '/api/websocket'); } catch (e) { return end(reject, e); }
+    ws.onmessage = function (ev) {
+      var m; try { m = JSON.parse(ev.data); } catch (e) { return; }
+      if (m.type === 'auth_required') ws.send(JSON.stringify({ type: 'auth', access_token: CFG.token }));
+      else if (m.type === 'auth_ok') ws.send(JSON.stringify(Object.assign({ id: 1 }, msg)));
+      else if (m.type === 'auth_invalid') end(reject, new Error('auth'));
+      else if (m.type === 'result' && m.id === 1) { if (m.success) end(resolve, m.result); else end(reject, new Error((m.error && m.error.message) || 'failed')); }
+    };
+    ws.onerror = function () { end(reject, new Error('socket')); };
+  });
+}
+function drawContext() {
+  var body = $('ctxbody'); body.innerHTML = ''; body.appendChild(h('div.note', { text: 'Loading…' }));
+  var tpl = "{% set e = '" + CFG.entity + "' %}{% set a = area_id(e) %}{{ ((area_entities(a) | select('match', '^(scene|script)[.]') | list) if a else []) | tojson }}";
+  Promise.all([
+    wsCall({ type: 'search/related', item_type: 'entity', item_id: CFG.entity }).catch(function () { return null; }),
+    api('/api/template', 'POST', { template: tpl }, true).catch(function () { return '[]'; }),
+    api('/api/states')
+  ]).then(function (r) {
+    var ws = r[0], inArea = []; try { inArea = JSON.parse(r[1]); } catch (e) { /* none */ } if (!Array.isArray(inArea)) inArea = [];
+    var states = {}; (r[2] || []).forEach(function (s) { states[s.entity_id] = s; });
+    var related = { scene: (ws && ws.scene) || [], script: (ws && ws.script) || [], automation: (ws && ws.automation) || [] };
+    if (!ws) Object.keys(states).forEach(function (id) { if (/^scene\./.test(id) && ((states[id].attributes || {}).entity_id || []).indexOf(CFG.entity) >= 0) related.scene.push(id); });      // without the websocket: the scenes that list this thermostat
+    var seen = {}, rel = [];
+    ['scene', 'script', 'automation'].forEach(function (d) { related[d].forEach(function (id) { if (!seen[id]) { seen[id] = 1; rel.push(id); } }); });
+    var area = inArea.filter(function (id) { return !seen[id]; });
+    body.innerHTML = '';
+    function section(title, ids) {
+      if (!ids.length) return; body.appendChild(h('div.lbl', { text: title }));
+      ids.slice(0, 12).forEach(function (id) {
+        var s = states[id]; if (!s) return; var dom = id.split('.')[0], name = (s.attributes && s.attributes.friendly_name) || id;
+        body.appendChild(h('div.row', {}, h('div.nm', { text: name }), h('button.act', { html: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5l11 7-11 7z"/></svg><span>Run</span>', onclick: function () { service(dom, dom === 'automation' ? 'trigger' : 'turn_on', { entity_id: id }).then(function () { toast('Running: ' + name, 2200); }, function () {}); } })));
+      });
+    }
+    section('Related', rel); section('Same room', area);
+    if (!body.children.length) {
+      body.appendChild(h('div.note', { text: 'No scene, script or automation uses this thermostat yet.' }));
+      body.appendChild(h('div.note.ts-hint', { text: 'This tab lists the ones that do, and the scenes and scripts of its room, each with a Run button. Add one in Home Assistant that sets this thermostat and it shows up here.' }));
+    }
+  }, function () { body.innerHTML = ''; body.appendChild(h('div.note', { text: 'Could not load this.' })); });
+}
+
+// -- Schedule: the weekly schedule of the thermostat, the same as the card's Schedule tab (weekday tabs, entries with degrees, Comfort / Sleep / Eco / Away profiles).
+// The Scheduler component keeps it; its list with every action comes from /api/scheduler/list, changes go through its services. The reading and building of the actions
+// (readSlot, buildActions, entriesFor, ...) is the card's own code (src/okie-thermo-sched.js), cut in by the script at the SCHED mark above.
+var DAYNAME = { mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun' };
+function createWheel(values, value) {
+  var rowH = 44, el = h('div.wheel', { tabindex: '0', role: 'listbox' }), inner = h('div'), idx = Math.max(0, values.indexOf(value)), timer = 0;
+  el.appendChild(inner); values.forEach(function (v) { inner.appendChild(h('div.wi', { role: 'option', text: v })); });
+  function mark() { Array.prototype.forEach.call(inner.children, function (c, i) { c.classList.toggle('sel', i === idx); }); }
+  el.addEventListener('scroll', function () { clearTimeout(timer); timer = setTimeout(function () { idx = Math.max(0, Math.min(values.length - 1, Math.round(el.scrollTop / rowH))); mark(); }, 90); }, { passive: true });
+  setTimeout(function () { el.scrollTop = idx * rowH; mark(); }, 40);
+  return { el: el, value: function () { return values[idx]; } };
+}
+var SCH = { sched: [], loaded: false, failed: false, has: true, day: null, view: 'list', E: null, openProf: false };
+var SCH_ICON = {
+  eco: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 5-13 14-14 0 9-4 14-12 14M5 19c3-4 6-7 10-9"/></svg>',
+  away: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20V5h9v15M6 20h12M12 12v.5"/></svg>',
+  sleep: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>',
+  comfort: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.600-7 10-7 10z"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
+};
+var SCH_LABELS = { comfort: 'Comfort', sleep: 'Sleep', eco: 'Eco', away: 'Away' }, SCH_MODE = { cool: 'Cool to', heat: 'Heat to', heat_cool: 'Heat · Cool', preset: 'Preset', off: 'Off', keep: 'Set to' };
+function schToday() { return DAYS[(new Date().getDay() + 6) % 7]; }
+function schAttrs() { return (server && server.attributes) || {}; }
+function schUnit() { return CFG.unit === '°C' ? '°C' : '°F'; }
+function schLimits() {
+  var a = schAttrs(), f = schUnit() === '°F', min = toNum(a.min_temp), max = toNum(a.max_temp), step = toNum(a.target_temp_step) || toNum(a.target_temperature_step) || (f ? 1 : 0.5);
+  return { min: min != null ? min : (f ? 50 : 10), max: max != null ? max : (f ? 90 : 32), step: step, gap: Math.max(step * 2, f ? 2 : 1) };
+}
+function schPresets() { return (schAttrs().preset_modes || []).filter(function (p) { return p !== 'none'; }); }
+function schExit() { return (schAttrs().preset_modes || []).indexOf('none') >= 0 ? 'none' : null; }
+function schModes() {
+  var hm = schAttrs().hvac_modes || ['off', 'heat', 'cool', 'heat_cool'], out = [];
+  if (hm.indexOf('cool') >= 0) out.push('cool'); if (hm.indexOf('heat') >= 0) out.push('heat'); if (hm.indexOf('heat_cool') >= 0) out.push('heat_cool');
+  if (schPresets().length) out.push('preset'); if (hm.indexOf('off') >= 0) out.push('off');
+  return out;
+}
+function schOwn() { var o = STORE && STORE.profiles; if (o && typeof o === 'object' && Object.keys(o).length) return o; try { return JSON.parse(localStorage.getItem('okie_profiles') || '{}') || {}; } catch (e) { return {}; } }
+function schProfiles() { return profileDefaults(schUnit(), schOwn()); }
+function schSaveProfile(id, low, high) { var own = Object.assign({}, schOwn()); own[id] = { low: low, high: high }; if (STORE) STORE.profiles = own; saveStore('profiles', own); }
+function schClock(hhmm) { var m = /^(\d\d):(\d\d)/.exec(hhmm || ''); if (!m) return hhmm || ''; try { return new Date(2000, 0, 1, +m[1], +m[2]).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }); } catch (e) { return hhmm; } }
+function schFmt(x) { return x == null ? '–' : (Math.round(x * 10) / 10 % 1 ? (Math.round(x * 10) / 10).toFixed(1) : String(Math.round(x))); }
+function schStepper(o) {
+  var v = o.value, val = h('div.ts-stv'), lbl = o.label ? h('div.ts-stl', { text: o.label }) : null;
+  function fmt(x) { return o.step < 1 ? (Math.round(x * 10) / 10).toFixed(1) : String(Math.round(x)); }
+  function set(x, quiet) { v = Math.min(o.max, Math.max(o.min, Math.round(x / o.step) * o.step)); val.textContent = fmt(v) + '°'; if (!quiet && o.onChange) o.onChange(v); }
+  function bump(d) { haptic(1); set(v + d * o.step); }
+  var el = h('div.ts-st' + (o.cls ? '.' + o.cls : ''), {}, lbl, h('button.ts-stb', { 'aria-label': 'Lower', html: '&minus;', onclick: function () { bump(-1); } }), val, h('button.ts-stb', { 'aria-label': 'Raise', html: '+', onclick: function () { bump(1); } }));
+  set(v, true);
+  return { el: el, value: function () { return v; }, set: function (x) { set(x, true); } };
+}
+function schLoad() {
+  return Promise.all([api('/api/scheduler/list').catch(function () { return null; }), api('/api/services').catch(function () { return []; }), api('/api/states/' + CFG.entity).catch(function () { return null; })]).then(function (r) {
+    SCH.has = (r[1] || []).some(function (d) { return d.domain === 'scheduler' && d.services && d.services.add; });
+    SCH.failed = r[0] == null; SCH.sched = Array.isArray(r[0]) ? r[0] : []; if (r[2] && r[2].attributes) server = r[2]; SCH.loaded = true;
+    if (curTab === 'schedule' && SCH.view === 'list') schList();
+  });
+}
+function schEntries() { return entriesFor(SCH.sched, CFG.entity); }
+function drawSchedule() {
+  var body = $('sbody'); body.innerHTML = '';
+  if (!SCH.day) SCH.day = schToday();
+  if (SCH.view === 'edit' && SCH.E) schEdit(); else { SCH.view = 'list'; schList(); }
+  schLoad();
+}
+function schChips(e) {
+  var c = function (cls, txt) { return h('span.ts-chip.' + cls, { text: txt }); };
+  if (e.mode === 'heat_cool') return [c('heat', schFmt(e.low) + '°'), c('cool', schFmt(e.high) + '°')];
+  if (e.mode === 'heat') return [c('heat', schFmt(e.temp) + '°')];
+  if (e.mode === 'cool') return [c('cool', schFmt(e.temp) + '°')];
+  if (e.mode === 'off') return [c('neutral', 'Off')];
+  if (e.mode === 'preset') return [c('neutral', String(e.preset))];
+  return [c('neutral', e.temp != null ? schFmt(e.temp) + '°' : '–')];
+}
+function schList() {
+  var body = $('sbody'), all = schEntries(); body.innerHTML = '';
+  if (!SCH.has && SCH.loaded) { body.appendChild(h('div.note.warn', { text: 'Schedules need the Scheduler component (HACS: nielsfaber/scheduler-component).' })); return; }
+  var tabs = h('div.ts-days');
+  DAYS.forEach(function (d) {
+    tabs.appendChild(h('button.ts-day' + (SCH.day === d ? '.on' : ''), { role: 'tab', 'aria-selected': SCH.day === d ? 'true' : 'false', onclick: function () { haptic(1); SCH.day = d; schList(); } }, DAYNAME[d], onDay(all, d).length ? h('i') : null));
+  });
+  body.appendChild(tabs);
+  if (!SCH.loaded) body.appendChild(h('div.note', { text: 'Loading…' })); else if (SCH.failed) body.appendChild(h('div.note.warn', { text: 'The schedules could not be read.' }));
+  var list = h('div.ts-list'), todays = onDay(all, SCH.day);
+  if (SCH.loaded && !SCH.failed && !todays.length) list.appendChild(h('div.note', { text: 'Nothing is scheduled for this day.' }));
+  todays.forEach(function (e) { list.appendChild(schRow(e)); });
+  body.appendChild(list);
+  body.appendChild(h('button.ts-add', { html: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span>Add</span>', onclick: function () { haptic(1); schNew(); } }));
+  body.appendChild(schProfilesPanel(all));
+}
+function schRow(e) {
+  var editable = !!e.time;
+  var sw = h('button.sw' + (e.enabled ? '.on' : ''), { role: 'switch', 'aria-checked': e.enabled ? 'true' : 'false', 'aria-label': e.name || e.sw, html: '<i></i>', onclick: function (ev) { ev.stopPropagation(); haptic(1); service('switch', 'toggle', { entity_id: e.sw }).then(function () { setTimeout(schLoad, 350); }, function () {}); } });
+  return h('div.ts-row' + (e.enabled ? '' : '.off'), { role: 'button', tabindex: '0', 'data-sid': e.sid, onclick: function () { if (editable) schOpen(e); } },
+    h('span.ts-ic', { html: SCH_ICON[iconFor(e.name, SCH_LABELS)] || SCH_ICON.clock }),
+    h('div.ts-main', {}, h('div.ts-nm', { text: e.name || SCH_MODE[e.mode] }), h('div.ts-chips', {}, schChips(e))),
+    h('div.ts-time', { text: e.time ? schClock(e.time) : 'sun' }), sw);
+}
+function schProfilesPanel(all) {
+  var prof = schProfiles(), L = schLimits(), box = h('div.ts-prof' + (SCH.openProf ? '.open' : ''));
+  box.appendChild(h('button.ts-prof-h', { 'aria-expanded': SCH.openProf ? 'true' : 'false', onclick: function () { SCH.openProf = !SCH.openProf; schList(); } }, h('span', { text: 'Comfort, Sleep, Eco & Away' }), h('span.ts-chev', { html: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>' })));
+  if (!SCH.openProf) return box;
+  box.appendChild(h('div.ts-prof-hint', { text: 'The degrees a new entry of that name starts with. Change what Eco means once, then update every schedule called Eco in one tap.' }));
+  PROFILE_IDS.forEach(function (id) {
+    var p = prof[id], stale = all.filter(function (e) { return e.mode === 'heat_cool' && matchProfile(e.name, SCH_LABELS) === id && (e.low !== p.low || e.high !== p.high); }), lo, hi, saveT = 0;
+    function save() { clearTimeout(saveT); saveT = setTimeout(function () { schSaveProfile(id, lo.value(), hi.value()); schKeep(); }, 500); }
+    lo = schStepper({ value: p.low, min: L.min, max: L.max - L.gap, step: L.step, cls: 'sm.heat', label: 'Heat', onChange: function (v) { if (hi.value() < v + L.gap) hi.set(Math.min(L.max, v + L.gap)); save(); } });
+    hi = schStepper({ value: p.high, min: L.min + L.gap, max: L.max, step: L.step, cls: 'sm.cool', label: 'Cool', onChange: function (v) { if (lo.value() > v - L.gap) lo.set(Math.max(L.min, v - L.gap)); save(); } });
+    var upd = stale.length ? h('button.ts-upd', { text: 'Update ' + stale.length, onclick: function () { schUpdateProfile(lo.value(), hi.value(), stale); } }) : null;
+    box.appendChild(h('div.ts-prow', { 'data-profile': id }, h('span.ts-ic', { html: SCH_ICON[id] }), h('div.ts-pn', { text: SCH_LABELS[id] }), lo.el, hi.el, upd));
+  });
+  return box;
+}
+function schKeep() { if (SCH.view === 'list' && curTab === 'schedule') { var b = $('sbody'), top = b.scrollTop; schList(); b.scrollTop = top; } }
+function schWrite(e, actions) { return service('scheduler', 'edit', { entity_id: e.sw, timeslots: (e.sc.timeslots || []).map(function (s, i) { var c = cleanSlot(s); if (i === e.slot) c.actions = actions; return c; }) }); }
+function schUpdateProfile(low, high, list) {
+  Promise.all(list.map(function (e) { return schWrite(e, buildActions({ mode: 'heat_cool', low: low, high: high }, CFG.entity, schExit())); })).then(function () { toast('Schedules updated', 2200); setTimeout(schLoad, 500); }, function () {});
+}
+function schNow5() { var d = new Date(), m = Math.ceil(d.getMinutes() / 5) * 5, hh = d.getHours() + (m >= 60 ? 1 : 0); return ('0' + (hh % 24)).slice(-2) + ':' + ('0' + (m % 60)).slice(-2); }
+function schSeed(name) {
+  var id = matchProfile(name, SCH_LABELS), p = schProfiles()[id || 'comfort'], ms = schModes(), mode = ms.indexOf('heat_cool') >= 0 ? 'heat_cool' : (ms.indexOf('cool') >= 0 ? 'cool' : ms[0] || 'cool'), L = schLimits();
+  return { mode: mode, low: p.low, high: p.high, temp: mode === 'heat' ? p.low : mode === 'cool' ? p.high : Math.round((p.low + p.high) / 2 / L.step) * L.step, preset: schPresets().indexOf('eco') >= 0 ? 'eco' : schPresets()[0] || null };
+}
+function schNew() { var s = schSeed('comfort'); SCH.E = { isNew: true, name: 'Comfort', time: schNow5(), days: [SCH.day], mode: s.mode, low: s.low, high: s.high, temp: s.temp, preset: s.preset, touched: false }; SCH.view = 'edit'; schEdit(); }
+function schOpen(e) {
+  var s = schSeed(e.name);
+  SCH.E = { isNew: false, e: e, name: e.name, time: e.time, days: e.days.slice(), mode: e.mode, low: e.low != null ? e.low : s.low, high: e.high != null ? e.high : s.high, temp: e.temp != null ? e.temp : s.temp, preset: e.preset || s.preset, touched: true };
+  SCH.view = 'edit'; schEdit();
+}
+function schBack() { SCH.view = 'list'; SCH.E = null; schList(); }
+function schEdit() {
+  var E = SCH.E, L = schLimits(), body = $('sbody'); body.innerHTML = '';
+  body.appendChild(h('div.ts-eh', {}, h('button.ts-back', { html: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg><span>Back</span>', onclick: schBack }), h('div.ts-et', { text: E.isNew ? 'New schedule' : 'Edit schedule' })));
+  var nameIn = h('input.ts-name', { type: 'text', value: E.name, placeholder: 'Name, for example Comfort', maxlength: '40', 'aria-label': 'Name', oninput: function () { E.name = this.value; markChips(); } });
+  nameIn.value = E.name; nameIn.style.userSelect = 'text'; nameIn.style.webkitUserSelect = 'text';
+  var chipRow = h('div.chips');
+  PROFILE_IDS.forEach(function (id) { chipRow.appendChild(h('button.chip', { 'data-profile': id, text: SCH_LABELS[id], onclick: function () { pickProfile(id); } })); });
+  function markChips() { Array.prototype.forEach.call(chipRow.children, function (b) { var on = matchProfile(E.name, SCH_LABELS) === b.getAttribute('data-profile'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); }); }
+  function pickProfile(id) {
+    E.name = SCH_LABELS[id]; nameIn.value = E.name;
+    if (!E.touched || E.isNew) { var s = schSeed(id); E.low = s.low; E.high = s.high; if (E.mode === 'heat') E.temp = s.low; else if (E.mode === 'cool') E.temp = s.high; drawTemps(); }
+    markChips(); haptic(1);
+  }
+  body.appendChild(h('div.lbl', { text: 'Name' })); body.appendChild(chipRow); body.appendChild(nameIn); markChips();
+  var hours = [], mins = []; for (var i = 0; i < 24; i++) hours.push(('0' + i).slice(-2)); for (var j = 0; j < 60; j += 5) mins.push(('0' + j).slice(-2));
+  var tm = /^(\d\d):(\d\d)/.exec(E.time || '07:00'), wh = createWheel(hours, tm[1]), wm = createWheel(mins, ('0' + (Math.round(+tm[2] / 5) * 5 % 60)).slice(-2));
+  body.appendChild(h('div.lbl', { text: 'Time' })); body.appendChild(h('div.wheels', {}, wh.el, h('div.colon', { text: ':' }), wm.el));
+  var dayRow = h('div.chips');
+  function drawDays() { dayRow.innerHTML = ''; DAYS.forEach(function (d) { var on = E.days.indexOf(d) >= 0; dayRow.appendChild(h('button.chip' + (on ? '.on' : ''), { text: DAYNAME[d], 'aria-pressed': on ? 'true' : 'false', onclick: function () { var k = E.days.indexOf(d); if (k >= 0) E.days.splice(k, 1); else E.days.push(d); drawDays(); } })); }); }
+  drawDays();
+  var quick = h('div.chips.ts-quick'); [['Every day', DAYS], ['Mon - Fri', WEEKDAYS], ['Weekend', WEEKEND]].forEach(function (q) { quick.appendChild(h('button.chip.ghost', { text: q[0], onclick: function () { E.days = q[1].slice(); drawDays(); } })); });
+  body.appendChild(h('div.lbl', { text: 'Days' })); body.appendChild(dayRow); body.appendChild(quick);
+  var ms = schModes(); if (E.mode && ms.indexOf(E.mode) < 0) ms.push(E.mode);
+  var seg = h('div.seg'), temps = h('div.ts-temps');
+  function drawSeg() { seg.innerHTML = ''; ms.forEach(function (m) { seg.appendChild(h('button' + (E.mode === m ? '.on' : ''), { text: SCH_MODE[m] || m, onclick: function () { E.mode = m; E.touched = true; haptic(1); drawSeg(); drawTemps(); } })); }); }
+  function drawTemps() {
+    temps.innerHTML = '';
+    var so = function (x) { return Object.assign({ min: L.min, max: L.max, step: L.step }, x); };
+    if (E.mode === 'heat_cool') {
+      var lo = schStepper(so({ value: E.low, max: L.max - L.gap, cls: 'heat', label: 'Heat to', onChange: function (v) { E.low = v; E.touched = true; if (E.high < v + L.gap) { E.high = Math.min(L.max, v + L.gap); hi.set(E.high); } } }));
+      var hi = schStepper(so({ value: E.high, min: L.min + L.gap, cls: 'cool', label: 'Cool to', onChange: function (v) { E.high = v; E.touched = true; if (E.low > v - L.gap) { E.low = Math.max(L.min, v - L.gap); lo.set(E.low); } } }));
+      temps.appendChild(lo.el); temps.appendChild(hi.el);
+    } else if (E.mode === 'heat' || E.mode === 'cool' || E.mode === 'keep') {
+      temps.appendChild(schStepper(so({ value: E.temp, cls: E.mode === 'heat' ? 'heat' : E.mode === 'cool' ? 'cool' : '', label: 'Temperature', onChange: function (v) { E.temp = v; E.touched = true; } })).el);
+    } else if (E.mode === 'preset') {
+      var r2 = h('div.chips'); schPresets().forEach(function (p) { r2.appendChild(h('button.chip' + (E.preset === p ? '.on' : ''), { text: p, onclick: function () { E.preset = p; drawTemps(); } })); });
+      temps.appendChild(h('div.lbl', { text: 'Preset' })); temps.appendChild(r2); temps.appendChild(h('div.ts-hint', { text: 'In a preset the thermostat chooses the degrees itself.' }));
+    }
+  }
+  drawSeg(); drawTemps();
+  body.appendChild(h('div.lbl', { text: 'What it does' })); body.appendChild(seg); body.appendChild(temps);
+  body.appendChild(h('button.act.primary', { text: 'Save schedule', onclick: function () { E.time = wh.value() + ':' + wm.value(); schSave(); } }));
+  if (!E.isNew) body.appendChild(h('button.act.danger', { text: 'Delete', onclick: schDelete }));
+}
+function schSave() {
+  var E = SCH.E, name = String(E.name || '').trim() || (E.mode === 'off' ? 'Off' : 'Comfort');
+  if (!E.days.length) { toast('Pick at least one day', 2200); return; }
+  var slot = { start: (E.time || '07:00') + ':00', actions: buildActions({ mode: E.mode, temp: E.temp, low: E.low, high: E.high, preset: E.preset }, CFG.entity, schExit()) };
+  var days = DAYS.filter(function (d) { return E.days.indexOf(d) >= 0; }), p;
+  if (E.isNew) p = service('scheduler', 'add', { weekdays: days, timeslots: [slot], repeat_type: 'repeat', name: name });
+  else { var e = E.e; p = service('scheduler', 'edit', { entity_id: e.sw, weekdays: days, name: name, timeslots: (e.sc.timeslots || []).map(function (s, i) { return i === e.slot ? slot : cleanSlot(s); }) }); }
+  p.then(function () { toast('Schedule saved', 2200); if (days.indexOf(SCH.day) < 0) SCH.day = days[0]; SCH.view = 'list'; SCH.E = null; schList(); setTimeout(schLoad, 500); }, function () {});
+}
+function schDelete() {
+  var e = SCH.E.e; SCH.view = 'list'; SCH.E = null; schList();
+  var row = $('sbody').querySelector('.ts-row[data-sid="' + e.sid + '"]'); if (row) row.style.display = 'none';
+  var undone = false; toast('Schedule deleted. Tap to undo', 4000);
+  $('toast').onclick = function () { undone = true; if (row) row.style.display = ''; toast(''); $('toast').onclick = null; };
+  setTimeout(function () {
+    if (undone) return; $('toast').onclick = null;
+    var done = e.slots > 1 ? service('scheduler', 'edit', { entity_id: e.sw, timeslots: (e.sc.timeslots || []).filter(function (s, i) { return i !== e.slot; }).map(cleanSlot) }) : service('scheduler', 'remove', { entity_id: e.sw });
+    done.then(function () { setTimeout(schLoad, 400); }, function () { if (row) row.style.display = ''; });
+  }, 4200);
+}
+
+// -- Settings: three groups of rows like the card's own settings (Thermostat: preset and fan; Dial: glow, softness, marks, colours; This device)
+var UNDO_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.6-5.9M4 4v5h5"/></svg>';
+function sgGroup(title, note) {
+  var card = h('div.sg-card'), g = h('div.sg', {}, h('div.sg-h', { text: title }), card);
+  if (note) g.appendChild(h('div.sg-note', { text: note }));
+  return { el: g, card: card };
+}
+function sgSlider(label, key, lo, hi, st, fmt, toStore, fromStore) {
+  toStore = toStore || function (v) { return v; }; fromStore = fromStore || function (v) { return v; };
+  var val = h('span', {}), undo = h('button.sg-undo', { 'aria-label': 'Back to the usual', html: UNDO_SVG, hidden: true }), inp = h('input.thl-r', { type: 'range', min: lo, max: hi, step: st, 'aria-label': label });
+  var def = DEFAULT_LOOK[key];
+  function shown() { val.textContent = fmt(+inp.value); undo.hidden = Math.abs(toStore(+inp.value) - def) < 1e-6; }
+  inp.value = fromStore(LK[key]); shown();
+  inp.addEventListener('input', function () { LK[key] = toStore(+inp.value); LK = normalizeLook(LK); syncLook(); shown(); if (scaleBar) scaleBar(); });
+  inp.addEventListener('change', function () { haptic(1); saveStore('look', LK); });
+  undo.addEventListener('click', function () { LK[key] = def; LK = normalizeLook(LK); syncLook(); inp.value = fromStore(LK[key]); shown(); if (scaleBar) scaleBar(); haptic(1); saveStore('look', LK); });
+  return h('div.sg-row', {}, h('div.sg-top', {}, h('span', { text: label }), h('span.sg-v', {}, val, undo)), inp);
+}
+var scaleBar = null;
+function dialGroup() {
+  var unit = CFG.unit === '°C' ? '°C' : '°F', a = (server && server.attributes) || {};
+  var min = isFinite(+a.min_temp) && a.min_temp != null ? +a.min_temp : (unit === '°F' ? 45 : 7), max = isFinite(+a.max_temp) && a.max_temp != null ? +a.max_temp : (unit === '°F' ? 95 : 35);
+  function toU(f) { return unit === '°C' ? Math.round((f - 32) * 5 / 9 * 2) / 2 : Math.round(f); }       // the limits are stored in whole degrees Fahrenheit
+  function toFh(u) { return unit === '°C' ? Math.round(u * 9 / 5 + 32) : u; }
+  var pct = function (v) { return Math.round(v) + '%'; }, px = function (v) { return Math.round(v) + ' px'; }, degree = function (v) { return v + unit; };
+  var G = sgGroup('Dial', 'Changes show on the wheel in Controls.'), bar = h('div.thl-bar');
+  scaleBar = function () {
+    var f = function (v) { return unit === '°C' ? v * 9 / 5 + 32 : v; }, lo = f(min), hi = f(max), span = Math.max(1, hi - lo), cl = function (v) { return Math.max(0, Math.min(100, v)); };
+    bar.style.background = 'linear-gradient(90deg,' + LK.c0 + ' 0%,' + LK.c1 + ' ' + cl((LK.cool - lo) / span * 100).toFixed(1) + '%,' + LK.c2 + ' ' + cl((LK.warm - lo) / span * 100).toFixed(1) + '%,' + LK.c3 + ' 100%)';
+  };
+  G.card.appendChild(sgSlider('Glow', 'glowOpacity', 0, 100, 1, pct));
+  G.card.appendChild(sgSlider('Glow softness', 'glowBlur', 0, 160, 1, px));
+  G.card.appendChild(sgSlider('Marks', 'ticks', 40, 160, 5, pct));
+  function colorRow(label, key) {
+    var inp = h('input.thl-color', { type: 'color', 'aria-label': label }); inp.value = LK[key];
+    inp.addEventListener('input', function () { LK[key] = inp.value; LK = normalizeLook(LK); syncLook(); scaleBar(); });
+    inp.addEventListener('change', function () { saveStore('look', LK); });
+    return h('label.thl-c', {}, inp, h('span', { text: label }));
+  }
+  var more = h('details.sg-more', {}, h('summary', { text: 'Colours' }));
+  var inner = h('div.sg-row', {}, bar, h('div.thl-cols', {}, colorRow('Coldest', 'c0'), colorRow('Cool', 'c1'), colorRow('Warm', 'c2'), colorRow('Hottest', 'c3')));
+  more.appendChild(inner);
+  more.appendChild(sgSlider('Cool until', 'cool', toU(40), toU(90), unit === '°F' ? 1 : 0.5, degree, toFh, toU));
+  more.appendChild(sgSlider('Warm from', 'warm', toU(45), toU(95), unit === '°F' ? 1 : 0.5, degree, toFh, toU));
+  G.card.appendChild(more); scaleBar();
+  G.card.appendChild(h('button.sg-btn', { text: 'Reset the dial look', onclick: function () { LK = normalizeLook(DEFAULT_LOOK); syncLook(); saveStore('look', {}); drawSettingsLive(true); } }));
+  return G.el;
+}
+function drawSettings() {
+  var body = $('setbody'); body.innerHTML = ''; drawSettingsLive(true);
+}
+function drawSettingsLive(force) {
+  var body = $('setbody'), a = (server && server.attributes) || {}, sig = JSON.stringify([a.preset_mode, a.fan_mode, a.preset_modes, a.fan_modes]);
+  if (!force && drawSettingsLive.sig === sig) return; drawSettingsLive.sig = sig;
+  var top = body.scrollTop; body.innerHTML = '';
+  var T = sgGroup('Thermostat');
+  function chips(label, modes, current, svc, key) {
+    if (!modes || !modes.length) return;
+    var row = h('div.chips'); modes.forEach(function (m) { row.appendChild(h('button.chip' + (m === current ? '.on' : ''), { text: m, onclick: function () { var d = {}; d[key] = m; call(svc, d); } })); });
+    T.card.appendChild(h('div.sg-row', {}, h('div.sg-top', {}, h('span', { text: label })), row));
+  }
+  chips('Preset', a.preset_modes, a.preset_mode, 'set_preset_mode', 'preset_mode');
+  chips('Fan', a.fan_modes, a.fan_mode, 'set_fan_mode', 'fan_mode');
+  if (T.card.children.length) body.appendChild(T.el);
+  body.appendChild(dialGroup());
+  var D = sgGroup('This device');
+  function kv(l, v) { D.card.appendChild(h('div.sg-row', {}, h('div.sg-kv', {}, h('span', { text: l }), h('b', { text: v == null || v === '' ? '–' : String(v) })))); }
+  kv('Entity id', CFG.entity); kv('Changed', server && server.last_changed ? relativeTime(Date.now() - Date.parse(server.last_changed), 'en') : '');
+  var det = h('details.sg-more', {}, h('summary', { text: 'All attributes' }));
+  Object.keys(a).forEach(function (k) { var v = a[k]; det.appendChild(h('div.sg-row', {}, h('div.sg-kv', {}, h('span', { text: k.replace(/_/g, ' ') }), h('b', { text: typeof v === 'object' ? JSON.stringify(v).slice(0, 120) : String(v) })))); });
+  D.card.appendChild(det);
+  body.appendChild(D.el); body.scrollTop = top;
+}
+
+window.addEventListener('resize', function () { if (curTab === 'controls') { wheel = null; build(); paint(); } });
+setTimeout(function () { build(); load(); }, 30);
+setInterval(function () { if (!dragging) load(); }, 6000);
+</script></body></html>

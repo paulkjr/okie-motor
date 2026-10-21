@@ -1,0 +1,235 @@
+{
+  "_readme": "Everything you may want to change about the widgets lives here. After editing run: tools/build.sh   (it regenerates Shared/WidgetSpec.swift and rebuilds). Sizes are in the old Scriptable widgets' own units: the thermostat is designed 316 high, the feeder and lights 158 high; the widget scales them to its real size.",
+  "urlScheme": "okiehome",
+  "accent": {
+    "amber": "#ffb020",
+    "ink": "#1d1b19"
+  },
+  "glass": {
+    "top": "#5b4e44",
+    "bottom": "#3a322c",
+    "cardStyle": "dark",
+    "cardTint": 21,
+    "cardEdge": 14,
+    "strength": 1.2,
+    "_note": "cardStyle / cardTint / cardEdge are the defaults of the card's Settings > Design > Liquid glass; the app copies the values you set there to the widgets. Dark glass alpha = min(0.88, cardTint * 2.4 / 100). strength: widgets have no blur behind them, so they are a bit denser than the card (1 = exactly the card's number, higher = less transparent)."
+  },
+  "thermostat": {
+    "entity": "climate.living_room",
+    "designHeight": 316,
+    "scale": {
+      "c0": "#1446be",
+      "c1": "#2d82ff",
+      "c2": "#ff962d",
+      "c3": "#ff2d55",
+      "cool": 69,
+      "warm": 75
+    },
+    "layoutSet": {
+      "medium": {
+        "panelW": 120,
+        "textX": 149,
+        "name": 27,
+        "nameY": 38.7,
+        "number": 132,
+        "numberY": 72.7,
+        "unit": 42,
+        "unitDY": 22,
+        "status": 24,
+        "statusFromBottom": 76.2,
+        "statusH": 40,
+        "statusRightGap": 14,
+        "icon": 46,
+        "chevron": 1,
+        "iconColumn": 1,
+        "colW": 112,
+        "iconStep": 0,
+        "iconBottom": 0,
+        "iconFirstX": 0
+      },
+      "small": {
+        "panelW": 66,
+        "textX": 30,
+        "name": 22,
+        "nameY": 28,
+        "number": 100,
+        "numberY": 46,
+        "unit": 32,
+        "unitDY": 14,
+        "status": 20,
+        "statusFromBottom": 124,
+        "statusH": 56,
+        "statusRightGap": 8,
+        "icon": 40,
+        "chevron": 0.8,
+        "iconColumn": 0,
+        "colW": 0,
+        "iconStep": 66,
+        "iconBottom": 52,
+        "iconFirstX": 20
+      }
+    }
+  },
+  "feeder": {
+    "entity": "script.feed_the_beasts_2",
+    "title": "Feed the Beasts",
+    "againMinutes": 10,
+    "armedSeconds": 30,
+    "color": "#ff962d",
+    "designHeight": 158,
+    "ring": 2.4,
+    "layoutSet": {
+      "medium": {
+        "badge": 70,
+        "badgeX": 20,
+        "badgeY": 44,
+        "titleSize": 19,
+        "titleY": 48,
+        "title2Y": 0,
+        "lineSize": 14,
+        "lineY": 82,
+        "textGap": 18
+      },
+      "small": {
+        "badge": 60,
+        "badgeX": 20,
+        "badgeY": 18,
+        "titleSize": 16,
+        "titleY": 94,
+        "title2Y": 113,
+        "lineSize": 11.5,
+        "lineY": 135,
+        "textGap": 0
+      }
+    },
+    "designs": [
+      {
+        "id": "classic",
+        "name": "Orange cat",
+        "top": "#5b4e44",
+        "bottom": "#3a322c",
+        "accent": "#ff962d"
+      },
+      {
+        "id": "peek",
+        "name": "Peeking cat",
+        "top": "#2f2926",
+        "bottom": "#1c1917",
+        "accent": "#ff962d"
+      },
+      {
+        "id": "leaves",
+        "name": "Green leaves",
+        "top": "#222d22",
+        "bottom": "#141b14",
+        "accent": "#8f9c74"
+      },
+      {
+        "id": "neon",
+        "name": "Neon bowl",
+        "top": "#1d1513",
+        "bottom": "#110c0b",
+        "accent": "#ff7a1f"
+      },
+      {
+        "id": "bowl",
+        "name": "Bowl",
+        "top": "#3b2b23",
+        "bottom": "#1a1210",
+        "accent": "#ff962d"
+      }
+    ]
+  },
+  "lights": {
+    "background": [
+      "#2d2d2f",
+      "#262628"
+    ],
+    "tile": "#1c1c1e",
+    "tileBorder": "#3b3b3d",
+    "caption": "#8e8e93",
+    "offDisc": "#3a3a3c",
+    "offInk": "#d9d9dc",
+    "tiles": [
+      {
+        "entity": "switch.bedlight",
+        "name": "bedLight",
+        "glyph": "bedlight",
+        "ink": "#f5c542",
+        "disc": "#5a4a14"
+      },
+      {
+        "entity": "script.govee_cozy_lights",
+        "name": "Cozy lights",
+        "glyph": "sofa",
+        "ink": "#ee8a5c",
+        "disc": "#5b3a30"
+      },
+      {
+        "entity": "script.govee_lets_go_to_sleep",
+        "name": "Let's go to sleep",
+        "glyph": "moon",
+        "ink": "#7c7cff",
+        "disc": "#38387a"
+      },
+      {
+        "entity": "script.govee_turn_up_the_lights",
+        "name": "Turn up the lights",
+        "glyph": "bulb",
+        "ink": "#f5a30b",
+        "disc": "#5a4214"
+      }
+    ],
+    "bright": {
+      "top": "#f6f0e4",
+      "bottom": "#ece4d4",
+      "tile": "#ffffff",
+      "tileBorder": "#ffffff",
+      "text": "#26211c",
+      "caption": "#8a847b",
+      "offDisc": "#8fa078",
+      "offInk": "#f1edd6",
+      "bedDisc": "#e0aa3e",
+      "bedInk": "#fff1bf",
+      "sofaDisc": "#8c5641",
+      "sofaInk": "#f6b494",
+      "moonDisc": "#5c4cc4",
+      "moonInk": "#c2b8ff",
+      "bulbDisc": "#dba037",
+      "bulbInk": "#fff0a8"
+    }
+  },
+  "weather": {
+    "entity": "weather.forecast_home",
+    "hoursPerPage": 6,
+    "daysPerPage": 6,
+    "maxHours": 48,
+    "maxDays": 10,
+    "night": [
+      "#06152a",
+      "#0a2d44",
+      "#0e6a67"
+    ],
+    "day": [
+      "#4a90e2",
+      "#2a6cb2"
+    ],
+    "pillAlpha": 0.35,
+    "rain": [
+      "#2c3e55",
+      "#46678a"
+    ]
+  },
+  "calendar": {
+    "dots": [
+      "#ffb020",
+      "#2d82ff",
+      "#3ddc84",
+      "#ff6b9d",
+      "#b48cff"
+    ],
+    "hiddenWords": [
+      "robot"
+    ]
+  }
+}

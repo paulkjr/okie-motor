@@ -1,0 +1,12 @@
+node_modules/
+.DS_Store
+*.log
+*.bak-okie
+# build outputs that are committed on purpose: dist/okie-motor.js, dist/okie-install.py, dist/okie-demo.html, dist/okie-version.json
+# the iOS app: generated project and build output
+ios-app/OkieHome.xcodeproj/
+ios-app/.build*/
+ios-app/*.log
+ios-app/DerivedData/
+xcuserdata/
+*.xcuserstate

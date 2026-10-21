@@ -1,0 +1,30 @@
+# Okie test dashboard: the Okie Motor card on its own dashboard, next to the old Fast Search Card tablet dashboard, so you can compare them.
+# Paste into the dashboard's raw configuration editor (pencil > three dots > Raw configuration editor).
+# Keep the old one first (see docs/WALL-TABLET.md): select all in the editor, copy it into tablet-dashboard-backup.yaml.
+title: Okie test
+kiosk_mode:                         # needs the kiosk-mode HACS plugin, which this dashboard already uses
+  hide_header: true
+  hide_sidebar: true
+views:
+  - title: Home
+    path: home
+    type: panel
+    cards:
+      - type: custom:okie-motor-card
+        top_offset: 56              # the old card kept 56 px free above itself
+        wallpaper: /local/okie-room.jpg   # the same room photo the old card used
+        start: bento
+        quickEnabled: false         # the old card had quick control off: tapping a tile opens its detail
+        search:
+          columns: 6                # the old card used 6 columns
+        squircle: none              # none (Standard) | strong (Prominent) | standard (Balanced) | soft (Subtle)
+        language: auto
+        zen:
+          enabled: true             # lock page with the big clock
+        rest:                       # screensaver and deep rest, like the old card's
+          enabled: true
+          saverAfterSec: 300
+          deepAfterSec: 120
+        videos:
+          enabled: true
+          path: /local/fast-search-videos

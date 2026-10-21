@@ -1,0 +1,45 @@
+# Compare dashboard: two tabs, the old Fast Search Card and Okie Motor, with the same wallpaper and the same space.
+# Paste into a NEW dashboard's raw configuration editor (Settings > Dashboards > Add dashboard > open it > pencil > three dots > Raw configuration editor).
+# The header stays visible so you can switch tabs; only the sidebar is hidden (kiosk-mode), like your tablet.
+title: Compare
+kiosk_mode:
+  hide_sidebar: true
+views:
+  - title: Fast Search Card
+    path: fast-search
+    type: panel
+    cards:
+      - type: custom:fast-search-card
+        card_mod:
+          style: |
+            :host{display:block !important;height:100% !important;min-height:calc(100vh - 56px) !important;background:#1a1712 url('/local/okie-room.jpg') center/cover no-repeat !important;box-sizing:border-box !important}
+            @media (min-width:700px){.main-container--bento{zoom:clamp(0.65, calc(0.65 + (100vw - 1080px) / 520px * 0.35), 1) !important}}
+            .bento-rich-weather-temp{font-size:24px !important;line-height:1 !important}
+            .bento-rich-weather-condition{font-size:13px !important;line-height:1.2 !important}
+            .bento-rich-weather-highlow{font-size:11px !important}
+            .bento-rich-weather-mid{align-items:center !important}
+            .circular-center-symmetric>div:last-child span{font-size:7px !important;letter-spacing:.5px !important;padding:1px 5px !important;border-width:1.5px !important}
+            .vpm-menu::before{background-color:rgba(18,18,18,.9) !important}
+            [class*='scroll-inner'],[class*='scrollbar']{overscroll-behavior:contain !important}
+  - title: Okie Motor
+    path: okie-motor
+    type: panel
+    cards:
+      - type: custom:okie-motor-card
+        top_offset: 0
+        wallpaper: /local/okie-room.jpg
+        start: bento
+        quickEnabled: false
+        search:
+          columns: 6
+        squircle: none
+        language: auto
+        zen:
+          enabled: true
+        rest:
+          enabled: true
+          saverAfterSec: 300
+          deepAfterSec: 120
+        videos:
+          enabled: true
+          path: /local/fast-search-videos

@@ -1,0 +1,29 @@
+{
+  "name": "okie-motor",
+  "private": true,
+  "version": "0.52.5",
+  "description": "A search-and-control dashboard card for Home Assistant: lock page, status island, search bar with AI, bento start screen, detail views, apps and settings.",
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "test": "node --test \"tests/*.test.js\"",
+    "build": "python3 tools/build.py",
+    "demo": "python3 tools/make-demo.py",
+    "serve": "node tools/serve.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "home-assistant",
+    "lovelace",
+    "dashboard",
+    "card",
+    "hacs",
+    "search",
+    "hemma"
+  ],
+  "files": [
+    "dist",
+    "src"
+  ]
+}

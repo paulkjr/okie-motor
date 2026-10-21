@@ -1,0 +1,28 @@
+# A dashboard that is just the Okie Motor. Create it in Home Assistant:
+#   Settings > Dashboards > Add dashboard > (any name, e.g. Okie) > open it > pencil > three dots > Raw configuration editor
+# and paste this. "panel" gives the card the whole view.
+title: Okie
+views:
+  - title: Home
+    path: home
+    type: panel
+    cards:
+      - type: custom:okie-motor-card
+        squircle: none                    # none (Standard) | strong (Prominent) | standard (Balanced) | soft (Subtle)
+        start: bento                      # bento | browse (opens with the search panel expanded)
+        language: auto                    # auto | en | de
+        weather_entity: weather.forecast_home
+        power_entity: sensor.grid_power   # optional; empty picks the strongest power sensor
+        wallpaper: /hemma_assets/rooms/livingroom-demo.jpg   # optional; Hemma serves these
+        bento:
+          pages: [weather, todos, news, calendar, tips]   # news finds every feed sensor by itself
+          slideSec: 8
+        rest:                             # wall tablet only; off by default
+          enabled: false
+          saverAfterSec: 300
+          deepAfterSec: 120
+          wakeEntities: binary_sensor.hallway_motion
+          screenEntity: switch.tablet_screen
+        videos:
+          enabled: true
+          path: /local/fast-search-videos   # your existing FSC clips work as they are

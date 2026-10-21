@@ -1,0 +1,21 @@
+name: test
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm test
+      - name: dist is up to date
+        run: |
+          python3 tools/build.py --no-hemma --build 1
+          python3 tools/make-demo.py
+          node -e "const p=require('./package.json'),b=require('fs').readFileSync('dist/okie-motor.js','utf8'); if(!b.includes('OkieMotor.version = \"'+p.version+'\"')) { console.error('dist/okie-motor.js is not the version in package.json; run npm run build'); process.exit(1) }"

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Okie weather widget, preview</title>
+<style>
+  body{margin:0;padding:18px;background:#b78f7f;font:13px -apple-system,system-ui,sans-serif;color:#222;}
+  h1{font-size:15px;margin:0 0 12px;}
+  .grid{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;}
+  .cell{display:flex;flex-direction:column;gap:6px;}
+  .cell canvas{border-radius:22px;display:block;box-shadow:0 2px 10px rgba(0,0,0,.25);}
+  .small canvas{width:158px;height:158px;}.medium canvas{width:338px;height:158px;}.large canvas{width:338px;height:354px;}
+</style></head>
+<body>
+<h1>Preview: the weather widget script run against a canvas stand-in for Scriptable (dev only, not shipped)</h1>
+<div class="grid" id="grid"></div>
+<script>
+function rgba(hex, a) { var n = parseInt(String(hex).replace('#', ''), 16); return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + (a == null ? 1 : a) + ')'; }
+function Color(hex, a) { this.css = rgba(hex, a); }
+Color.white = function () { return new Color('#ffffff'); };
+function Point(x, y) { this.x = x; this.y = y; }
+function Size(w, h) { this.width = w; this.height = h; }
+function Rect(x, y, w, h) { this.x = x; this.y = y; this.width = w; this.height = h; }
+function Font(size, weight) { this.size = size; this.weight = weight; }
+['system:400', 'thinSystem:200', 'lightSystem:300', 'mediumSystem:500', 'semiboldSystem:600', 'boldSystem:700', 'heavySystem:900'].forEach(function (d) { var p = d.split(':'); Font[p[0] + 'Font'] = function (s) { return new Font(s, +p[1]); }; });
+Font.systemFont = function (s) { return new Font(s, 400); };
+function Path() { this.ops = []; }
+Path.prototype.move = function (p) { this.ops.push(['m', p]); };
+Path.prototype.addLine = function (p) { this.ops.push(['l', p]); };
+Path.prototype.addCurve = function (p, c1, c2) { this.ops.push(['c', p, c1, c2]); };
+Path.prototype.closeSubpath = function () { this.ops.push(['z']); };
+function DrawContext() { this.align = 'left'; this.respectScreenScale = true; }
+Object.defineProperty(DrawContext.prototype, 'size', { set: function (s) { this._size = s; } });
+Object.defineProperty(DrawContext.prototype, 'c', { get: function () {
+  if (!this._c) { var sc = this.respectScreenScale ? 3 : 1; this.canvas = document.createElement('canvas'); this.canvas.width = this._size.width * sc; this.canvas.height = this._size.height * sc; this._c = this.canvas.getContext('2d'); this._c.scale(sc, sc); }
+  return this._c; } });
+
+var Device = { screenSize: function () { return { width: 393, height: 852 }; }, screenScale: function () { return 3; }, language: function () { return 'en'; } };
+DrawContext.prototype.setFillColor = function (c) { this.c.fillStyle = c.css; };
+DrawContext.prototype.setStrokeColor = function (c) { this.c.strokeStyle = c.css; };
+DrawContext.prototype.setLineWidth = function (n) { this.c.lineWidth = n; this.c.lineCap = 'round'; this.c.lineJoin = 'round'; };
+DrawContext.prototype.fillRect = function (r) { this.c.fillRect(r.x, r.y, r.width, r.height); };
+DrawContext.prototype.fillEllipse = function (r) { this.c.beginPath(); this.c.ellipse(r.x + r.width / 2, r.y + r.height / 2, r.width / 2, r.height / 2, 0, 0, 7); this.c.fill(); };
+DrawContext.prototype.strokeEllipse = function (r) { this.c.beginPath(); this.c.ellipse(r.x + r.width / 2, r.y + r.height / 2, r.width / 2, r.height / 2, 0, 0, 7); this.c.stroke(); };
+DrawContext.prototype.addPath = function (p) { this.path = p; };
+DrawContext.prototype._trace = function () { var c = this.c; c.beginPath(); this.path.ops.forEach(function (o) { if (o[0] === 'm') c.moveTo(o[1].x, o[1].y); else if (o[0] === 'c') c.bezierCurveTo(o[2].x, o[2].y, o[3].x, o[3].y, o[1].x, o[1].y); else if (o[0] === 'l') c.lineTo(o[1].x, o[1].y); else c.closePath(); }); };
+DrawContext.prototype.strokePath = function () { this._trace(); this.c.stroke(); };
+DrawContext.prototype.fillPath = function () { this._trace(); this.c.fill(); };
+DrawContext.prototype.setFont = function (f) { this.font = f; };
+DrawContext.prototype.setTextColor = function (c) { this.textCss = c.css; };
+DrawContext.prototype.setTextAlignedLeft = function () { this.align = 'left'; };
+DrawContext.prototype.setTextAlignedCenter = function () { this.align = 'center'; };
+DrawContext.prototype.setTextAlignedRight = function () { this.align = 'right'; };
+DrawContext.prototype.drawTextInRect = function (t, r) { var c = this.c; c.save(); c.beginPath(); c.rect(r.x, r.y, r.width, r.height); c.clip(); c.font = this.font.weight + ' ' + this.font.size + 'px -apple-system,system-ui,sans-serif'; c.fillStyle = this.textCss; c.textBaseline = 'top'; c.textAlign = this.align; var x = this.align === 'center' ? r.x + r.width / 2 : (this.align === 'right' ? r.x + r.width : r.x); c.fillText(t, x, r.y); c.restore(); };
+DrawContext.prototype.getImage = function () { this.c; return { canvas: this.canvas }; };
+function ListWidget() { this.lines = []; }
+ListWidget.prototype.setPadding = function () {};
+ListWidget.prototype.addText = function (t) { var x = { text: t, centerAlignText: function () {} }; this.lines.push(x); return x; };
+var STORE = { okie_ha_token: 'preview', okie_ha_unit: '°F' };
+var Keychain = { contains: function (k) { return k in STORE; }, get: function (k) { return STORE[k]; }, set: function (k, v) { STORE[k] = v; } };
+var args = {};
+var scenario = null;
+function Request(url) { this.url = url; }
+Request.prototype.loadJSON = function () { var u = this.url, b = this.body ? JSON.parse(this.body) : null; var s = scenario;
+  if (/\/api\/states\/sun\.sun$/.test(u)) return Promise.resolve({ state: s.night ? 'below_horizon' : 'above_horizon', attributes: {} });
+  if (/get_forecasts/.test(u)) return Promise.resolve({ changed_states: [], service_response: (function () { var o = {}; o[b.entity_id] = { forecast: b.type === 'hourly' ? s.hourly : s.daily }; return o; })() });
+  if (s.down) return Promise.reject(new Error('Could not connect to the server'));
+  if (/\/api\/states$/.test(u)) return Promise.resolve([{ entity_id: 'light.x' }, { entity_id: 'weather.berlin' }]);
+  var m = /\/api\/states\/(.+)$/.exec(u);
+  if (s.only && m && m[1] !== s.only) return Promise.reject(new Error('404'));
+  return Promise.resolve(s.st); };
+var result = null;
+var Script = { setWidget: function (w) { result = w; }, complete: function () {}, name: function () { return 'Okie Weather'; } };
+var AF = Object.getPrototypeOf(async function () {}).constructor;
+function hours(n, conds, t0) { var a = []; for (var i = 0; i < n; i++) a.push({ datetime: new Date(Date.now() + i * 3600e3).toISOString(), temperature: t0 - i, condition: conds[i % conds.length] }); return a; }
+function days(conds) { return [0, 1, 2, 3, 4, 5].map(function (i) { return { datetime: new Date(Date.now() + i * 86400e3).toISOString(), temperature: 88 + (i % 3), templow: 70 - (i % 4), condition: conds[i % conds.length] }; }); }
+var ATTR = { friendly_name: 'Forecast Home', temperature: 77, humidity: 65, wind_speed: 13, wind_speed_unit: 'mph', wind_bearing: 0, pressure: 30, pressure_unit: 'inHg', dew_point: 70, uv_index: 5.7, cloud_coverage: 27 };
+var SCEN = {
+  'day, partly cloudy': { night: false, st: { state: 'partlycloudy', attributes: ATTR }, hourly: hours(8, ['partlycloudy', 'sunny', 'rainy', 'cloudy'], 82), daily: days(['sunny', 'rainy', 'partlycloudy', 'cloudy']) },
+  'night, clear': { night: true, st: { state: 'clear-night', attributes: ATTR }, hourly: hours(8, ['clear-night', 'partlycloudy'], 77), daily: days(['sunny', 'rainy', 'partlycloudy']) },
+  'entity not found, uses the one that exists': { night: false, only: 'weather.berlin', st: { state: 'sunny', attributes: Object.assign({}, ATTR, { friendly_name: 'Forecast Berlin' }) }, hourly: hours(8, ['sunny', 'cloudy'], 75), daily: days(['sunny', 'cloudy']) },
+  'cannot reach Home Assistant': { night: true, down: true, st: null, hourly: [], daily: [] },
+  'rain': { night: false, st: { state: 'rainy', attributes: ATTR }, hourly: hours(8, ['rainy', 'cloudy'], 70), daily: days(['rainy', 'cloudy']) },
+};
+async function run(family, sc) {
+  scenario = sc; result = null;
+  var code = await (await fetch('okie-weather-widget.js')).text();
+  await new AF('Script', 'config', 'Keychain', 'Request', 'ListWidget', 'DrawContext', 'Color', 'Font', 'Path', 'Point', 'Rect', 'Size', 'args', 'Alert', 'Notification', 'Device', code)(Script, { runsInWidget: true, widgetFamily: family }, Keychain, Request, ListWidget, DrawContext, Color, Font, Path, Point, Rect, Size, args, function () {}, function () {}, Device);
+  return result;
+}
+(async function () {
+  var grid = document.getElementById('grid'); window.__done = false; window.__errors = [];
+  for (var name in SCEN) {
+    for (var fam of ['small', 'medium', 'large']) {
+      try { var w = await run(fam, SCEN[name]); var cell = document.createElement('div'); cell.className = 'cell ' + fam; cell.appendChild(w.backgroundImage.canvas); var cap = document.createElement('div'); cap.textContent = fam + ': ' + name; cell.appendChild(cap); grid.appendChild(cell); }
+      catch (e) { window.__errors.push(name + '/' + fam + ': ' + e.message); }
+    }
+  }
+  window.__done = true;
+})();
+</script></body></html>

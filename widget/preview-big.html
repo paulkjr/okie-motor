@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Okie thermostat widget, big view preview</title>
+<style>
+  body{margin:0;padding:16px;background:#555;font:13px -apple-system,system-ui,sans-serif;color:#eee;display:flex;gap:24px;align-items:flex-start;}
+  iframe{width:393px;height:852px;border:0;border-radius:36px;background:#000;}
+  pre{margin:0;max-width:420px;white-space:pre-wrap;}
+</style></head>
+<body>
+<iframe id="f"></iframe>
+<pre id="log">calls:</pre>
+<script>
+// Dev only: the big view of the widget script, with a made-up Home Assistant behind it.
+var AF = Object.getPrototypeOf(async function () {}).constructor;
+var state = { entity_id: 'climate.living_room', state: 'cool', last_changed: new Date(Date.now() - 3 * 3600000).toISOString(), attributes: { friendly_name: 'Google Nest', current_temperature: 72, temperature: 71, hvac_action: 'cooling', min_temp: 50, max_temp: 90, current_humidity: 65, target_temp_step: 1, hvac_modes: ['off', 'heat', 'cool', 'heat_cool'], preset_modes: ['none', 'eco'], preset_mode: 'none', fan_modes: ['on', 'off'], fan_mode: 'off' } };
+var others = [
+  { entity_id: 'scene.movie_time', state: 'scening', attributes: { friendly_name: 'Movie time' } },
+  { entity_id: 'script.goodnight', state: 'off', attributes: { friendly_name: 'Goodnight' } },
+  { entity_id: 'automation.cool_down', state: 'on', attributes: { friendly_name: 'Cool down at 5 pm' } },
+  { entity_id: 'switch.schedule_a1b2c3', state: 'on', attributes: { friendly_name: 'Schedule', name: 'Nest cool 18:30', entities: ['climate.living_room'], weekdays: ['mon', 'tue', 'wed', 'thu', 'fri'], timeslots: ['18:30:00'], next_trigger: new Date(Date.now() + 7200000).toISOString() } },
+  { entity_id: 'switch.schedule_other', state: 'off', attributes: { friendly_name: 'Other', name: 'Kitchen light', entities: ['light.kitchen'], weekdays: ['mon'], timeslots: ['07:00:00'] } }
+];
+window.__calls = [];
+window.__sched = []; window.__schedCalls = []; window.__wsCalls = [];      // the Scheduler's own list (what /api/scheduler/list answers)
+window.__state = state; window.__others = others;
+window.__mockFetch = function (url, opts) {
+  var swOf = function (id) { return window.__sched.filter(function (x) { return 'switch.schedule_' + x.schedule_id === id; })[0]; };
+  var path = String(url).replace(/^https?:\/\/[^/]+/, ''), method = (opts && opts.method) || 'GET', body = opts && opts.body ? JSON.parse(opts.body) : null;
+  window.__calls.push(method + ' ' + path.slice(0, 70) + (body ? ' ' + JSON.stringify(body).slice(0, 110) : ''));
+  document.getElementById('log').textContent = 'calls:\n' + window.__calls.slice(-14).join('\n');
+  var ok = function (v) { return Promise.resolve({ ok: true, status: 200, json: function () { return Promise.resolve(v); }, text: function () { return Promise.resolve(typeof v === 'string' ? v : JSON.stringify(v)); } }); };
+  if (method === 'GET' && /\/api\/states\/climate/.test(path)) return ok(JSON.parse(JSON.stringify(state)));
+  if (method === 'GET' && /\/api\/states$/.test(path)) return ok([state].concat(others));
+  if (method === 'GET' && /\/api\/services$/.test(path)) return ok([{ domain: 'climate', services: { set_temperature: {} } }, { domain: 'scheduler', services: { add: {}, remove: {} } }]);
+  if (method === 'GET' && /\/api\/history\/period\//.test(path)) {
+    var now = Date.now(), H = 3600000;
+    return ok([[{ state: 'off', last_changed: new Date(now - 24 * H).toISOString() }, { state: 'cool', last_changed: new Date(now - 20 * H).toISOString() }, { state: 'off', last_changed: new Date(now - 15 * H).toISOString() }, { state: 'cool', last_changed: new Date(now - 9 * H).toISOString() }, { state: 'heat', last_changed: new Date(now - 4 * H).toISOString() }, { state: 'cool', last_changed: new Date(now - 3 * H).toISOString() }]]);
+  }
+  if (method === 'POST' && /\/api\/template$/.test(path)) return ok(JSON.stringify(['script.goodnight', 'scene.movie_time']));      // the scenes and scripts of the thermostat's room
+  if (method === 'POST' && /set_temperature/.test(path)) { state.attributes.temperature = body.temperature; return ok([]); }
+  if (method === 'POST' && /set_hvac_mode/.test(path)) { state.state = body.hvac_mode; return ok([]); }
+  if (method === 'POST' && /set_preset_mode/.test(path)) { state.attributes.preset_mode = body.preset_mode; return ok([]); }
+  if (method === 'POST' && /set_fan_mode/.test(path)) { state.attributes.fan_mode = body.fan_mode; return ok([]); }
+  if (method === 'POST' && /switch\/toggle/.test(path) && swOf(body.entity_id)) { var sc2 = swOf(body.entity_id); sc2.enabled = !sc2.enabled; return ok([]); }
+  if (method === 'POST' && /switch\/toggle/.test(path)) { var sw = others.filter(function (o) { return o.entity_id === body.entity_id; })[0]; if (sw) sw.state = sw.state === 'on' ? 'off' : 'on'; return ok([]); }
+  if (method === 'GET' && /\/api\/scheduler\/list$/.test(path)) return ok(JSON.parse(JSON.stringify(window.__sched.map(function (x) { return Object.assign({}, x, { entity_id: 'switch.schedule_' + x.schedule_id, tags: [] }); }))));
+  if (method === 'POST' && /scheduler\/add/.test(path)) { window.__schedCalls.push(['add', body]); window.__sched.push({ schedule_id: 'w' + (window.__sched.length + 1) + Math.floor(Math.random() * 90), weekdays: body.weekdays, timeslots: body.timeslots.map(function (t) { return Object.assign({ stop: null, conditions: [], condition_type: 'and' }, t); }), repeat_type: body.repeat_type, name: body.name || '', enabled: true }); return ok([]); }
+  if (method === 'POST' && /scheduler\/edit/.test(path)) { window.__schedCalls.push(['edit', body]); var sc = swOf(body.entity_id); if (sc) { if (body.weekdays) sc.weekdays = body.weekdays; if (body.timeslots) sc.timeslots = body.timeslots; if (body.name != null) sc.name = body.name; } return ok([]); }
+  if (method === 'POST' && /scheduler\/remove/.test(path)) { window.__schedCalls.push(['remove', body]); var k = window.__sched.findIndex(function (x) { return 'switch.schedule_' + x.schedule_id === body.entity_id; }); if (k >= 0) window.__sched.splice(k, 1); return ok([]); }
+  if (method === 'POST' && /\/api\/services\/(scene|script|automation)\//.test(path)) return ok([]);
+  return Promise.resolve({ ok: false, status: 404, json: function () { return Promise.resolve({}); }, text: function () { return Promise.resolve(''); } });
+};
+(async function () {
+  var code = await (await fetch('okie-thermostat-widget.js')).text();
+  var m = { exports: {} };
+  await new AF('module', code)(m);
+  var html = m.exports.bigHtml({ url: location.origin, token: 'preview-token', entity: 'climate.living_room', unit: '°F' });
+  html = html.replace('<head>', '<head><script>window.fetch=function(u,o){return parent.__mockFetch(u,o);};' +
+    // a stand-in for Home Assistant's websocket: the page asks it what is related to the thermostat (search/related)
+    'window.WebSocket=function(){var me=this;setTimeout(function(){me.onmessage&&me.onmessage({data:JSON.stringify({type:"auth_required"})});},5);' +
+    'this.send=function(t){var m=JSON.parse(t);if(m.type==="auth"){setTimeout(function(){me.onmessage({data:JSON.stringify({type:"auth_ok"})});},5);}' +
+    'else if(m.type==="search/related"){parent.__wsCalls.push(m);setTimeout(function(){me.onmessage({data:JSON.stringify({id:m.id,type:"result",success:true,result:{scene:["scene.movie_time"],script:[],automation:["automation.cool_down"],area:["living_room"]}})});},5);}};this.close=function(){};};' +
+    '<\/script>');
+  document.getElementById('f').srcdoc = html;
+  window.__ready = true;
+})();
+</script></body></html>

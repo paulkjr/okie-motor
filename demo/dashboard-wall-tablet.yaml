@@ -1,0 +1,31 @@
+# The dashboard for a tablet on the wall: lock page, screensaver, deep rest at night.
+# Paste into the dashboard's raw configuration editor (pencil > three dots > Raw configuration editor).
+# See docs/guides/08-WALL-TABLET-AND-FIRE-TABLET.md.
+title: Tablet
+
+# Hides Home Assistant's own top bar and sidebar. Needs the "kiosk-mode" plugin from HACS.
+kiosk_mode:
+  hide_header: true
+  hide_sidebar: true
+
+views:
+  - title: Home
+    path: home
+    type: panel
+    cards:
+      - type: custom:okie-motor-card
+        start: bento
+        language: auto
+        squircle: strong              # none | strong | standard | soft
+        # wallpaper: /local/okie/wallpaper.jpg
+        zen:
+          enabled: true               # the lock page with the big clock
+        rest:                         # screensaver and deep rest (these belong to this one screen)
+          lockAfter: '300'            # back to the lock page after 30, 60, 120 or 300 seconds without a touch, or 'never'
+          deepAfterSec: 120           # then dim deeply and shift the clock against burn-in
+          awaySaverAfterSec: 60       # sooner when every person is away
+          # wakeEntities: binary_sensor.hall_motion, binary_sensor.doorbell
+          # screenEntity: switch.tablet_screen    # e.g. Fully Kiosk's "Screen" switch: off at deep rest, on at wake
+        videos:
+          enabled: true
+          path: /local/okie-videos
