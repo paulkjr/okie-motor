@@ -160,14 +160,20 @@
   function recordingsBase(cfg, loc) {
     cfg = cfg || {};
     if (cfg.recordings === false) return '';
-    if (cfg.clipsUrl) return String(cfg.clipsUrl);
+    if (cfg.clipsUrl) return safeHttpUrl(cfg.clipsUrl);            // an address from settings (settings can be imported): only a web address or a path, never javascript: or data:
     return '';
   }
+  /** An address that is a web address (http or https) or a path on this site, else ''. It is parsed the way the browser parses it, so "java\tscript:" and upper case schemes do not get through. */
+  function safeHttpUrl(v) {
+    var s = typeof v === 'string' ? v.trim() : '';
+    if (!s) return '';
+    try { var u = new URL(s, 'https://okie-motor.invalid/'); return u.protocol === 'http:' || u.protocol === 'https:' ? s : ''; } catch (e) { return ''; }
+  }
   /** The link that opens the recording of one event: the page plays the clip that was running at that second (embed = a page for a frame, it tells the dashboard when it is closed). */
-  function recordingLink(base, tsMs) { return base ? base + (base.indexOf('?') < 0 ? '?' : '&') + 'ts=' + Math.round(tsMs / 1000) + '&embed=1' : ''; }
+  function recordingLink(base, tsMs) { base = safeHttpUrl(base); return base ? base + (base.indexOf('?') < 0 ? '?' : '&') + 'ts=' + Math.round(tsMs / 1000) + '&embed=1' : ''; }
 
   var pureApi = {
-    recordingsBase: recordingsBase, recordingLink: recordingLink,
+    recordingsBase: recordingsBase, recordingLink: recordingLink, safeHttpUrl: safeHttpUrl,
     cameraKey: cameraKey, isAlertSensor: isAlertSensor, cameraAlerts: cameraAlerts, listCameras: listCameras,
     lastMotionImage: lastMotionImage, alertSources: alertSources, kindOf: kindOf, eventsFromHistory: eventsFromHistory, groupByDay: groupByDay, unseenCount: unseenCount,
   };

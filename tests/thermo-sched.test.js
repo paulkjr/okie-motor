@@ -94,3 +94,19 @@ test('icons follow the name, a slot is cleaned of empty fields before it is writ
   assert.equal(S.iconFor('X'), 'clock');
   assert.deepEqual(S.cleanSlot({ start: '06:00:00', stop: null, conditions: [], condition_type: 'and', actions: [] }), { start: '06:00:00', condition_type: 'and', actions: [] });
 });
+
+test('saving an edit keeps what else the slot does: only the thermostat calls of the card are replaced', () => {
+  const own = S.buildActions({ mode: 'heat', temp: 21 }, 'climate.a', 'none');
+  const light = { service: 'light.turn_on', entity_id: 'light.hall', service_data: {} }, fan = { service: 'climate.set_fan_mode', entity_id: 'climate.a', service_data: { fan_mode: 'low' } }, scene = { service: 'scene.turn_on', entity_id: 'scene.night', service_data: {} };
+  const old = [light, { service: 'climate.set_preset_mode', entity_id: 'climate.a', service_data: { preset_mode: 'eco' } }, fan, { service: 'climate.set_temperature', entity_id: ['climate.a', 'climate.b'], service_data: { temperature: 19 } }, scene];
+  const m = S.mergeActions(old, own, 'climate.a');
+  assert.deepEqual(m.slice(0, 1), [light], 'what came before stays first');
+  assert.deepEqual(m.slice(1, 1 + own.length), own, 'the card calls sit where its first old call was');
+  assert.ok(m.includes(fan) && m.includes(scene) && m.includes(light), 'the fan mode, the scene and the light are still there');
+  assert.deepEqual(m.filter(a => a.entity_id.length === 1 && a.entity_id[0] === 'climate.b').map(a => a.service_data.temperature), [19], 'a call for two thermostats keeps the other one');
+  assert.equal(m.filter(a => [].concat(a.entity_id).includes('climate.a') && ['climate.set_temperature', 'climate.set_hvac_mode', 'climate.set_preset_mode'].includes(a.service)).length, own.length, 'no old card call of this thermostat is left');
+  assert.equal(S.readSlot({ actions: m }, 'climate.a').temp, 21, 'the entry reads back what was written');
+  assert.deepEqual(S.mergeActions([light], own, 'climate.a'), [light, ...own], 'a slot without card calls gets them at the end');
+  assert.deepEqual(S.mergeActions(undefined, own, 'climate.a'), own);
+  assert.equal(old.length, 5, 'the input is not changed'); assert.deepEqual(old[3].entity_id, ['climate.a', 'climate.b']);
+});

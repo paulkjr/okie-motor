@@ -86,6 +86,17 @@ The long list: [docs/FEATURES.md](docs/FEATURES.md). Every YAML option: [docs/OP
 
 The author uses it every day on a Home Assistant server, an iPad, an iPhone and a browser. It is one person's project: expect rough edges, and please open an issue with what you saw and which device you used. The numbers in the settings file and the layout are tuned on an iPad (9th generation) and a recent iPhone.
 
+## Privacy: what leaves your install
+
+By default **nothing**: the card talks only to your own Home Assistant, there is no analytics and no account. Two optional features call a free outside service, and you can see exactly what they send:
+
+| Feature | Service | What is sent | Default |
+|---|---|---|---|
+| Extra weather places (the plus on the weather screen) | [Open-Meteo](https://open-meteo.com) | the name you search for, and the coordinates of a city you chose | only when you use it |
+| The name of your town on the weather screen (Settings > Standing values) | [bigdatacloud.net](https://www.bigdatacloud.net) | the latitude and longitude of your home from Home Assistant, once; the answer is kept | **off** |
+
+The iPhone and iPad app gives your sign-in only to the page of your own Home Assistant, and only that page can use the app's haptics, microphone and backup.
+
 ## Develop
 
 ```bash

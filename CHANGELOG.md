@@ -2,6 +2,16 @@
 
 The same entries are shown inside the card (dock > What's new). Newest first.
 
+## 0.52.6 (2026-10-24)
+
+Safer with values from entities, settings and the web.
+- The energy server page shows the numbers and texts of the server sensor as plain text: a value that an entity reports can no longer put markup into the page
+- The recordings address of the cameras card (Settings, clips address) only accepts web addresses and paths, also when it comes from an imported settings file; anything else, such as a javascript: address, is dropped
+- Editing a thermostat schedule keeps everything else in that slot: only the thermostat calls the card wrote are replaced, so a fan mode, a light, a scene or another thermostat in the same slot stay
+- The name of your town on the weather screen is now off by default (it sent the home coordinates to bigdatacloud.net); switch it on in Settings if you want it, a name found before is still shown
+- iPhone and iPad app: the sign-in goes only to the page of your own Home Assistant, and only that page can use the haptics, the microphone and the backup of the app
+- Thanks to the reviewer of the HACS submission for reading the whole card
+
 ## 0.52.5 (2026-10-21)
 
 The Feed the Beasts card has five more looks.

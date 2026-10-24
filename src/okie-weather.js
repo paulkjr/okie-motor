@@ -329,13 +329,14 @@
   }
   api.picture = picture; api.makeStars = makeStars; api.skyBg = skyBg;
 
-  /** The name of the place the house is at ("Lutz"): Home Assistant's own latitude and longitude, looked up once with a free reverse look-up and kept. null until known. */
+  /** The name of the place the house is at ("Lutz"): Home Assistant's own latitude and longitude, looked up once with a free reverse look-up (bigdatacloud.net) and kept. Only when `weatherPlaceLookup` is on; null until known. */
   var homePlaceMem = null;
   function homePlace(ctx, done) {
     var hs = ctx.hass(), c = hs && hs.config; if (!c || !isFinite(c.latitude) || !isFinite(c.longitude)) return null;
     var key = (+c.latitude).toFixed(2) + ',' + (+c.longitude).toFixed(2), saved = ctx.store.get('wx.place', null);
     if (saved && saved.key === key && saved.name) return saved.name;
     if (homePlaceMem && homePlaceMem.key === key) return homePlaceMem.name || null;
+    if (!ctx.settings.get().weatherPlaceLookup) return null;           // off unless you turn it on (Settings): the lookup sends the home coordinates to bigdatacloud.net. A name that was found before is still shown.
     homePlaceMem = { key: key, name: '' };
     var url = 'https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + encodeURIComponent(c.latitude) + '&longitude=' + encodeURIComponent(c.longitude) + '&localityLanguage=' + (ctx.lang() === 'de' ? 'de' : 'en');
     Promise.resolve(g.fetch(url)).then(function (r) { return r.json(); }).then(function (j) {

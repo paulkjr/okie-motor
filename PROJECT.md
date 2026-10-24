@@ -81,6 +81,9 @@ Real `backdrop-filter` glass with settings for blur, tint, edges and card style;
 
 * The card talks only to **your Home Assistant**. There is no analytics, no account and no server of ours.
 * The optional "extra weather places" feature looks up city names and forecasts with the free [Open-Meteo](https://open-meteo.com) API from the browser when you use it.
+* The optional "name of your town" on the weather screen (`weatherPlaceLookup`, **off by default**) sends the latitude and longitude of your home once to [bigdatacloud.net](https://www.bigdatacloud.net) and keeps the answer.
+* In the iOS app only a page of your own Home Assistant gets the sign-in (`localStorage.hassTokens`) and may call the native message handlers (haptics, speech, backup); a link to another site opens in the same web view but gets neither.
+* Values that come from entities (the attributes of the server power sensor) are escaped before they are shown, and the recordings address of the cameras card only accepts web addresses and paths.
 * Tokens live in the iOS Keychain (app and widgets) or in Home Assistant's own browser storage (the card); Scriptable widgets keep their long-lived token in the iPhone Keychain.
 * Settings files you export contain your settings (including favorites' entity ids): look at them before you share them.
 

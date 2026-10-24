@@ -114,11 +114,37 @@
     });
     return total;
   }
+  /** An attribute as a finite number, else null: attributes are whatever the entity reports, a string or markup is not a number. */
+  function num(v) { var n = typeof v === 'number' ? v : (typeof v === 'string' && v.trim() !== '' ? Number(v) : NaN); return isFinite(n) ? n : null; }
   function fmtN(v, de) { var s = v >= 100 ? String(Math.round(v)) : v >= 10 ? v.toFixed(1) : v.toFixed(2); return de ? s.replace('.', ',') : s; }
   function fmtW(v, de) { if (v == null || isNaN(v)) return '—'; return v >= 1000 ? (de ? (v / 1000).toFixed(2).replace('.', ',') : (v / 1000).toFixed(2)) + ' kW' : Math.round(v) + ' W'; }
   function fmtUsd(v) { return v == null || isNaN(v) ? '—' : '$' + (v < 10 ? v.toFixed(2) : Math.round(v).toLocaleString('en-US')); }
 
-  var api = { SENSORS: SENSORS, readHouse: readHouse, deviceWatts: deviceWatts, flowSeconds: flowSeconds, histKwh: histKwh, fmtN: fmtN, fmtW: fmtW, fmtUsd: fmtUsd, sourcesFromPrefs: sourcesFromPrefs, allIds: allIds, sumChange: sumChange, sumIds: sumIds, bucketTotals: bucketTotals, homeConsumption: homeConsumption, summarize: summarize, rangeWindow: rangeWindow, fmtKwh: fmtKwh };
+  /** Text made safe to put into markup: attributes of an entity are whatever the entity reports. */
+  function escH(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  var PRICE_SRC = { teco: 'e.src_teco_avg', bill: 'e.src_bill', manual: 'e.src_manual' };
+  /**
+   * The server page as markup: the three big numbers and the rows under them. Every value that came from the attributes of the server power sensor goes through escH
+   * (or is turned into a number first), because these strings are set as HTML. tr(key, vars) is the card's translator.
+   * Returns { cards: [[markup, label]], rows: [[label, markup]] }.
+   */
+  function serverRows(serverW, a, tr, de) {
+    a = a || {}; var sys = (a.system && typeof a.system === 'object') ? a.system : {};
+    var up = num(sys.uptime_s), src = Object.prototype.hasOwnProperty.call(PRICE_SRC, a.price_source) ? PRICE_SRC[a.price_source] : null;
+    return {
+      cards: [['≈' + escH(fmtW(serverW, de)), tr('e.now_w')], [num(a.kwh_today) != null ? fmtN(num(a.kwh_today), de) + '<small> kWh</small>' : '—', tr('e.today_k')], [escH(fmtUsd(num(a.cost_per_month))), tr('e.per_month_c')]],
+      rows: [
+        [tr('e.cost'), escH(tr('e.cost_v', { d: fmtUsd(num(a.cost_per_day)), y: fmtUsd(num(a.cost_per_year)) }))],
+        [tr('e.price_used'), (num(a.price_cents) != null ? escH(tr('e.cents_only', { c: num(a.price_cents).toFixed(2) })) : '—') + (src ? ' <span class="m">(' + escH(tr(src)) + ')</span>' : '')],
+        [tr('e.estimate_of'), 'CPU ' + (a.cpu_package_w != null ? escH(a.cpu_package_w) + ' W' : '—') + ' + ' + escH(tr('e.memory').toLowerCase()) + ' ' + (a.dram_w != null ? escH(a.dram_w) + ' W' : '—') + (a.assumed_rest_of_system_w != null ? ' + ' + escH(a.assumed_rest_of_system_w) + ' W' : '')],
+        [tr('e.up_for'), up != null ? Math.floor(up / 86400) + ' d ' + Math.floor(up % 86400 / 3600) + ' h' : '—'],
+        [tr('e.disk'), sys.disk_used_gb != null ? escH(sys.disk_used_gb) + ' / ' + escH(sys.disk_total_gb) + ' GB' : '—'],
+        [tr('e.memory'), (sys.mem_used_pct != null ? escH(sys.mem_used_pct) + '% / ' + escH(sys.mem_total_gb) + ' GB' : '—') + (sys.load1 != null ? ' · load ' + escH(sys.load1) : '') + (sys.temp_c != null ? ' · ' + escH(sys.temp_c) + '°C' : '')],
+      ],
+    };
+  }
+
+  var api = { escH: escH, num: num, serverRows: serverRows, SENSORS: SENSORS, readHouse: readHouse, deviceWatts: deviceWatts, flowSeconds: flowSeconds, histKwh: histKwh, fmtN: fmtN, fmtW: fmtW, fmtUsd: fmtUsd, sourcesFromPrefs: sourcesFromPrefs, allIds: allIds, sumChange: sumChange, sumIds: sumIds, bucketTotals: bucketTotals, homeConsumption: homeConsumption, summarize: summarize, rangeWindow: rangeWindow, fmtKwh: fmtKwh };
   if (isNode) { module.exports = api; return; }
   if (typeof document === 'undefined') return;
 
@@ -280,7 +306,7 @@
     s += leader(6, serverTop, 6) + leader(179, [hub[0], hub[1] - 15], 0) + leader(353, lampTop, 6);
     return '<svg class="eh-scene" viewBox="0 0 520 366" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Home energy">' + s + '</svg>';
   }
-  var esc = function (v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var esc = escH;
   function shortDate(iso, lang) { try { return new Date(iso + 'T12:00:00').toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-US', { month: 'short', day: 'numeric' }); } catch (e) { return iso; } }
 
   /** The House tab: three headline numbers, the house with its flow lines, four tiles. A tap on a number, a tile or a part of the house opens the tab that tells more (go). */
@@ -388,21 +414,14 @@
   // ---------------------------------------------------------- the Server tab ----
   function serverTab(ctx, body) {
     var t = function (k, v) { return core.t(k, ctx.lang(), v); }, de = ctx.lang() === 'de', sig = '';
-    var SRC = { teco: 'e.src_teco_avg', bill: 'e.src_bill', manual: 'e.src_manual' };
     function draw() {
       var H = readHouse(ctx.hass().states), a = H.serverAttr, sys = a.system || {}, next = JSON.stringify([H.serverW, a, H.containers]);
       if (next === sig) return; sig = next; body.innerHTML = '';
       if (H.serverW == null) body.appendChild(h('div.note-l', null, t('e.srv_unavail')));
       else {
-        body.appendChild(statCards([['≈' + esc(fmtW(H.serverW, de)), t('e.now_w')], [a.kwh_today != null ? fmtN(a.kwh_today, de) + '<small> kWh</small>' : '—', t('e.today_k')], [esc(fmtUsd(a.cost_per_month)), t('e.per_month_c')]]));
-        body.appendChild(kvTable([
-          [t('e.cost'), esc(t('e.cost_v', { d: fmtUsd(a.cost_per_day), y: fmtUsd(a.cost_per_year) }))],
-          [t('e.price_used'), (a.price_cents != null ? esc(t('e.cents_only', { c: Number(a.price_cents).toFixed(2) })) : '—') + (SRC[a.price_source] ? ' <span class="m">(' + esc(t(SRC[a.price_source])) + ')</span>' : '')],
-          [t('e.estimate_of'), 'CPU ' + (a.cpu_package_w != null ? a.cpu_package_w + ' W' : '—') + ' + ' + t('e.memory').toLowerCase() + ' ' + (a.dram_w != null ? a.dram_w + ' W' : '—') + (a.assumed_rest_of_system_w != null ? ' + ' + a.assumed_rest_of_system_w + ' W' : '')],
-          [t('e.up_for'), sys.uptime_s != null ? Math.floor(sys.uptime_s / 86400) + ' d ' + Math.floor(sys.uptime_s % 86400 / 3600) + ' h' : '—'],
-          [t('e.disk'), sys.disk_used_gb != null ? sys.disk_used_gb + ' / ' + sys.disk_total_gb + ' GB' : '—'],
-          [t('e.memory'), (sys.mem_used_pct != null ? sys.mem_used_pct + '% / ' + sys.mem_total_gb + ' GB' : '—') + (sys.load1 != null ? ' · load ' + sys.load1 : '') + (sys.temp_c != null ? ' · ' + sys.temp_c + '°C' : '')],
-        ]));
+        var R = serverRows(H.serverW, a, t, de);
+        body.appendChild(statCards(R.cards));
+        body.appendChild(kvTable(R.rows));
       }
       body.appendChild(h('div.lbl', { style: { margin: '18px 0 6px' } }, t('e.containers')));
       if (!H.containers || !H.containers.length) body.appendChild(h('div.note-l', null, t('e.no_containers')));

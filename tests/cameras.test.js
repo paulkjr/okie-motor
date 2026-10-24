@@ -153,3 +153,14 @@ test('cameras: the link to one event carries its time in seconds and asks for th
   assert.equal(C.recordingLink('https://h/ring?x=1', 5000), 'https://h/ring?x=1&ts=5&embed=1');
   assert.equal(C.recordingLink('', 5000), '');
 });
+
+test('the recordings address from the settings: a web address or a path, never javascript: or data: (settings can be imported from a file)', () => {
+  const bad = ['javascript:alert(1)', 'JaVaScRiPt:alert(1)', 'java\tscript:alert(1)', ' javascript:alert(1)', 'data:text/html,<script>1</script>', 'vbscript:x', 'file:///etc/passwd', '', null, undefined, 42, {}];
+  bad.forEach(v => assert.equal(C.safeHttpUrl(v), '', 'dropped: ' + String(v)));
+  ['https://example.org/ring', 'http://192.0.2.5:8765/ring', '/local/clips.html', 'clips/index.html'].forEach(v => assert.equal(C.safeHttpUrl(v), v));
+  const https = { protocol: 'https:', hostname: 'ha.example.org' };
+  assert.equal(C.recordingsBase({ clipsUrl: 'javascript:alert(1)' }, https), '', 'a bad address is dropped, not replaced by a guess');
+  assert.equal(C.recordingsBase({ clipsUrl: 'https://example.org/ring' }, https), 'https://example.org/ring');
+  assert.equal(C.recordingLink('javascript:alert(1)', 1000), '', 'the link to a clip checks its base too');
+  assert.match(C.recordingLink('https://example.org/ring', 1000), /^https:\/\/example\.org\/ring\?ts=1&embed=1$/);
+});

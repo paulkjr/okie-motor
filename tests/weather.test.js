@@ -168,3 +168,14 @@ test('hours and days of a city keep their own labels and night flag; days are no
   assert.equal(days.length, 16);
   assert.equal(days[3].label, 'D3');
 });
+
+test('weather: the home place lookup (it sends the home coordinates to bigdatacloud.net) is off by default and only runs when the setting is on', () => {
+  const fs = require('fs'), path = require('path'), src = n => fs.readFileSync(path.join(__dirname, '../src', n), 'utf8');
+  assert.match(src('okie-card.js'), /weatherPlaceLookup: false/);
+  const S = require('../src/okie-settings.js'), row = S.ROWS.find(r => r.id === 'weather_place');
+  assert.ok(row && row.type === 'toggle' && row.path === 'weatherPlaceLookup', 'a switch for it in Settings');
+  const w = src('okie-weather.js'), at = w.indexOf('function homePlace('), net = w.indexOf('bigdatacloud', at);
+  assert.ok(at > 0 && net > at, 'the lookup is in homePlace');
+  assert.ok(w.slice(at, net).includes('weatherPlaceLookup'), 'the setting is checked before anything is sent');
+  assert.equal((w.match(/bigdatacloud\.net\/data/g) || []).length, 1, 'one place sends it');
+});

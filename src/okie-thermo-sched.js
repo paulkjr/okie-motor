@@ -80,6 +80,24 @@
     return out;
   }
 
+  /** The service calls this card writes for a thermostat (buildActions) and reads back (readSlot). Anything else a slot does is the user's own and is kept. */
+  var OWN_SERVICES = { 'climate.set_hvac_mode': 1, 'climate.set_temperature': 1, 'climate.set_preset_mode': 1, 'climate.turn_off': 1, 'climate.turn_on': 1 };
+  /**
+   * The actions of a slot after an edit: the card's own calls for this thermostat are replaced by `own` (at the place of the first of them), and everything else the user had
+   * in the slot stays (the fan mode, a light, a scene, another thermostat). A call for several thermostats keeps its other thermostats.
+   */
+  function mergeActions(oldActions, own, climateId) {
+    var out = [], placed = false;
+    (oldActions || []).forEach(function (a) {
+      var ids = [].concat((a && a.entity_id) || []);
+      if (!a || ids.indexOf(climateId) < 0 || !OWN_SERVICES[String(a.service || '')]) { out.push(a); return; }
+      if (!placed) { out = out.concat(own); placed = true; }
+      var rest = ids.filter(function (id) { return id !== climateId; });
+      if (rest.length) out.push(Object.assign({}, a, { entity_id: rest }));
+    });
+    return placed ? out : out.concat(own);
+  }
+
   /** The entries (one per time slot) that act on this thermostat, from the Scheduler's list. */
   function entriesFor(schedules, climateId) {
     var out = [];
@@ -130,7 +148,7 @@
   // @pure:end
 
   var pureApi = { DAYS: DAYS, WEEKDAYS: WEEKDAYS, WEEKEND: WEEKEND, expandDays: expandDays, clockOf: clockOf, readSlot: readSlot, buildActions: buildActions, entriesFor: entriesFor, onDay: onDay,
-    PROFILE_IDS: PROFILE_IDS, profileDefaults: profileDefaults, matchProfile: matchProfile, iconFor: iconFor, cleanSlot: cleanSlot };
+    PROFILE_IDS: PROFILE_IDS, profileDefaults: profileDefaults, matchProfile: matchProfile, iconFor: iconFor, cleanSlot: cleanSlot, mergeActions: mergeActions };
   if (isNode) { module.exports = pureApi; return; }
   if (typeof document === 'undefined') return;
 
@@ -291,9 +309,9 @@
       var jobs = list.map(function (e) { return writeSlot(e, buildActions({ mode: 'heat_cool', low: low, high: high }, item.id, exitPreset())); });
       Promise.all(jobs).then(function () { ctx.toast('success', t('ts.updated')); reloadSoon(500); }, function () { ctx.toast('error', t('ts.failed')); });
     }
-    /** Replace the actions of one slot of a schedule, keeping its other slots. */
+    /** Replace this thermostat's actions in one slot of a schedule, keeping the slot's other actions and the other slots. */
     function writeSlot(e, actions) {
-      var slots = (e.sc.timeslots || []).map(function (s, i) { var c = cleanSlot(s); if (i === e.slot) c.actions = actions; return c; });
+      var slots = (e.sc.timeslots || []).map(function (s, i) { var c = cleanSlot(s); if (i === e.slot) c.actions = mergeActions(s.actions, actions, item.id); return c; });
       return ctx.call('scheduler', 'edit', { entity_id: e.sw, timeslots: slots });
     }
 
@@ -379,7 +397,9 @@
       var name = String(E.name || '').trim() || (E.mode === 'off' ? t('ts.m.off') : t('ts.p.comfort'));
       if (!E.days.length) { ctx.toast('error', t('ts.day_empty')); return; }
       var entry = { mode: E.mode, temp: E.temp, low: E.low, high: E.high, preset: E.preset };
-      var slot = { start: (E.time || '07:00') + ':00', actions: buildActions(entry, item.id, exitPreset()) };
+      var own = buildActions(entry, item.id, exitPreset()), old = E.isNew ? null : (E.e.sc.timeslots || [])[E.e.slot];
+      var slot = old ? cleanSlot(old) : {};                              // an edit keeps what else the slot has (its other actions, its end, its conditions)
+      slot.start = (E.time || '07:00') + ':00'; slot.actions = old ? mergeActions(old.actions, own, item.id) : own;
       var days = DAYS.filter(function (d) { return E.days.indexOf(d) >= 0; });
       var p;
       if (E.isNew) p = ctx.call('scheduler', 'add', { weekdays: days, timeslots: [slot], repeat_type: 'repeat', name: name });

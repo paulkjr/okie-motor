@@ -126,3 +126,31 @@ test('house: numbers read like the card: kW above 1000 W, dollars with cents und
   assert.equal(E.fmtN(0.106), '0.11'); assert.equal(E.fmtN(41.83), '41.8'); assert.equal(E.fmtN(1213), '1213'); assert.equal(E.fmtN(41.83, true), '41,8');
   assert.equal(E.fmtUsd(1.5), '$1.50'); assert.equal(E.fmtUsd(190.71), '$191'); assert.equal(E.fmtUsd(1234), '$1,234'); assert.equal(E.fmtUsd(null), '—');
 });
+
+test('server page: attributes are whatever the entity reports, so no value reaches the markup unescaped', () => {
+  const tr = (k, v) => k + (v ? JSON.stringify(v) : '');
+  const evil = '<img src=x onerror=alert(1)>';
+  const r = E.serverRows(120, {
+    kwh_today: evil, cost_per_month: evil, cost_per_day: evil, cost_per_year: evil, price_cents: evil, price_source: 'constructor',
+    cpu_package_w: evil, dram_w: evil, assumed_rest_of_system_w: evil,
+    system: { uptime_s: evil, disk_used_gb: evil, disk_total_gb: evil, mem_used_pct: evil, mem_total_gb: evil, load1: evil, temp_c: evil },
+  }, tr, false);
+  const all = JSON.stringify(r);
+  assert.ok(!/<img/i.test(all), 'a tag from an attribute is not in the markup');
+  assert.ok(/&lt;img/.test(all), 'it is shown as text instead');
+  assert.equal(r.cards.length, 3); assert.equal(r.rows.length, 6);
+  assert.equal(r.cards[1][0], '—', 'a string is not a number of kWh');
+  assert.equal(r.rows[3][1], '—', 'a string is not an uptime');
+});
+
+test('server page: real numbers still read as numbers, and the markup the card adds itself stays', () => {
+  const tr = (k, v) => k;
+  const r = E.serverRows(95.4, { kwh_today: '2.5', cost_per_month: 12.3, cost_per_day: 0.41, cost_per_year: 150, price_cents: 13.5, price_source: 'bill', cpu_package_w: 22.5, dram_w: 3, assumed_rest_of_system_w: 20, system: { uptime_s: 90061, disk_used_gb: 120, disk_total_gb: 500, mem_used_pct: 41, mem_total_gb: 32, load1: 0.52, temp_c: 55 } }, tr, false);
+  assert.ok(r.cards[0][0].startsWith('≈95'));
+  assert.match(r.cards[1][0], /^2\.50<small> kWh<\/small>$/);
+  assert.equal(r.rows[3][1], '1 d 1 h');
+  assert.match(r.rows[1][1], /<span class="m">\(e\.src_bill\)<\/span>$/);
+  assert.equal(r.rows[4][1], '120 / 500 GB');
+  assert.equal(r.rows[5][1], '41% / 32 GB · load 0.52 · 55°C');
+  assert.deepEqual([E.num(5), E.num('5'), E.num(' '), E.num('x'), E.num(null), E.num(NaN), E.num({}), E.num(Infinity)], [5, 5, null, null, null, null, null, null]);
+});

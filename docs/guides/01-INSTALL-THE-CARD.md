@@ -18,7 +18,7 @@ The repository follows HACS' rules for dashboard plugins: `hacs.json` and `dist/
 2. Put it into your Home Assistant `config` folder as `www/okie-motor.js` (create the `www` folder if it is not there; use the File editor, Studio Code Server or the Samba share; the first time you create `www`, restart Home Assistant once so it is served).
    Inside Home Assistant the file is now reachable as `/local/okie-motor.js`.
 3. Open **Settings > Dashboards**, the **⋮** menu at the top right, **Resources** (needs Advanced mode, see [00-START-HERE](00-START-HERE.md)), **Add resource**:
-   * URL: `/local/okie-motor.js?v=0.52.5`
+   * URL: `/local/okie-motor.js?v=0.52.6`
    * Resource type: **JavaScript module**
 4. Hard refresh the browser.
 

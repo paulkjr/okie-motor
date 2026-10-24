@@ -11,6 +11,7 @@ squircle: none            # card corner shape: none (Standard) | strong (Promine
 start: bento              # bento | browse (opens with the search panel expanded)
 language: auto            # auto | en | de
 weather_entity: weather.home      # optional; empty uses the first weather entity
+weatherPlaceLookup: false          # true: look up the name of your town once (sends the home latitude and longitude to bigdatacloud.net); also a switch in Settings
 power_entity: sensor.house_power  # optional; empty uses the strongest power sensor
 wallpaper: /local/room.jpg        # optional
 scale: 100                # content size in percent (40-130); smaller leaves more of the wallpaper visible (this screen only)

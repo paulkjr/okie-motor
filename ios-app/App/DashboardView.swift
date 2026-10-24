@@ -99,6 +99,12 @@ struct DashboardWeb: UIViewRepresentable {
         start(w, coordinator: c)
     }
 
+    /// A string as a JavaScript string literal (quotes and all).
+    private static func jsString(_ s: String) -> String {
+        guard let d = try? JSONSerialization.data(withJSONObject: s, options: .fragmentsAllowed), let t = String(data: d, encoding: .utf8) else { return "\"\"" }
+        return t
+    }
+
     /// Puts the sign-in where Home Assistant's own page looks for it (localStorage.hassTokens), then opens the dashboard.
     private func start(_ w: WKWebView, coordinator: Coordinator) {
         let host = session.baseURL.absoluteString.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
@@ -110,13 +116,15 @@ struct DashboardWeb: UIViewRepresentable {
         let ucc = w.configuration.userContentController
         ucc.removeAllUserScripts()
         if let d = try? JSONSerialization.data(withJSONObject: tokens), let js = String(data: d, encoding: .utf8) {
-            ucc.addUserScript(WKUserScript(source: "try { localStorage.setItem('hassTokens', JSON.stringify(\(js))); } catch (e) {}", injectionTime: .atDocumentStart, forMainFrameOnly: true))
+            // only the page of your own Home Assistant gets the sign-in: a link to another site opens in this web view too, and must never see the tokens
+            ucc.addUserScript(WKUserScript(source: "try { var t = \(js); if (location.origin === new URL(t.hassUrl).origin) { localStorage.setItem('hassTokens', JSON.stringify(t)); } } catch (e) {}", injectionTime: .atDocumentStart, forMainFrameOnly: true))
         }
         // the card keeps its Settings in localStorage "okie:settings"; its glass numbers go to the widgets so they wear the same glass
-        let glass = "function s(){try{var o=JSON.parse(localStorage.getItem('okie:settings')||'{}');if(typeof o==='string')o=JSON.parse(o);window.webkit.messageHandlers.okieGlass.postMessage(JSON.stringify((o&&o.glass)||{}));}catch(e){}}s();setInterval(s,3000);"
+        let own = Self.jsString(host)
+        let glass = "(function(){if(location.origin!==new URL(\(own)).origin)return;function s(){try{var o=JSON.parse(localStorage.getItem('okie:settings')||'{}');if(typeof o==='string')o=JSON.parse(o);window.webkit.messageHandlers.okieGlass.postMessage(JSON.stringify((o&&o.glass)||{}));}catch(e){}}s();setInterval(s,3000);})();"
         ucc.addUserScript(WKUserScript(source: glass, injectionTime: .atDocumentEnd, forMainFrameOnly: true))
         // the card's Dial look (Settings > Thermostat dial) goes to the big thermostat and the thermostat widget, so the wheel glows the same everywhere
-        let look = "function l(){try{var o=JSON.parse(localStorage.getItem('okie:settings')||'{}');if(typeof o==='string')o=JSON.parse(o);window.webkit.messageHandlers.okieLook.postMessage(JSON.stringify((o&&o.thermo)||{}));}catch(e){}}l();setInterval(l,3000);"
+        let look = "(function(){if(location.origin!==new URL(\(own)).origin)return;function l(){try{var o=JSON.parse(localStorage.getItem('okie:settings')||'{}');if(typeof o==='string')o=JSON.parse(o);window.webkit.messageHandlers.okieLook.postMessage(JSON.stringify((o&&o.thermo)||{}));}catch(e){}}l();setInterval(l,3000);})();"
         ucc.addUserScript(WKUserScript(source: look, injectionTime: .atDocumentEnd, forMainFrameOnly: true))
         let path = UserDefaults.standard.string(forKey: "dashboardPath") ?? "/okie-tablet/home"
         var url = path.hasPrefix("http") ? URL(string: path) : URL(string: host + (path.hasPrefix("/") ? path : "/" + path))
@@ -255,7 +263,15 @@ struct DashboardWeb: UIViewRepresentable {
             return t
         }
 
+        /// Is this frame a page of your own Home Assistant (the address you signed in to)? A link to another site opens in this same web view.
+        private func isOwnPage(_ frame: WKFrameInfo) -> Bool {
+            guard let base = latest?.session.baseURL, let host = base.host else { return false }
+            let o = frame.securityOrigin
+            return o.protocol.lowercased() == (base.scheme ?? "").lowercased() && o.host.lowercased() == host.lowercased() && o.port == (base.port ?? 0)
+        }
+
         func userContentController(_ c: WKUserContentController, didReceive message: WKScriptMessage) {
+            guard isOwnPage(message.frameInfo) else { return }          // haptics, the microphone, backup and the rest are for the card of your Home Assistant, not for another site opened in this web view
             if message.name == "okieGlass", let json = message.body as? String {
                 if GlassRule.save(GlassRule.from(json: json)) { WidgetCenter.shared.reloadAllTimelines() }
             } else if message.name == "okieHome" {

@@ -36,7 +36,7 @@
     visibility: { hidden: false, disabled: false, diagnostic: false },
     excluded: ['switch.schedule_*'],     // the Scheduler component's helper switches belong to the Schedules app, not the device list
     limits: { max: 0, areaOnly: true, hideUnavailable: true },
-    weather_entity: '', power_entity: '', weatherPlaces: [], weatherCities: [], calendarColors: {}, calendarHidden: null,      // weatherPlaces: other weather entities you added on the weather screen (the + button)
+    weather_entity: '', power_entity: '', weatherPlaces: [], weatherCities: [], weatherPlaceLookup: false, calendarColors: {}, calendarHidden: null,      // weatherPlaces: other weather entities you added on the weather screen (the + button)
     wallpaper: '', wallpaperView: false, bgMode: 'auto',
     sync: { enabled: true },      // the same settings on every screen (okie-sync.js)
     glass: { brightness: 100, blur: 20, contrast: 100, saturation: 100, grayscale: 0, tint: 76, cardBlur: 60, cardTint: 21, cardStyle: 'dark', cardEdge: 14 },      // cardBlur: frosted blur behind the device cards (px, 0 = clear); cardTint: how much light or dark tint they carry (%); cardStyle: light (white) or dark glass; cardEdge: the thin light rim that keeps clear glass readable (%)

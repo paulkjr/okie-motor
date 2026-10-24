@@ -37,6 +37,7 @@ is the same resized picture as in `harness/assets/room.jpg`. Everything in `ios-
 ## Services and trademarks
 
 * **Open-Meteo**: the optional "extra weather places" feature of the card looks up place names and forecasts with the free [Open-Meteo](https://open-meteo.com) API (data CC BY 4.0, "Weather data by Open-Meteo.com").
+* **bigdatacloud.net**: the optional "name of your town" setting of the weather screen (off by default) sends the latitude and longitude of your home once to the free [BigDataCloud](https://www.bigdatacloud.net) reverse-geocoding service and keeps the answer.
 * **Spotify**: the large music card draws a simplified green circle logo when the name of a player contains "spotify". Spotify is a trademark of Spotify AB; this project is not affiliated with or endorsed by Spotify.
 * **Home Assistant**, **HACS**, **Hemma**, **Scriptable**, **Fully Kiosk Browser**, **Apple**, **iPhone**, **iPad**, **iOS**, **Xcode**, **WidgetKit**, **Amazon Fire** and other names are trademarks of their owners and are used only to say what this project works with.
 * The Okie Motor / Okie Home name, the app icon and the card's own drawings are this project's own.
