@@ -607,3 +607,17 @@ test('snapHeight: a column height sticks to a height that means something', () =
   assert.equal(L.snapHeight(676, [{ v: 650, kind: 'other' }, { v: 700, kind: 'card' }], 30).h, 700);      // the nearer one wins
   assert.equal(L.snapHeight(500, [], 22).h, 500);
 });
+
+test('panelExtra: a column height set with its handle makes the panel exactly that tall; an unset column fills the room (both set used to leave a strip of nothing under the columns)', () => {
+  const room = 500, grid = 722, auto = 352;
+  assert.equal(L.panelExtra(auto, grid, room, [0, 0], 200), auto, 'nothing set: the panel fills the room');
+  assert.equal(L.panelExtra(auto, grid, room, [785, 784], 200), 63, 'both set: as tall as the taller column');
+  assert.equal(L.panelExtra(auto, grid, room, [785, 0], 200), auto, 'one set: the other column still fills the room, so the panel does too');
+  assert.equal(L.panelExtra(auto, grid, room, [0, 600], 200), auto);
+  assert.equal(L.panelExtra(auto, grid, room, [500, 500], 200), -222, 'shorter than the normal panel: the panel gets shorter');
+  assert.equal(L.panelExtra(auto, grid, room, [2000, 0], 200), room, 'a column never reaches past the room');
+  assert.equal(L.panelExtra(auto, grid, room, [150, 150], 200), auto, 'under the least height counts as not set');
+  assert.equal(L.panelExtra(auto, grid, room, [undefined, null], 200), auto);
+  assert.equal(L.panelExtra(0, grid, room, [], 200), 0, 'a desktop without heights is unchanged');
+  assert.equal(L.panelExtra(auto, grid, room, ['785', '784.4'], 200), 63, 'saved numbers may be strings');
+});

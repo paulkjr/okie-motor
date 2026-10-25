@@ -490,11 +490,9 @@
         auto = Math.max(0, Math.floor(room - 0.10 * (host._avail || 0) / z));
       }
       panel = auto;
-      if (wide) {      // a height set with a handle makes the panel as tall as the taller column
-        [Math.round(+cfg().w1height) || 0, Math.round(+cfg().wrheight) || 0].forEach(function (px) { if (px >= HMIN) panel = Math.max(panel, Math.min(px, gridH + room) - gridH); });
-      }
+      if (wide) panel = L.panelExtra(auto, gridH, room, [cfg().w1height, cfg().wrheight], HMIN);      // a height set with a handle makes the panel as tall as the taller column (see panelExtra)
       st.style.setProperty('--okie-col-extra', auto + 'px'); st.style.setProperty('--okie-w1-extra', panel + 'px');
-      st.dataset.w1grow = panel > 0 ? 'true' : 'false';
+      st.dataset.w1grow = panel !== 0 || auto > 0 ? 'true' : 'false';
       if (panel !== w1extra) { w1extra = panel; fitting = true; try { host._measure(); } finally { fitting = false; } }      // the columns got taller: centre them again
       requestAnimationFrame(markScrolls);
     }

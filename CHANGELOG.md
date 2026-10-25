@@ -2,6 +2,12 @@
 
 The same entries are shown inside the card (dock > What's new). Newest first.
 
+## 0.52.7 (2026-10-24)
+
+The start screen is no longer pushed to the top on a tablet.
+- When you had set the height of both columns with the handles, the panel under them still filled the whole window, so a strip of nothing stayed under the columns and the block was centred as if it were taller: it sat too high. The panel now follows the columns you set
+- A column you have not set still fills the room, and a short column gives a shorter panel (both then sit in the upper middle)
+
 ## 0.52.6 (2026-10-24)
 
 Safer with values from entities, settings and the web.

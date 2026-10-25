@@ -271,6 +271,16 @@
   }
   /** Room to leave above a column that is shorter than the window, so it sits in the middle. `always` centres at any content size; without it only a column made smaller than 100% is centred. */
   function centerGap(avail, shown, pct, always, bias) { if (!always && userScale(pct) >= 1) return 0; return Math.max(0, Math.floor((avail - shown) / 2 * (bias > 0 && bias <= 1 ? bias : 1))); }
+  /**
+   * How much taller than its normal height the panel of the start screen is (`--okie-w1-extra`; may be negative: a shorter panel). A column whose height was set with its handle makes the panel exactly that tall; a column
+   * that was not set fills the room (`auto`, on a tablet the window minus a margin). The panel is as tall as the taller of the two columns, so with both columns set it follows them (it used to stay at `auto` and left
+   * a strip of nothing under the columns, which made the whole block look pushed to the top). heights: the two saved heights (0 = not set); a height under `hmin` counts as not set; a column never reaches past the room.
+   */
+  function panelExtra(auto, gridH, room, heights, hmin) {
+    var extras = (heights || []).map(function (px) { px = Math.round(+px) || 0; return px >= (hmin || 0) && px > 0 ? Math.min(px, gridH + room) - gridH : null; });
+    if (!extras.some(function (e) { return e != null; })) return auto;
+    return Math.max.apply(null, extras.map(function (e) { return e == null ? auto : e; }));
+  }
   /** The real height of the zoomed column. iOS web views (the iPad's Safari and the Okie Home app) report a zoomed element at its UNzoomed size: when the box height equals the layout height
    *  and the zoom is not 1, the real height is the layout height times the zoom. Other engines already give the zoomed height. */
   /** canScroll({ overflowX, overflowY, scrollWidth, clientWidth, scrollHeight, clientHeight }) -> true when a finger can scroll this box (a scroll box with more inside than shows). */
@@ -711,7 +721,7 @@
     TOP_CATEGORIES: TOP_CATEGORIES, CHIP_FILTERS: CHIP_FILTERS, inTopCategory: inTopCategory,
     applyChipFilter: applyChipFilter, groupItems: groupItems, areaSensors: areaSensors,
     normalizeState: normalizeState, videoCandidates: videoCandidates, resolveVideo: resolveVideo,
-    zoomFor: zoomFor, textScale: textScale, scaleFonts: scaleFonts, userScale: userScale, scaledZoom: scaledZoom, phoneZoom: phoneZoom, panelTop: panelTop, centerGap: centerGap, columnHeight: columnHeight, snapHeight: snapHeight, canScroll: canScroll, rightLayout: rightLayout, TABLET_CENTER_BIAS: TABLET_CENTER_BIAS, w1Extra: w1Extra, layoutFor: layoutFor, gridColumns: gridColumns, typistAt: typistAt, recentBuckets: recentBuckets, TIME_SORT: TIME_SORT, decodeEntities: decodeEntities, activeCount: activeCount, looksLikeAsk: looksLikeAsk,
+    zoomFor: zoomFor, textScale: textScale, scaleFonts: scaleFonts, userScale: userScale, scaledZoom: scaledZoom, phoneZoom: phoneZoom, panelTop: panelTop, centerGap: centerGap, panelExtra: panelExtra, columnHeight: columnHeight, snapHeight: snapHeight, canScroll: canScroll, rightLayout: rightLayout, TABLET_CENTER_BIAS: TABLET_CENTER_BIAS, w1Extra: w1Extra, layoutFor: layoutFor, gridColumns: gridColumns, typistAt: typistAt, recentBuckets: recentBuckets, TIME_SORT: TIME_SORT, decodeEntities: decodeEntities, activeCount: activeCount, looksLikeAsk: looksLikeAsk,
     LADDER: LADDER, availableHeight: availableHeight, pickRung: pickRung, squareSize: squareSize,
     springStep: springStep, springSettled: springSettled,
     ARC: ARC, dialLook: dialLook, dialGlow: dialGlow, dialTickAngles: dialTickAngles, sliderGlow: sliderGlow, valueFromPointer: valueFromPointer, angleForValue: angleForValue, polar: polar, arcPath: arcPath, tempColor: tempColor, snap: snap, clamp: clamp,

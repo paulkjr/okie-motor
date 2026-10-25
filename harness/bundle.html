@@ -56,6 +56,8 @@ if (/[?&]fakevoice=1/.test(location.search)) {
   if (q.get('favs')) card.setConfig(Object.assign({}, card._config || {}, { favorites: ['light.kitchen_ceiling','light.living_room_lamp','climate.living_room','cover.living_room_blinds','media_player.living_room_tv','light.anziehraum_deckenleuchte','cover.anziehraum_rollade','cover.arbeitszimmer_rollade','light.kitchen_counter','switch.coffee_machine','light.living_room_strip','fan.arbeitszimmer_klima','vacuum.robo','script.govee_cozy_lights'], bento: { w1mode: 'favorites', w1layout: 'list' }, start: q.get('start') || 'bento', zen: { enabled: q.get('zen') === '1' }, splash: 'none', language: q.get('lang') || 'en', weather_entity: 'weather.home', power_entity: 'sensor.house_power' }));
   card.hass = m.hass;
   var hh = m.hass; hh.language = q.get('lang') || 'en'; hh.locale = { language: hh.language };
+  // dev: ?colh=785,784 sets the saved heights of the two columns (the left, the right), as the handles of the arrangement do
+  if (q.get('colh')) setTimeout(function () { try { var hh = q.get('colh').split(','); card._settings.set({ bento: { w1height: +hh[0] || 0, wrheight: +(hh[1] || hh[0]) || 0 } }); } catch (e) { /* not there */ } }, 600);
   // dev: ?feeder=peek (compact, classic, peek, leaves, neon, bowl) sets the look of the feeder card
   if (q.get('feeder')) setTimeout(function () { try { card._settings.set({ bento: { feederDesign: q.get('feeder') } }); } catch (e) { /* not there */ } }, 600);
   // dev: ?feederpick=Neon%20bowl&arrange=1 opens the pencil of the feeder card, taps that look in the picker, closes the picker and writes what happened over the page
