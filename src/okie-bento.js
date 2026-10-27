@@ -767,7 +767,7 @@
       function setPaused(hover) { paused = hover; pager.dataset.paused = (hover || userPaused) ? 'true' : 'false'; }
       function labelOf(p) { return p.label || t('b.' + p.id); }
       function drawPager() {
-        pager.innerHTML = ''; pager.classList.toggle('single', pages.length < 2);
+        pager.innerHTML = ''; pager.classList.toggle('single', pages.length < 2); pager.style.display = pages.length < 2 ? 'none' : '';      // a card with one page has no dots, pause or pencil
         pages.forEach(function (p, i) { pager.appendChild(h('button.hsp-dot' + (i === idx ? '.on' : ''), { 'aria-label': t('b.page', { n: i + 1 }) + ', ' + labelOf(p), 'aria-current': i === idx ? 'true' : null, onclick: function () { go(i); } })); });
         if (pages.length > 1) pager.appendChild(h('button.hsp-pp', { 'aria-label': userPaused ? t('b.play') : t('b.pause'), onclick: function () { userPaused = !userPaused; setPaused(paused); drawPager(); }, html: UI.icon(userPaused ? 'play' : 'pause', 12) }));
         pager.appendChild(h('button.hsp-ed', { 'aria-label': t('b.edit'), title: t('b.edit'), onclick: function (e) { e.stopPropagation(); setEditing(true); }, html: UI.icon('pencil', 13) }));

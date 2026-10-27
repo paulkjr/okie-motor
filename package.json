@@ -1,7 +1,7 @@
 {
   "name": "okie-motor",
   "private": true,
-  "version": "0.55.2",
+  "version": "0.55.3",
   "description": "A search-and-control dashboard card for Home Assistant: lock page, status island, search bar with AI, bento start screen, detail views, apps and settings.",
   "license": "GPL-3.0-or-later",
   "scripts": {

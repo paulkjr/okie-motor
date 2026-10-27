@@ -2,6 +2,11 @@
 
 The same entries are shown inside the card (dock > What's new). Newest first.
 
+## 0.55.3 (2026-10-27)
+
+**A card with one page has no pager.**
+- A card that shows a single page (a widget you added on its own) no longer draws the dots, the pause button and the pencil in its corner
+
 ## 0.55.2 (2026-10-27)
 
 **The sliding cards on the right are all the same height.**
