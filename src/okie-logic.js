@@ -288,6 +288,55 @@
     var sc = function (o) { return o === 'auto' || o === 'scroll' || o === 'overlay'; };
     return (sc(b.overflowY) && b.scrollHeight > b.clientHeight + 1) || (sc(b.overflowX) && b.scrollWidth > b.clientWidth + 1);
   }
+  // ---- the slider cards of the right column: stacks of pages ----
+  // bento.stacks: [[page ids of the first card], [page ids of the second], ...]. A page id is a slider page (weather, todos, news, calendar, tips) or a card of the deck (d:cameras, d:sensors ...).
+  // The keys of the cards in the right column stay the old ones for the first two (w:slider, w:deck), so a layout saved before keeps its order: then w:s2, w:s3 ...
+  var STD_PAGES = ['weather', 'todos', 'news', 'calendar', 'tips'];
+  function stackKey(i) { return i === 0 ? 'w:slider' : i === 1 ? 'w:deck' : 'w:s' + i; }
+  function stackIndex(key) { if (key === 'w:slider') return 0; if (key === 'w:deck') return 1; var m = /^w:s(\d+)$/.exec(String(key)); return m ? +m[1] : -1; }
+  /** Only known pages, each once, no empty card. */
+  function cleanStacks(stacks, known) {
+    var seen = {};
+    return (Array.isArray(stacks) ? stacks : []).map(function (s) { return (Array.isArray(s) ? s : []).filter(function (id) { if (known.indexOf(id) < 0 || seen[id]) return false; seen[id] = 1; return true; }); })
+      .filter(function (s) { return s.length; });
+  }
+  /**
+   * The stacks to show: the saved ones, else made from the settings of before (one swipeable card, or the sliding card and the deck as two).
+   * c: the bento settings, o: { known: every page id there is, deck: the ids of the deck pages (d:...), w2: is the sliding card on }.
+   */
+  function migrateStacks(c, o) {
+    c = c || {}; if (Array.isArray(c.stacks)) return cleanStacks(c.stacks, o.known);
+    var saved = Array.isArray(c.pages) ? c.pages : STD_PAGES, std = o.w2 === false ? [] : saved.filter(function (id) { return id.indexOf('d:') !== 0; });
+    if (c.oneWidget !== false && o.deck.length) {
+      var all = o.w2 === false ? [] : saved.slice();
+      if (c.pagesVer !== 2 || o.w2 === false) o.deck.forEach(function (id) { if (all.indexOf(id) < 0) all.push(id); });
+      return cleanStacks([all], o.known);
+    }
+    var deck = Array.isArray(c.deckPages) && c.deckPages.length ? c.deckPages.map(function (id) { return id.indexOf('d:') === 0 ? id : 'd:' + id; }) : o.deck;
+    return cleanStacks([std, deck], o.known);
+  }
+  function hasPage(stacks, id) { return stacks.some(function (s) { return s.indexOf(id) >= 0; }); }
+  /** A page that was not in any card gets a card of its own, at the end. */
+  function addPage(stacks, id) { var out = stacks.map(function (s) { return s.slice(); }); if (!hasPage(out, id)) out.push([id]); return out; }
+  /** A page leaves its card; a card with no page left goes. */
+  function removePage(stacks, id) { return stacks.map(function (s) { return s.filter(function (x) { return x !== id; }); }).filter(function (s) { return s.length; }); }
+  /** The pages of card `from` join card `onto` (at its end); card `from` goes. */
+  function mergeStacks(stacks, from, onto) {
+    var out = stacks.map(function (s) { return s.slice(); });
+    if (from === onto || from < 0 || onto < 0 || from >= out.length || onto >= out.length) return out;
+    out[onto] = out[onto].concat(out[from]); out.splice(from, 1); return out;
+  }
+  /** Old card index -> index of the card of the new list that shares a page with it (-1: the card is gone). */
+  function stackMap(before, after) {
+    return before.map(function (s) { for (var i = 0; i < after.length; i++) if (s.some(function (id) { return after[i].indexOf(id) >= 0; })) return i; return -1; });
+  }
+  /** The keys of the right column (w:slider, w:deck, a favorite ...) after the cards moved: stack keys follow the map, the others stay. */
+  function remapStackKeys(keys, map) {
+    var out = [];
+    (keys || []).forEach(function (k) { var i = stackIndex(k); if (i < 0) { out.push(k); return; } var n = map[i]; if (n >= 0 && out.indexOf(stackKey(n)) < 0) out.push(stackKey(n)); });
+    return out;
+  }
+
   /**
    * rightLayout({ order }) -> { names, areas, rows }: the grid of the right column for the cards that are in it, top to bottom. order: their keys (w:slider, w:deck, w:feeder, or a favorite's id).
    * A favorite is a card of its own height (an auto row, area p0, p1 ...). With favorites in the column the sliding card keeps the height it has without them (the column scrolls), and with no
@@ -297,6 +346,7 @@
     var NAME = { 'w:slider': 'w2', 'w:deck': 'w34', 'w:feeder': 'w5' };
     var ROW = { 'w:slider': 'minmax(250px,1fr)', 'w:deck': 'var(--w34-row-height,196px)', 'w:feeder': 'var(--okie-feed-h,92px)' };
     var order = o.order || [], names = [], rows = [], n = 0, widgets = [], cards = 0;
+    order.forEach(function (k) { if (!NAME[k] && stackIndex(k) >= 2) { NAME[k] = 'ws' + stackIndex(k); ROW[k] = 'var(--w34-row-height,196px)'; } });      // a third card and more: as high as the second
     order.forEach(function (k) {
       if (NAME[k]) { names.push(NAME[k]); rows.push(ROW[k]); widgets.push(k); } else { names.push('p' + n++); rows.push('auto'); cards++; }
     });
@@ -721,7 +771,7 @@
     TOP_CATEGORIES: TOP_CATEGORIES, CHIP_FILTERS: CHIP_FILTERS, inTopCategory: inTopCategory,
     applyChipFilter: applyChipFilter, groupItems: groupItems, areaSensors: areaSensors,
     normalizeState: normalizeState, videoCandidates: videoCandidates, resolveVideo: resolveVideo,
-    zoomFor: zoomFor, textScale: textScale, scaleFonts: scaleFonts, userScale: userScale, scaledZoom: scaledZoom, phoneZoom: phoneZoom, panelTop: panelTop, centerGap: centerGap, panelExtra: panelExtra, columnHeight: columnHeight, snapHeight: snapHeight, canScroll: canScroll, rightLayout: rightLayout, TABLET_CENTER_BIAS: TABLET_CENTER_BIAS, w1Extra: w1Extra, layoutFor: layoutFor, gridColumns: gridColumns, typistAt: typistAt, recentBuckets: recentBuckets, TIME_SORT: TIME_SORT, decodeEntities: decodeEntities, activeCount: activeCount, looksLikeAsk: looksLikeAsk,
+    zoomFor: zoomFor, textScale: textScale, scaleFonts: scaleFonts, userScale: userScale, scaledZoom: scaledZoom, phoneZoom: phoneZoom, panelTop: panelTop, centerGap: centerGap, panelExtra: panelExtra, columnHeight: columnHeight, snapHeight: snapHeight, canScroll: canScroll, rightLayout: rightLayout, stackKey: stackKey, stackIndex: stackIndex, cleanStacks: cleanStacks, migrateStacks: migrateStacks, addPage: addPage, removePage: removePage, mergeStacks: mergeStacks, stackMap: stackMap, remapStackKeys: remapStackKeys, STD_PAGES: STD_PAGES, TABLET_CENTER_BIAS: TABLET_CENTER_BIAS, w1Extra: w1Extra, layoutFor: layoutFor, gridColumns: gridColumns, typistAt: typistAt, recentBuckets: recentBuckets, TIME_SORT: TIME_SORT, decodeEntities: decodeEntities, activeCount: activeCount, looksLikeAsk: looksLikeAsk,
     LADDER: LADDER, availableHeight: availableHeight, pickRung: pickRung, squareSize: squareSize,
     springStep: springStep, springSettled: springSettled,
     ARC: ARC, dialLook: dialLook, dialGlow: dialGlow, dialTickAngles: dialTickAngles, sliderGlow: sliderGlow, valueFromPointer: valueFromPointer, angleForValue: angleForValue, polar: polar, arcPath: arcPath, tempColor: tempColor, snap: snap, clamp: clamp,

@@ -18,7 +18,7 @@
 
   core.registerStrings('en', {
     'b.favorites': 'Favorites', 'b.suggestions': 'Suggestions', 'b.nofav': 'Tap the heart in any device to pin it here.',
-    'b.split': 'Split', 'b.merge': 'Merge', 'b.edit_cards': 'Cards on this slider', 'b.slider_name': 'Widgets', 'b.edit_hint': 'Drag the handle to change the order. Switch a card off to hide it and on to bring it back.', 'b.reset': 'Reset', 'b.done': 'Done', 'b.edit': 'Edit cards', 'b.unavailable': 'Nothing to show yet', 'b.kindle_lbl': 'Kindle Fire', 'b.weather': 'Weather', 'b.cameras': 'Cameras', 'b.calendar': 'Calendar', 'b.todos': 'To-do', 'b.news': 'News', 'b.tips': 'Tips', 'b.chronicle': 'Recently in the house',
+    'b.add_widgets': 'Add or remove widgets', 'b.edit_cards': 'Cards on this slider', 'b.slider_name': 'Widgets', 'b.edit_hint': 'Drag the handle to change the order. Switch a card off to hide it and on to bring it back.', 'b.reset': 'Reset', 'b.done': 'Done', 'b.edit': 'Edit cards', 'b.unavailable': 'Nothing to show yet', 'b.kindle_lbl': 'Kindle Fire', 'b.weather': 'Weather', 'b.cameras': 'Cameras', 'b.calendar': 'Calendar', 'b.todos': 'To-do', 'b.news': 'News', 'b.tips': 'Tips', 'b.chronicle': 'Recently in the house',
     'b.nothing_yet': 'Nothing yet', 'b.no_events': 'No upcoming events', 'b.no_todos': 'All done', 'b.no_news': 'No articles yet', 'b.overdue': 'overdue',
     'b.no_widgets': 'No widgets to show yet. Add a weather, calendar or to-do entity.', 'b.hl': 'H:{h}°  L:{l}°', 'b.humidity': 'Humidity {h}%',
     'b.view_tiles': 'Tile view', 'b.view_list': 'List view', 'b.resize': 'Change the height of this area', 'b.grip': 'Drag to change the height, double-tap to reset', 'b.pause': 'Pause', 'b.play': 'Play', 'b.page': 'Page {n}',
@@ -27,7 +27,7 @@
   });
   core.registerStrings('de', {
     'b.favorites': 'Favoriten', 'b.suggestions': 'Vorschläge', 'b.nofav': 'Tippe in einem Gerät auf das Herz, um es hier anzuheften.',
-    'b.split': 'Teilen', 'b.merge': 'Verbinden', 'b.edit_cards': 'Karten dieses Schiebers', 'b.slider_name': 'Widgets', 'b.edit_hint': 'Am Griff ziehen, um die Reihenfolge zu ändern. Eine Karte ausschalten blendet sie aus, einschalten holt sie zurück.', 'b.reset': 'Zurücksetzen', 'b.done': 'Fertig', 'b.edit': 'Karten bearbeiten', 'b.unavailable': 'Noch nichts anzuzeigen', 'b.kindle_lbl': 'Kindle Fire', 'b.weather': 'Wetter', 'b.cameras': 'Kameras', 'b.calendar': 'Kalender', 'b.todos': 'Aufgaben', 'b.news': 'Nachrichten', 'b.tips': 'Tipps', 'b.chronicle': 'Zuletzt im Haus',
+    'b.add_widgets': 'Widgets hinzufügen oder entfernen', 'b.edit_cards': 'Karten dieses Schiebers', 'b.slider_name': 'Widgets', 'b.edit_hint': 'Am Griff ziehen, um die Reihenfolge zu ändern. Eine Karte ausschalten blendet sie aus, einschalten holt sie zurück.', 'b.reset': 'Zurücksetzen', 'b.done': 'Fertig', 'b.edit': 'Karten bearbeiten', 'b.unavailable': 'Noch nichts anzuzeigen', 'b.kindle_lbl': 'Kindle Fire', 'b.weather': 'Wetter', 'b.cameras': 'Kameras', 'b.calendar': 'Kalender', 'b.todos': 'Aufgaben', 'b.news': 'Nachrichten', 'b.tips': 'Tipps', 'b.chronicle': 'Zuletzt im Haus',
     'b.nothing_yet': 'Noch nichts', 'b.no_events': 'Keine anstehenden Termine', 'b.no_todos': 'Alles erledigt', 'b.no_news': 'Noch keine Artikel', 'b.overdue': 'überfällig',
     'b.no_widgets': 'Noch nichts anzuzeigen. Füge eine Wetter-, Kalender- oder Aufgaben-Entität hinzu.', 'b.hl': 'H:{h}°  T:{l}°', 'b.humidity': 'Feuchte {h}%',
     'b.view_tiles': 'Kachelansicht', 'b.view_list': 'Listenansicht', 'b.resize': 'Höhe dieses Bereichs ändern', 'b.grip': 'Ziehen, um die Höhe zu ändern, doppeltippen zum Zurücksetzen', 'b.pause': 'Pause', 'b.play': 'Abspielen', 'b.page': 'Seite {n}',
@@ -62,7 +62,7 @@
     '.stage .w1-widgets>.gdeck{height:240px;}.stage:not([data-mobile="true"]):not([data-hoehe="boden"]) .w1-widgets>.gdeck{height:240px;}',
     '.wright>.fv-item{min-width:0;}',
     '.w2,.gdeck,.fdc{position:relative;}',
-    '.wm .mv.sp{width:auto;padding:0 12px 0 10px;gap:6px;display:inline-flex;align-items:center;font-size:13px;font-weight:600;}',
+    '.bento.arranging .wright>.wr-add{display:flex;}.wright>.wr-add{margin:0;}.xzone.merge{border-radius:24px;box-shadow:0 0 0 3px #fff,0 0 28px rgba(255,255,255,.5);background:rgba(255,255,255,.12);}',
     // while the arrangement is edited: a veil over the right-column cards with the arrow that takes the card to the other column
     '.bento .wm.fv-sw{display:none;z-index:30;border-radius:inherit;background:rgba(20,18,16,.8);}.bento.arranging .wm.fv-sw{display:flex;}',
     '.bento.arranging .wright>.fv-item .fv-sw{display:flex;}.bento.arranging .wright>.fv-item>:first-child{pointer-events:none;}.bento.arranging .wright>.fv-item>.fv-x{display:grid;}',
@@ -205,14 +205,17 @@
     // ---- the two columns work as one: any card, in the list or in the right column, can be pulled over to the other column and dropped between its cards, or moved inside its own ----
     //   favorites stays the list of cards (its order is the order of the list). bento.rightCards / bento.rightOrder: which favorites, and with them which right-column cards (keys w:slider, w:deck, w:feeder),
     //   are in the right column and in which order. bento.leftWidgets: right-column cards that moved above the list.
-    var lw = h('div.w1-widgets'), WIDGETS = ['slider', 'deck', 'feeder'], pinNodes = {}, placedOnce = false;
-    function widgetEl(id) { return id === 'slider' ? w2 : id === 'deck' ? deck : (feederCard ? feederCard.el : null); }
+    var lw = h('div.w1-widgets'), pinNodes = {}, placedOnce = false, stacks = [], sliders = [], dAll = [], built = false;
+    /** The right-column cards by id: slider, deck, s2 ... (the slider cards: the first, the second ...) and feeder. */
+    function widgetIds() { var ids = stacks.map(function (s, i) { return L.stackKey(i).slice(2); }); if (feederCard) ids.push('feeder'); return ids; }
+    function widgetEl(id) { if (id === 'feeder') return feederCard ? feederCard.el : null; var sl = sliders[L.stackIndex('w:' + id)]; return sl ? sl.el : null; }
     function isWKey(k) { return String(k).indexOf('w:') === 0; }
     function keyEl(k) { return isWKey(k) ? widgetEl(k.slice(2)) : (pinNodes[k] || null); }
-    function leftIds() { return (cfg().leftWidgets || []).filter(function (id) { return WIDGETS.indexOf(id) >= 0 && widgetEl(id); }); }
+    function leftIds() { return (cfg().leftWidgets || []).filter(function (id) { return widgetIds().indexOf(id) >= 0 && widgetEl(id); }); }
     function defaultKeys() {
-      var left = leftIds();
-      return (root.dataset.swap === 'true' ? ['deck', 'feeder', 'slider'] : ['slider', 'deck', 'feeder']).filter(function (k) { return widgetEl(k) && left.indexOf(k) < 0; }).map(function (k) { return 'w:' + k; });
+      var left = leftIds(), ids = widgetIds();
+      if (root.dataset.swap === 'true' && ids.length > 1) ids = ids.slice(1).concat(ids[0]);      // swapped: the first card goes last
+      return ids.filter(function (k) { return widgetEl(k) && left.indexOf(k) < 0; }).map(function (k) { return 'w:' + k; });
     }
     /** The cards of the right column in their order: the saved order, then whatever is not in it yet (the right-column cards first, then the favorites that moved over). */
     function rightKeys() {
@@ -242,6 +245,8 @@
       patch.leftWidgets = left; patch.rightOrder = keys; patch.rightCards = keys.filter(function (k) { return !isWKey(k); });
       ctx.settings.set({ favorites: favs, bento: patch });
     }
+    /** A card of the right column dropped on another one: its pages join that card (they swipe one after the other there). */
+    function mergeCards(fromKey, ontoKey) { var f = L.stackIndex(fromKey), o = L.stackIndex(ontoKey); if (f < 0 || o < 0 || f === o) return; saveStacks(L.mergeStacks(stacks, f, o)); }
     function sideFor(id, dir) { return { dir: dir, onMove: function () { place(id, dir, null); } }; }
 
     // ---- drag and drop between the columns, while the arrangement is edited. Hold a card for a moment and pull it (or pull its handle at once): a small card with its name follows the finger, the column
@@ -258,6 +263,15 @@
       var ra = UI.screenRect(w1), rb = UI.screenRect(wr), rt = UI.screenRect(root);
       if (rb.width <= 4 || y < rt.top - 60 || y > rt.bottom + 60) return null;
       var side = x > (ra.right + rb.left) / 2 ? 'right' : 'left', col = side === 'right' ? rb : ra, before = null, lineY = null, last = null, items = [];
+      if (side === 'right' && L.stackIndex(key) >= 0) {      // a card of the right column held over the middle of another one: dropping it there merges its pages into that card
+        var ks = rightKeys();
+        for (var m = 0; m < ks.length; m++) {
+          if (ks[m] === key || L.stackIndex(ks[m]) < 0) continue;
+          var me = keyEl(ks[m]); if (!me || !me.isConnected) continue;
+          var mr = UI.screenRect(me), mx = mr.width * 0.18, my = mr.height * 0.22;
+          if (x > mr.left + mx && x < mr.right - mx && y > mr.top + my && y < mr.bottom - my) return { side: 'right', onto: ks[m], before: null, lineY: null, col: mr };
+        }
+      }
       if (side === 'right') items = rightKeys().filter(function (k) { return k !== key; }).map(function (k) { return { k: k, el: keyEl(k) }; });
       else if (!isWKey(key) && curOrd && curOrd.order) items = curOrd.order.filter(function (k) { return k !== key; }).map(function (k) { return { k: k, el: curOrd.nodes[k] }; });
       for (var i = 0; i < items.length; i++) {
@@ -329,6 +343,7 @@
         function aim2() { tg = dropTarget(last.x, last.y, spec.key); paint(); }
         function paint() {
           if (tg) {
+            zone.classList.toggle('merge', !!tg.onto);
             zone.style.cssText = 'left:' + tg.col.left + 'px;top:' + tg.col.top + 'px;width:' + tg.col.width + 'px;height:' + tg.col.height + 'px;'; zone.classList.add('on');
             if (tg.lineY != null) { line.hidden = false; line.style.cssText = 'left:' + (tg.col.left + 10) + 'px;width:' + (tg.col.width - 20) + 'px;top:' + tg.lineY + 'px;'; } else line.hidden = true;
           } else { zone.classList.remove('on'); line.hidden = true; }
@@ -338,7 +353,7 @@
           var go = dragging && tg; xlog({ ev: 'carry-up', dragging: dragging, side: tg && tg.side, before: tg && tg.before, x: Math.round(ev.clientX), y: Math.round(ev.clientY) });
           var t = tg; done();
           if (dragging) { var sw = function (c) { c.stopPropagation(); c.preventDefault(); }; window.addEventListener('click', sw, true); setTimeout(function () { window.removeEventListener('click', sw, true); }, 350); }
-          if (go) { if (ctx.haptic) ctx.haptic('tap'); place(spec.key, t.side, t.before); }
+          if (go) { if (ctx.haptic) ctx.haptic('tap'); if (t.onto) mergeCards(spec.key, t.onto); else place(spec.key, t.side, t.before); }
         }
         function cancel(ev) { if (ev.pointerId === pid) { xlog({ ev: 'carry-cancel', dragging: dragging, picked: picked, ms: Date.now() - t0 }); done(); } }
         window.addEventListener('pointermove', move, true); window.addEventListener('pointerup', up, true); window.addEventListener('pointercancel', cancel, true);
@@ -368,29 +383,24 @@
       return {
         key: key,
         from: function () { return w ? (leftIds().indexOf(id) >= 0 ? 'left' : 'right') : (rightKeys().indexOf(key) >= 0 ? 'right' : 'left'); },
-        label: w ? (id === 'feeder' ? core.t('fd.title', ctx.lang()) : (id === 'slider' ? t(one ? 'b.slider_name' : 'b.weather') : t('b.cameras'))) : L.shortName(item.name, item.area),
-        icon: w ? (id === 'slider' ? 'cloud' : id === 'deck' ? 'camera' : 'grid') : UI.domainIcon(item.domain, item.deviceClass, 'on'),
+        label: w ? (id === 'feeder' ? core.t('fd.title', ctx.lang()) : stackLabel(L.stackIndex(key))) : L.shortName(item.name, item.area),
+        icon: w ? (id === 'feeder' ? 'grid' : stackIcon(L.stackIndex(key))) : UI.domainIcon(item.domain, item.deviceClass, 'on'),
       };
     }
     /** The bar over a right-column card while the arrangement is edited: the same as a card of the list (handle, name, arrow). */
     function ensureOverlays(left) {
       var RM = g.OkieMotor.rooms;
-      WIDGETS.forEach(function (id) {
+      widgetIds().forEach(function (id) {
         var el = widgetEl(id); if (!el || !RM) return;
         var dest = left.indexOf(id) >= 0 ? 'right' : 'left', spec = carrySpec('w:' + id);
         var wm = [].filter.call(el.children, function (c) { return c.classList && c.classList.contains('wm'); })[0];
         if (!wm) { wm = h('div.fv-sw.wm'); el.appendChild(wm); bindCarry(wm, spec); holdArrange(el, spec); }
-        if (wm.dataset.dest === dest && wm.dataset.one === (one ? '1' : '0')) return;
-        wm.dataset.dest = dest; wm.dataset.one = one ? '1' : '0'; wm.innerHTML = '';
+        if (wm.dataset.dest === dest) return;
+        wm.dataset.dest = dest; wm.innerHTML = '';
         var grip = RM.gripButton(ctx); bindCarry(grip, spec, { free: true, any: true });
         wm.appendChild(grip); wm.appendChild(h('b', null, spec.label));
-        if (id === 'slider' || id === 'deck') wm.appendChild(h('button.mv.fv-edit', { type: 'button', 'aria-label': t('b.edit_cards'), title: t('b.edit_cards'), html: UI.icon('pencil', 18), onclick: function (e) { e.stopPropagation(); if (ctx.haptic) ctx.haptic(8); (id === 'slider' ? editSlider : editDeck)(); } }));      // which cards the slider shows
+        if (id !== 'feeder') wm.appendChild(h('button.mv.fv-edit', { type: 'button', 'aria-label': t('b.edit_cards'), title: t('b.edit_cards'), html: UI.icon('pencil', 18), onclick: function (e) { e.stopPropagation(); if (ctx.haptic) ctx.haptic(8); editStack(L.stackIndex('w:' + id)); } }));      // which pages this card shows
         if (id === 'feeder' && FDm && FDm.openPicker) wm.appendChild(h('button.mv.fv-edit', { type: 'button', 'aria-label': core.t('fd.edit', ctx.lang()), title: core.t('fd.edit', ctx.lang()), html: UI.icon('pencil', 18), onclick: function (e) { e.stopPropagation(); if (ctx.haptic) ctx.haptic(8); FDm.openPicker(ctx, feederCard); } }));      // the look of the feeder card
-        // merge or split: the cameras, sensors, Kindle and map pages ride inside the sliding card (one card) or sit in a card of their own (two cards)
-        if (dAll && dAll.length && c0.w2 && (id === 'deck' || id === 'slider') && (one ? id === 'slider' : true)) {
-          var label = t(one ? 'b.split' : 'b.merge');
-          wm.appendChild(h('button.mv.fv-edit.sp', { type: 'button', 'aria-label': label, title: label, html: UI.icon(one ? 'rows' : 'grid', 18) + '<span>' + label + '</span>', onclick: function (e) { e.stopPropagation(); if (ctx.haptic) ctx.haptic(8); ctx.settings.set({ bento: { oneWidget: !one } }); } }));
-        }
         wm.appendChild(RM.sideButton(ctx, { dir: dest, onMove: function () { place('w:' + id, dest, null); } }));
       });
     }
@@ -407,18 +417,16 @@
         bindCarry(node, carrySpec(x.id, x)); holdArrange(node, carrySpec(x.id, x)); pinNodes[k] = node;
       });
       left.forEach(function (id) { var el = widgetEl(id); if (el) lw.appendChild(el); });
-      var moved = one || left.length > 0 || keys.join() !== defaultKeys().join();
-      if (!moved && !placedOnce) { ensureOverlays(left); layoutRight(keys, false); return; }
       placedOnce = true;
-      if (moved) { keys.forEach(function (k) { var el = keyEl(k); if (el) wr.appendChild(el); }); if (tiles.length) wr.appendChild(w34); }
-      else [w2, deck, tiles.length ? w34 : null, feederCard ? feederCard.el : null].forEach(function (el) { if (el) wr.appendChild(el); });      // back to the first order (the feeder takes the next free cell, so the order matters)
-      ensureOverlays(left); layoutRight(keys, moved);
+      keys.forEach(function (k) { var el = keyEl(k); if (el) wr.appendChild(el); }); if (tiles.length) wr.appendChild(w34);
+      wr.appendChild(addWidgetsBtn);      // shown while the arrangement is edited, like Add or remove favorites
+      ensureOverlays(left); layoutRight(keys, true);
     }
     /** The grid of the right column for the cards that are in it now (the stylesheet only knows the full set). */
     function layoutRight(keys, moved) {
-      keys = keys || rightKeys(); if (moved == null) moved = one || leftIds().length > 0 || keys.join() !== defaultKeys().join();
+      keys = keys || rightKeys(); moved = true;
       wr.dataset.moved = moved ? 'on' : ''; fadeSoon();
-      var lay = L.rightLayout({ order: keys, reserve: one });
+      var lay = L.rightLayout({ order: keys, reserve: sliders.length < 2 });
       keys.forEach(function (k, i) { var el = keyEl(k); if (el) { if (moved) el.style.setProperty('--okie-ga', lay.names[i]); else el.style.removeProperty('--okie-ga'); } });
       if (!moved) { wr.style.gridTemplateRows = ''; wr.style.gridTemplateAreas = ''; return; }
       wr.style.gridTemplateAreas = lay.areas; wr.style.gridTemplateRows = lay.rows;
@@ -702,7 +710,6 @@
     }
 
     // ------------------------------------------------------------ W2 ----
-    var w2 = null, bgs = null, track = null, foot = null, pager = null, pages = [], idx = 0, slideTimer = 0, restT = 0, paused = false, userPaused = false;
     function weatherId() {
       var hs = ctx.hass(), id = ctx.settings.get().weather_entity;
       return (id && hs.states[id]) ? id : Object.keys(hs.states).filter(function (k) { return k.indexOf('weather.') === 0; })[0];
@@ -710,16 +717,19 @@
     function feeds() { return F.newsFeeds(ctx.hass().states, cfg().news_entity); }
     function readKeys() { return ctx.store.get('news.read', []); }
     var DEFAULT_PAGES = ['weather', 'todos', 'news', 'calendar', 'tips'];
-    /** The page ids of the card, in order: the saved list, and with one card the deck pages (d:cameras, d:kindle ...) too; a list saved before they existed gets them at its end. */
-    function pageIds() {
-      var c = cfg(), base = (Array.isArray(c.pages) ? c.pages : DEFAULT_PAGES).slice();
-      if (!one) return base.filter(function (id) { return id.indexOf('d:') !== 0; });
-      if (c.pagesVer !== 2) dAll.forEach(function (x) { if (base.indexOf('d:' + x.id) < 0) base.push('d:' + x.id); });
-      return base.filter(function (id) { return id.indexOf('d:') !== 0 || dAll.some(function (x) { return 'd:' + x.id === id; }); });
+    /** Every page that can be on a card of the right column, in the order the editor lists them: [{ id, label, icon, note }]. */
+    function catalog() {
+      var out = [['weather', 'sun'], ['todos', 'checklist'], ['news', 'newsbook'], ['calendar', 'calendar'], ['tips', 'tips']].map(function (x) { return { id: x[0], label: t('b.' + x[0]), icon: x[1], note: pageAvailable(x[0]) ? '' : t('b.unavailable') }; });
+      dAll.forEach(function (x) { out.push({ id: 'd:' + x.id, label: x.label, icon: x.icon, note: '' }); });
+      return out;
     }
-    function buildPages() {
-      var c = cfg(), hs = ctx.hass(), P = [];
-      pageIds().forEach(function (id) {
+    function pageInfo(id) { return catalog().filter(function (x) { return x.id === id; })[0] || { id: id, label: id, icon: 'grid' }; }
+    function stackLabel(i) { var ids = stacks[i] || []; if (!ids.length) return t('b.slider_name'); return pageInfo(ids[0]).label + (ids.length > 1 ? ' +' + (ids.length - 1) : ''); }
+    function stackIcon(i) { var ids = stacks[i] || []; return ids.length ? pageInfo(ids[0]).icon : 'grid'; }
+    function allPages() { var out = []; sliders.forEach(function (sl) { out = out.concat(sl.pages); }); return out; }
+    function buildPages(ids) {
+      var P = [];
+      ids.forEach(function (id) {
         if (id.indexOf('d:') === 0) {
           var x = dAll.filter(function (q) { return 'd:' + q.id === id; })[0];
           if (x) P.push({ id: id, icon: x.icon, label: x.label, make: function (el) { el.classList.add('deckpage'); el.appendChild(x.el); return { update: function () {} }; } });
@@ -734,66 +744,80 @@
       });
       return P;
     }
-    function buildW2() {
-      w2 = h('section.w2.rich', { role: 'region', 'aria-roledescription': 'carousel', 'aria-label': t('b.weather') });
-      bgs = h('div.w2-bgs'); track = h('div.w2-track'); foot = h('div.w2-foot'); pager = h('div.hero-slide-pager');
-      w2.appendChild(bgs); w2.appendChild(track); w2.appendChild(foot); w2.appendChild(pager);
-      pages = buildPages();
-      if (!pages.length) { bgs.appendChild(h('div.w2-bg.on', { style: { background: 'linear-gradient(160deg,rgb(74,144,226),rgb(42,108,178))' } })); track.appendChild(h('div.w2-page', null, h('div.empty-pg', null, t('b.no_widgets')))); pager.hidden = true; return w2; }
-      pages.forEach(function (p) {
-        var b = BRAND[p.id] || (p.id.indexOf('d:') === 0 ? BRAND.cameras : BRAND.weather);
-        p.bg = h('div.w2-bg', { style: { background: 'linear-gradient(160deg,rgb(' + b[0] + '),rgb(' + b[1] + '))' } }); bgs.appendChild(p.bg);
-        p.el = h('div.w2-page', { dataset: { page: p.id }, 'aria-hidden': 'true' }); track.appendChild(p.el);
-        p.inst = p.make(p.el, p) || {};
-      });
-      w2.style.setProperty('--slide-ms', Math.max(3, cfg().slideSec || 8) * 1000 + 'ms');
-      go(0, true);
-      // swipe (a drag of more than 50px changes the page) + pause while the pointer or focus is inside
-      var sx = 0, dx = 0, drag = false;
-      w2.addEventListener('pointerdown', function (e) { if (e.target.closest('button,.chk,.row-hero,.pg-row.link,.wx-loc')) return; drag = true; sx = e.clientX; dx = 0; });
-      w2.addEventListener('pointermove', function (e) { if (drag) dx = e.clientX - sx; });
-      var endDrag = function () { if (!drag) return; drag = false; if (Math.abs(dx) > 50) { w2.dataset.swiped = '1'; setTimeout(function () { delete w2.dataset.swiped; }, 350); go(idx + (dx < 0 ? 1 : -1)); } };
-      w2.addEventListener('pointerup', endDrag); w2.addEventListener('pointercancel', function () { drag = false; });
-      w2.addEventListener('pointerenter', function () { setPaused(true); }); w2.addEventListener('pointerleave', function () { setPaused(false); });
-      w2.addEventListener('focusin', function () { setPaused(true); }); w2.addEventListener('focusout', function () { setPaused(false); });
-      // a tap on the card itself (not on a row, a button or a link in it) opens what the page is about: the weather, the tasks, the news ...
-      w2.addEventListener('click', function (e) {
-        if (w2.dataset.swiped || w2.dataset.lp || e.target.closest('button,a,input,.chk,.row-hero,.pg-row,.nw-row,.news-r,.wx-loc,.hero-slide-pager,[role="link"],[role="button"]')) return;
-        var pg = pages[idx]; if (!pg || pg.id.indexOf('d:') === 0) return;      // a deck page (cameras, Kindle ...) opens itself
-        if (ctx.haptic) ctx.haptic('tap');
-        if (pg.id === 'weather') { var wid = weatherId(); if (wid) ctx.openDetail(wid); }
-        else ctx.openApp({ todos: 'tasks', news: 'news', calendar: 'calendar', tips: 'tips', cameras: 'cameras' }[pg.id] || pg.id);
-      });
-      return w2;
-    }
-    function setPaused(hover) { paused = hover; pager.dataset.paused = (hover || userPaused) ? 'true' : 'false'; }
-    function drawPager() {
-      pager.innerHTML = '';
-      pages.forEach(function (p, i) { pager.appendChild(h('button.hsp-dot' + (i === idx ? '.on' : ''), { 'aria-label': t('b.page', { n: i + 1 }) + ', ' + t('b.' + p.id), 'aria-current': i === idx ? 'true' : null, onclick: function () { go(i); } })); });
-      pager.appendChild(h('button.hsp-pp', { 'aria-label': userPaused ? t('b.play') : t('b.pause'), onclick: function () { userPaused = !userPaused; setPaused(paused); drawPager(); }, html: UI.icon(userPaused ? 'play' : 'pause', 12) }));
-      pager.appendChild(h('button.hsp-ed', { 'aria-label': t('b.edit'), title: t('b.edit'), onclick: function (e) { e.stopPropagation(); editSlider(); }, html: UI.icon('pencil', 13) }));
-      pager.dataset.paused = (paused || userPaused) ? 'true' : 'false';
-    }
-    function drawFoot() {
-      var p = pages[idx]; foot.innerHTML = '';
-      if (p.id === 'weather' || p.id.indexOf('d:') === 0) return;      // a deck page has its own caption; the weather card says the place and the condition at the top: a caption under the hours only overlapped them (the other cards keep theirs: "To-do / 5 Incomplete")
-      var sub = p.inst && p.inst.subtitle ? p.inst.subtitle() : '';
-      foot.appendChild(h('span.f1', null, t('b.' + p.id))); if (sub) foot.appendChild(h('span.f2', null, sub));
-    }
-    function go(i, silent) {
-      if (!pages.length) return;
-      idx = (i + pages.length) % pages.length;
-      track.style.transform = 'translateX(' + (-100 * idx) + '%)';
-      pages.forEach(function (p, k) { p.bg.classList.toggle('on', k === idx); p.el.setAttribute('aria-hidden', k === idx ? 'false' : 'true'); p.el.style.visibility = ''; });
-      clearTimeout(restT); restT = setTimeout(function () { pages.forEach(function (p, k) { if (p.el) p.el.style.visibility = k === idx ? '' : 'hidden'; }); }, 700);      // at rest only the page in view is drawn (the track is one wide layer of all of them)
-      drawPager(); drawFoot();
-      if (!silent) startSlide();
-    }
-    function startSlide() {
-      clearInterval(slideTimer);
-      var sec = Math.max(3, cfg().slideSec || 8);
-      w2.style.setProperty('--slide-ms', sec * 1000 + 'ms');
-      slideTimer = setInterval(function () { if (!paused && !userPaused && pages.length > 1 && document.visibilityState !== 'hidden') go(idx + 1); }, sec * 1000);
+    /**
+     * One swipeable card of the right column with the pages `ids`: one page after the other (a swipe, the dots, or by itself), the pause button, the pencil.
+     * Every card has its own state, so there can be several of them. Returns { el, pages, go, update, show, drawFoot, dispose }.
+     */
+    function makeSlider(ids, k) {
+      var el = h('section.w2.rich', { role: 'region', 'aria-roledescription': 'carousel', 'aria-label': stackLabel(k) });
+      var bgs = h('div.w2-bgs'), track = h('div.w2-track'), foot = h('div.w2-foot'), pager = h('div.hero-slide-pager');
+      var pages = [], idx = 0, slideTimer = 0, restT = 0, paused = false, userPaused = false;
+      el.appendChild(bgs); el.appendChild(track); el.appendChild(foot); el.appendChild(pager);
+      function setPaused(hover) { paused = hover; pager.dataset.paused = (hover || userPaused) ? 'true' : 'false'; }
+      function labelOf(p) { return p.label || t('b.' + p.id); }
+      function drawPager() {
+        pager.innerHTML = ''; pager.classList.toggle('single', pages.length < 2);
+        pages.forEach(function (p, i) { pager.appendChild(h('button.hsp-dot' + (i === idx ? '.on' : ''), { 'aria-label': t('b.page', { n: i + 1 }) + ', ' + labelOf(p), 'aria-current': i === idx ? 'true' : null, onclick: function () { go(i); } })); });
+        if (pages.length > 1) pager.appendChild(h('button.hsp-pp', { 'aria-label': userPaused ? t('b.play') : t('b.pause'), onclick: function () { userPaused = !userPaused; setPaused(paused); drawPager(); }, html: UI.icon(userPaused ? 'play' : 'pause', 12) }));
+        pager.appendChild(h('button.hsp-ed', { 'aria-label': t('b.edit'), title: t('b.edit'), onclick: function (e) { e.stopPropagation(); editStack(k); }, html: UI.icon('pencil', 13) }));
+        pager.dataset.paused = (paused || userPaused) ? 'true' : 'false';
+      }
+      function drawFoot() {
+        var p = pages[idx]; foot.innerHTML = ''; if (!p) return;
+        if (p.id === 'weather' || p.id.indexOf('d:') === 0) return;      // a deck page has its own caption; the weather card says the place and the condition at the top: a caption under the hours only overlapped them (the other cards keep theirs: "To-do / 5 Incomplete")
+        var sub = p.inst && p.inst.subtitle ? p.inst.subtitle() : '';
+        foot.appendChild(h('span.f1', null, labelOf(p))); if (sub) foot.appendChild(h('span.f2', null, sub));
+      }
+      function go(i, silent) {
+        if (!pages.length) return;
+        idx = (i + pages.length) % pages.length;
+        track.style.transform = 'translateX(' + (-100 * idx) + '%)';
+        pages.forEach(function (p, kk) { p.bg.classList.toggle('on', kk === idx); p.el.setAttribute('aria-hidden', kk === idx ? 'false' : 'true'); p.el.style.visibility = ''; });
+        clearTimeout(restT); restT = setTimeout(function () { pages.forEach(function (p, kk) { if (p.el) p.el.style.visibility = kk === idx ? '' : 'hidden'; }); }, 700);      // at rest only the page in view is drawn (the track is one wide layer of all of them)
+        drawPager(); drawFoot();
+        if (!silent) startSlide();
+      }
+      function startSlide() {
+        clearInterval(slideTimer);
+        var sec = Math.max(3, cfg().slideSec || 8);
+        el.style.setProperty('--slide-ms', sec * 1000 + 'ms');
+        slideTimer = setInterval(function () { if (!paused && !userPaused && pages.length > 1 && document.visibilityState !== 'hidden') go(idx + 1); }, sec * 1000);
+      }
+      pages = buildPages(ids);
+      if (!pages.length) {
+        bgs.appendChild(h('div.w2-bg.on', { style: { background: 'linear-gradient(160deg,rgb(74,144,226),rgb(42,108,178))' } })); track.appendChild(h('div.w2-page', null, h('div.empty-pg', null, t('b.no_widgets'))));
+        pager.appendChild(h('button.hsp-ed', { 'aria-label': t('b.edit'), title: t('b.edit'), onclick: function (e) { e.stopPropagation(); editStack(k); }, html: UI.icon('pencil', 13) }));
+      } else {
+        pages.forEach(function (p) {
+          var b = BRAND[p.id] || (p.id.indexOf('d:') === 0 ? BRAND.cameras : BRAND.weather);
+          p.bg = h('div.w2-bg', { style: { background: 'linear-gradient(160deg,rgb(' + b[0] + '),rgb(' + b[1] + '))' } }); bgs.appendChild(p.bg);
+          p.el = h('div.w2-page', { dataset: { page: p.id }, 'aria-hidden': 'true' }); track.appendChild(p.el);
+          p.inst = p.make(p.el, p) || {};
+        });
+        el.style.setProperty('--slide-ms', Math.max(3, cfg().slideSec || 8) * 1000 + 'ms');
+        go(0, true);
+        // swipe (a drag of more than 50px changes the page) + pause while the pointer or focus is inside
+        var sx = 0, dx = 0, drag = false;
+        el.addEventListener('pointerdown', function (e) { if (e.target.closest('button,.chk,.row-hero,.pg-row.link,.wx-loc')) return; drag = true; sx = e.clientX; dx = 0; });
+        el.addEventListener('pointermove', function (e) { if (drag) dx = e.clientX - sx; });
+        var endDrag = function () { if (!drag) return; drag = false; if (Math.abs(dx) > 50) { el.dataset.swiped = '1'; setTimeout(function () { delete el.dataset.swiped; }, 350); go(idx + (dx < 0 ? 1 : -1)); } };
+        el.addEventListener('pointerup', endDrag); el.addEventListener('pointercancel', function () { drag = false; });
+        el.addEventListener('pointerenter', function () { setPaused(true); }); el.addEventListener('pointerleave', function () { setPaused(false); });
+        el.addEventListener('focusin', function () { setPaused(true); }); el.addEventListener('focusout', function () { setPaused(false); });
+        // a tap on the card itself (not on a row, a button or a link in it) opens what the page is about: the weather, the tasks, the news ...
+        el.addEventListener('click', function (e) {
+          if (el.dataset.swiped || el.dataset.lp || e.target.closest('button,a,input,.chk,.row-hero,.pg-row,.nw-row,.news-r,.wx-loc,.hero-slide-pager,[role="link"],[role="button"]')) return;
+          var pg = pages[idx]; if (!pg || pg.id.indexOf('d:') === 0) return;      // a deck page (cameras, Kindle ...) opens itself
+          if (ctx.haptic) ctx.haptic('tap');
+          if (pg.id === 'weather') { var wid = weatherId(); if (wid) ctx.openDetail(wid); }
+          else ctx.openApp({ todos: 'tasks', news: 'news', calendar: 'calendar', tips: 'tips', cameras: 'cameras' }[pg.id] || pg.id);
+        });
+        if (pages.length > 1) startSlide();
+      }
+      return { el: el, pages: pages, go: go, drawFoot: drawFoot,
+        update: function () { pages.forEach(function (p) { if (p.inst && p.inst.update) p.inst.update(); }); if (pages.length) drawFoot(); },
+        show: function () { pages.forEach(function (p) { if (p.inst && p.inst.reload) p.inst.reload(); }); },
+        dispose: function () { clearInterval(slideTimer); clearTimeout(restT); } };
     }
     function pageHead(icon, title, sub, extra) {
       return h('div.page-head', null, h('span.ph-bubble', { html: UI.icon(icon, 18) }), h('div', null, h('div.ph-t', null, title), h('div.ph-s', null, sub || '')), extra || null);
@@ -978,7 +1002,7 @@
       if (kind === 'todos') {
         var tt = tl.makeSystemTile({ label: t('b.todos'), icon: 'checklist', color: 'rgb(0,122,255)', open: function () { ctx.openApp('tasks'); } });
         tt._upd = function () {
-          var p = pages.filter(function (x) { return x.id === 'todos'; })[0], c = p && p.inst && p.inst.counts ? p.inst.counts() : null;
+          var p = allPages().filter(function (x) { return x.id === 'todos'; })[0], c = p && p.inst && p.inst.counts ? p.inst.counts() : null;
           if (!c) { F.fetchTodos(ctx).then(function (list) { var v = F.todoView(list, Date.now()); tt.set(t('b.incomplete', { n: v.overdue.length + v.today.length + v.upcoming.length + v.undated.length }), t('b.overdue_n', { n: v.overdue.length })); }); return; }
           tt.set(t('b.incomplete', { n: c.open }), t('b.overdue_n', { n: c.overdue }));
         };
@@ -1027,7 +1051,7 @@
           list.innerHTML = '';
           var nodes = {}, onN = onIds().length;
           items.forEach(function (x) {
-            var sw = h('button.pe-sw' + (x.on ? '.on' : ''), { type: 'button', role: 'switch', 'aria-checked': x.on ? 'true' : 'false', 'aria-label': x.label, disabled: x.on && onN <= (spec.minOn || 1), onclick: function () { x.on = !x.on; if (ctx.haptic) ctx.haptic('switch'); save(); draw(); } });
+            var sw = h('button.pe-sw' + (x.on ? '.on' : ''), { type: 'button', role: 'switch', 'aria-checked': x.on ? 'true' : 'false', 'aria-label': x.label, disabled: x.on && onN <= (spec.minOn == null ? 1 : spec.minOn), onclick: function () { x.on = !x.on; if (ctx.haptic) ctx.haptic('switch'); save(); draw(); } });
             var grip = h('button.pe-grip', { type: 'button', 'aria-label': x.label, html: UI.icon('rows', 18) });
             var row = h('div.pe-row' + (x.on ? '' : '.off'), { dataset: { id: x.id } }, grip, h('span.pe-ic', { html: UI.icon(x.icon || 'eye', 18) }), h('span.pe-t', null, h('b', null, x.label), x.note ? h('em', null, x.note) : null), sw);
             nodes[x.id] = row; list.appendChild(row);
@@ -1066,24 +1090,33 @@
       if (id === 'cameras') return !!(g.OkieMotor.cameras && g.OkieMotor.cameras.cameras(ctx).length);
       return true;
     }
-    function editSlider() {
-      var meta = {}; Object.keys(PAGE_META).forEach(function (k) { meta[k] = PAGE_META[k]; });
-      if (one) dAll.forEach(function (x) { meta['d:' + x.id] = x.icon; });
-      function label(id) { var x = id.indexOf('d:') === 0 ? dAll.filter(function (q) { return 'd:' + q.id === id; })[0] : null; return x ? x.label : t('b.' + id); }
-      function itemsFor(on) {
-        var order = on.concat(Object.keys(meta).filter(function (id) { return on.indexOf(id) < 0; }));
-        return order.map(function (id) { return { id: id, label: label(id), icon: meta[id], on: on.indexOf(id) >= 0, note: pageAvailable(id) ? '' : t('b.unavailable') }; });
-      }
-      openEditor({ title: t('b.edit_cards'), items: itemsFor(pageIds()), minOn: 1,
-        onChange: function (idsOn) { ctx.settings.set({ bento: { pages: idsOn, pagesVer: 2 } }); rebuildW2(); },
-        onReset: function () { ctx.settings.set({ bento: { pages: DEFAULT_PAGES.slice(), pagesVer: 0 } }); rebuildW2(); return itemsFor(pageIds()); } });
+    /** Which cards the right column has, as the stacks of pages in the settings. */
+    function loadStacks() { stacks = L.migrateStacks(cfg(), { known: catalog().map(function (x) { return x.id; }), deck: dAll.map(function (x) { return 'd:' + x.id; }), w2: !!c0.w2 }); }
+    function saveStacks(next) {
+      var map = L.stackMap(stacks, next), c = cfg(), left = (c.leftWidgets || []).map(function (id) { return 'w:' + id; });
+      var order = Array.isArray(c.rightOrder) ? L.remapStackKeys(c.rightOrder, map) : c.rightOrder, lw2 = L.remapStackKeys(left, map).map(function (k) { return k.slice(2); });
+      stacks = next; ctx.settings.set({ bento: { stacks: next, rightOrder: order, leftWidgets: lw2 } }); rebuildSliders();
     }
-    function rebuildW2() {
-      var old = w2; clearInterval(slideTimer); idx = 0;
-      var neu = buildW2();
-      if (old && old.parentNode) old.parentNode.replaceChild(neu, old);
-      drawRight();
-      if (pages.length > 1) startSlide();
+    /** The cards are built again (their pages, their order): the old ones go, the new ones take their place. */
+    function rebuildSliders() {
+      sliders.forEach(function (sl) { sl.dispose(); if (sl.el.parentNode) sl.el.parentNode.removeChild(sl.el); });
+      sliders = stacks.map(function (ids, i) { return makeSlider(ids, i); });
+      if (built) drawRight();      // the first time the cards are placed when the list is drawn
+    }
+    // Add or remove widgets: every page there is, on or off. A page switched on gets a card of its own (drop it on another card to merge them); off takes it from its card.
+    function openWidgets() {
+      function itemsFor() { var on = L.cleanStacks(stacks, catalog().map(function (x) { return x.id; })).reduce(function (a, st) { return a.concat(st); }, []); return catalog().map(function (x) { return Object.assign({ on: on.indexOf(x.id) >= 0 }, x); }).sort(function (a, b) { return (b.on ? 1 : 0) - (a.on ? 1 : 0); }); }
+      openEditor({ title: t('b.add_widgets'), items: itemsFor(), minOn: 0,
+        onChange: function (idsOn) { var next = stacks.map(function (st) { return st.slice(); }); catalog().forEach(function (x) { var on = idsOn.indexOf(x.id) >= 0, now = next.some(function (st) { return st.indexOf(x.id) >= 0; }); if (on && !now) next = L.addPage(next, x.id); else if (!on && now) next = L.removePage(next, x.id); }); saveStacks(next); },
+        onReset: function () { ctx.settings.set({ bento: { stacks: null, rightOrder: null, leftWidgets: [] } }); loadStacks(); rebuildSliders(); return itemsFor(); } });
+    }
+    // The pages of one card: switch them on or off, and the order they come in. Pages that are on no card can be added here too.
+    function editStack(k) {
+      var mine = (stacks[k] || []).slice(), others = []; stacks.forEach(function (st, i) { if (i !== k) others = others.concat(st); });
+      function itemsFor(on) { var rest = catalog().filter(function (x) { return on.indexOf(x.id) < 0 && others.indexOf(x.id) < 0; }); return on.map(pageInfo).map(function (x) { return Object.assign({ on: true }, x); }).concat(rest.map(function (x) { return Object.assign({ on: false }, x); })); }
+      openEditor({ title: t('b.edit_cards'), items: itemsFor(mine), minOn: 1,
+        onChange: function (idsOn) { var next = stacks.map(function (st) { return st.slice(); }); next[k] = idsOn.slice(); saveStacks(next.filter(function (st) { return st.length; })); },
+        onReset: function () { ctx.settings.set({ bento: { stacks: null, rightOrder: null, leftWidgets: [] } }); loadStacks(); rebuildSliders(); return itemsFor((stacks[0] || []).slice()); } });
     }
     // ---------------------------------------------------------- build ----
     var c0 = cfg();
@@ -1094,62 +1127,23 @@
     var SNm = g.OkieMotor.sensors, sensCard = c0.sensorsCard !== false && SNm && SNm.buildCard && SNm.count(ctx) ? SNm.buildCard(ctx) : null;      // the sensors card: a page after the cameras
     // the cameras card and, beside or under it, the Kindle, the AWTRIX and the home map
     var GDm = g.OkieMotor.gadgets, gcards = c0.gadgetCards !== false && GDm && GDm.buildCards ? GDm.buildCards(ctx) : [];
-    // the cameras card, the Kindle, the AWTRIX and the home map are the pages of one card: one at a time, the same pager as the weather card (dots, and the pencil)
-    var deck = null, dTrack = null, dPager = null, dAll = [], dOn = [], dIdx = 0, deckDefault = [];
+    // the cameras card, the sensors card, the Kindle, the AWTRIX and the home map are pages of the cards of the right column, like the weather and the tasks
     if (camCard) dAll.push({ id: 'cameras', label: t('b.cameras'), icon: 'camera', el: camCard.el });
     if (sensCard) dAll.push({ id: 'sensors', label: core.t('app.sensors', ctx.lang()), icon: 'door', el: sensCard.el });
     gcards.forEach(function (c) { var id = c.el.dataset.gadget; dAll.push({ id: id, label: c.el.getAttribute('aria-label') || id, icon: id === 'map' ? 'home' : 'gadget', el: c.el }); });
-    deckDefault = dAll.map(function (x) { return x.id; });
-    var one = c0.oneWidget !== false && !!c0.w2 && dAll.length > 0;      // one swipeable card: the sliding card's pages and the cameras, Kindle, AWTRIX and map as more pages of it (Settings: Widgets)
-    if (c0.w2) wr.appendChild(buildW2());
-    function deckSaved() {
-      var sv = cfg().deckPages;
-      if (!Array.isArray(sv) || !sv.length) return deckDefault.slice();
-      var ok = sv.filter(function (id) { return deckDefault.indexOf(id) >= 0; });
-      return ok.length ? ok : deckDefault.slice();
-    }
-    function deckPager() {
-      dPager.innerHTML = '';
-      dOn.forEach(function (id, i) { var x = dAll.filter(function (q) { return q.id === id; })[0]; dPager.appendChild(h('button.hsp-dot' + (i === dIdx ? '.on' : ''), { 'aria-label': t('b.page', { n: i + 1 }) + ', ' + (x ? x.label : id), 'aria-current': i === dIdx ? 'true' : null, onclick: function (e) { e.stopPropagation(); deckGo(i); } })); });
-      dPager.appendChild(h('button.hsp-ed', { 'aria-label': t('b.edit'), title: t('b.edit'), onclick: function (e) { e.stopPropagation(); editDeck(); }, html: UI.icon('pencil', 13) }));
-    }
-    function deckGo(i) { if (!dOn.length) return; dIdx = (i + dOn.length) % dOn.length; dTrack.style.transform = 'translateX(' + (-100 * dIdx) + '%)'; deckPager(); }
-    function deckLayout() {
-      dOn = deckSaved(); dTrack.innerHTML = '';
-      dOn.forEach(function (id) { var x = dAll.filter(function (q) { return q.id === id; })[0]; if (x) dTrack.appendChild(x.el); });
-      deck.dataset.n = String(dOn.length); dPager.hidden = false; dPager.classList.toggle('single', dOn.length < 2);
-      dIdx = Math.min(dIdx, Math.max(0, dOn.length - 1)); dTrack.style.transform = 'translateX(' + (-100 * dIdx) + '%)'; deckPager();
-    }
-    function editDeck() {
-      function itemsFor(on) {
-        var order = on.concat(deckDefault.filter(function (id) { return on.indexOf(id) < 0; }));
-        return order.map(function (id) { var x = dAll.filter(function (q) { return q.id === id; })[0]; return { id: id, label: x.label, icon: x.icon, on: on.indexOf(id) >= 0, note: '' }; });
-      }
-      openEditor({ title: t('b.edit_cards'), items: itemsFor(deckSaved()), minOn: 1,
-        onChange: function (idsOn) { ctx.settings.set({ bento: { deckPages: idsOn } }); deckLayout(); },
-        onReset: function () { ctx.settings.set({ bento: { deckPages: null } }); deckLayout(); return itemsFor(deckDefault); } });
-    }
-    if (dAll.length && !one) {
-      deck = h('section.gdeck', { role: 'region', 'aria-roledescription': 'carousel', 'aria-label': t('b.cameras') });
-      dTrack = h('div.gd-track'); dPager = h('div.hero-slide-pager.static.gd-pager'); deck.appendChild(dTrack); deck.appendChild(dPager);
-      deckLayout(); wr.appendChild(deck); root.dataset.cams = 'on';
-      var gx = 0, gdx = 0, gdrag = false;
-      deck.addEventListener('pointerdown', function (e) { if (e.target.closest('button')) return; gdrag = true; gx = e.clientX; gdx = 0; });
-      deck.addEventListener('pointermove', function (e) { if (gdrag) gdx = e.clientX - gx; });
-      var gEnd = function () { if (!gdrag) return; gdrag = false; if (Math.abs(gdx) > 50) { deck.dataset.swiped = '1'; setTimeout(function () { delete deck.dataset.swiped; }, 350); deckGo(dIdx + (gdx < 0 ? 1 : -1)); } };
-      deck.addEventListener('pointerup', gEnd); deck.addEventListener('pointercancel', function () { gdrag = false; });
-      deck.addEventListener('click', function (e) { if (deck.dataset.swiped || deck.dataset.lp) { e.stopPropagation(); e.preventDefault(); } }, true);      // the finger that swipes must not also open the card
-    }
+    var addWidgetsBtn = h('button.rm-add.wr-add', { type: 'button', html: UI.icon('plus', 22) + '<span>' + t('b.add_widgets') + '</span>', onclick: function () { openWidgets(); } });
+    loadStacks(); rebuildSliders();
+    if (dAll.length) root.dataset.cams = 'on';
     var w34 = h('div.w34');
     [c0.w3, c0.w4].forEach(function (k) { var el = sysTile(k); if (el) { tiles.push(el); w34.appendChild(el); } });
     if (tiles.length) wr.appendChild(w34);
-    if (one) root.dataset.cams = 'on';
     var FDm = g.OkieMotor.feeder, feederCard = c0.feederCard !== false && FDm && FDm.buildCard ? FDm.buildCard(ctx) : null;      // under the cameras card
     function applyFeederHeight() { if (feederCard) wr.style.setProperty('--okie-feed-h', FDm.heightOf(feederCard.design()) + 'px'); }      // the row of the right column is as high as the design of the card
     if (feederCard) { wr.appendChild(feederCard.el); wr.dataset.feeder = 'on'; applyFeederHeight(); }
     if (wr.children.length) root.appendChild(wr);
     wrGrip = buildWrGrip();
-    if (w1) drawW1(true);
+    if (w1) drawW1(true); else drawRight();
+    built = true;
     if (w1body && typeof MutationObserver === 'function') {
       var mo = new MutationObserver(function () { requestAnimationFrame(fitW1); });
       mo.observe(w1body, { childList: true });
@@ -1162,7 +1156,6 @@
     if (ctx.bus && ctx.bus.on) { var offNav = ctx.bus.on('nav', function (n) { if (editing && n && n.mode !== 'start') setEditing(false); }); disposers.push(function () { if (typeof offNav === 'function') offNav(); }); }      // opening a card, a device or an app ends the arrangement
     if (ctx.bus && ctx.bus.on) { var offFit = ctx.bus.on('resize', function () { fitW1(); }); disposers.push(function () { if (typeof offFit === 'function') offFit(); }); }
     requestAnimationFrame(fitW1);
-    if (pages.length > 1) startSlide();
     timers.push(setInterval(function () { tiles.forEach(function (x) { if (x._upd) x._upd(); }); }, 30000));
 
     // Home Assistant's row height for the small tiles follows the grid height
@@ -1177,16 +1170,15 @@
       update: function () {
         registry.forEach(function (el, id) { var s = ctx.state(id); if (s && s !== el._lastState) tl.paint(el, el._item, s); });
         richW1.forEach(function (c) { c.update(); });
-        pages.forEach(function (p) { if (p.inst && p.inst.update) p.inst.update(); });
+        sliders.forEach(function (sl) { sl.update(); });
         tiles.forEach(function (x) { if (x._upd) x._upd(); });
         drawW1(false);
         if (camCard) camCard.update(); if (sensCard) sensCard.update(); gcards.forEach(function (c) { c.update(); }); if (feederCard) feederCard.update();
-        if (pages.length) drawFoot();
       },
-      show: function () { drawW1(false); pages.forEach(function (p) { if (p.inst && p.inst.reload) p.inst.reload(); }); fadeSoon(); },      // back on the start screen: the list is redrawn only when something in it changed (settings and states keep it current while it is away)
+      show: function () { drawW1(false); sliders.forEach(function (sl) { sl.show(); }); fadeSoon(); },      // back on the start screen: the list is redrawn only when something in it changed (settings and states keep it current while it is away)
       stagger: function () { root.classList.add('stagger'); setTimeout(function () { root.classList.remove('stagger'); }, 2000); },
-      dispose: function () { clearInterval(slideTimer); timers.forEach(clearInterval); if (camCard) camCard.dispose(); if (sensCard) sensCard.dispose(); if (feederCard) feederCard.dispose(); if (ro) ro.disconnect(); disposers.forEach(function (d) { d(); }); },
-      _go: go,
+      dispose: function () { sliders.forEach(function (sl) { sl.dispose(); }); timers.forEach(clearInterval); if (camCard) camCard.dispose(); if (sensCard) sensCard.dispose(); if (feederCard) feederCard.dispose(); if (ro) ro.disconnect(); disposers.forEach(function (d) { d(); }); },
+      _go: function (i) { if (sliders[0]) sliders[0].go(i); },
     };
   }
 

@@ -18,6 +18,7 @@
   core.registerStrings('en', {
     'dt.controls': 'Controls', 'dt.context': 'Context', 'dt.history': 'History', 'dt.schedule': 'Schedule', 'dt.settings': 'Settings',
     'dt.related': 'Related', 'dt.same_area': 'In this room', 'dt.nothing_related': 'No scene, script or automation uses this device yet.', 'dt.nothing_related_hint': 'This tab lists the ones that do, and the scenes and scripts of its room, each with a Run button. Add one in Home Assistant that uses this device and it shows up here.', 'dt.run': 'Run', 'dt.running': 'Started',
+    'dt.edit': 'Edit this screen', 'dt.rename': 'Rename', 'dt.rename_orig': 'Original name', 'dt.rename_save': 'Save', 'dt.hero_hint': 'Drag to resize the picture', 'dt.hero_reset': 'Reset size', 'dt.done': 'Done',
     'dt.24h': '24 hours', 'dt.7d': '7 days', 'dt.30d': '30 days', 'dt.changes': 'Changes', 'dt.avg_run': 'Avg. on-time', 'dt.active': 'Active', 'dt.min': 'Min', 'dt.max': 'Max', 'dt.avg': 'Avg',
     'dt.by_hour': 'Time of day', 'dt.durations': 'Time in each state', 'dt.loading': 'Loading history…', 'dt.no_history': 'No history for this period.', 'dt.history_failed': 'Could not load history.',
     'dt.sched_none': 'No schedules for this device yet.', 'dt.sched_add': 'New schedule', 'dt.sched_time': 'Time', 'dt.sched_days': 'Days', 'dt.sched_action': 'Action', 'dt.sched_save': 'Save schedule',
@@ -31,6 +32,7 @@
   core.registerStrings('de', {
     'dt.controls': 'Steuerung', 'dt.context': 'Kontext', 'dt.history': 'Verlauf', 'dt.schedule': 'Zeitplan', 'dt.settings': 'Einstellungen',
     'dt.related': 'Zugehörig', 'dt.same_area': 'In diesem Raum', 'dt.nothing_related': 'Noch keine Szene, kein Skript und keine Automation nutzt dieses Gerät.', 'dt.nothing_related_hint': 'Dieser Tab zeigt die, die es nutzen, und die Szenen und Skripte seines Raums, jeweils mit einem Ausführen-Knopf. Lege in Home Assistant eine an, die dieses Gerät nutzt, und sie erscheint hier.', 'dt.run': 'Ausführen', 'dt.running': 'Gestartet',
+    'dt.edit': 'Diesen Bildschirm bearbeiten', 'dt.rename': 'Umbenennen', 'dt.rename_orig': 'Originalname', 'dt.rename_save': 'Speichern', 'dt.hero_hint': 'Ziehen, um das Bild zu verändern', 'dt.hero_reset': 'Größe zurücksetzen', 'dt.done': 'Fertig',
     'dt.24h': '24 Stunden', 'dt.7d': '7 Tage', 'dt.30d': '30 Tage', 'dt.changes': 'Wechsel', 'dt.avg_run': 'Ø Einschaltdauer', 'dt.active': 'Aktiv', 'dt.min': 'Min', 'dt.max': 'Max', 'dt.avg': 'Ø',
     'dt.by_hour': 'Tageszeit', 'dt.durations': 'Zeit je Zustand', 'dt.loading': 'Verlauf wird geladen…', 'dt.no_history': 'Kein Verlauf in diesem Zeitraum.', 'dt.history_failed': 'Verlauf konnte nicht geladen werden.',
     'dt.sched_none': 'Noch keine Zeitpläne für dieses Gerät.', 'dt.sched_add': 'Neuer Zeitplan', 'dt.sched_time': 'Uhrzeit', 'dt.sched_days': 'Tage', 'dt.sched_action': 'Aktion', 'dt.sched_save': 'Zeitplan speichern',
@@ -394,7 +396,8 @@
     var photoUrl = pk ? SN.photo(pk) : '';      // sensors and blinds have a photo of their own behind the (optional) video
     if (photoUrl) { hero.appendChild(h('div.dt-photo', { style: { backgroundImage: 'url("' + photoUrl + '")' } })); iconBg.style.display = 'none'; }
     hero.appendChild(iconBg); hero.appendChild(vidA); hero.appendChild(vidB);
-    hero.appendChild(h('div.dt-top', null, back, h('div.dt-head', null, title, sub), heart));
+    var pen = h('button.dt-circ', { 'aria-label': t('dt.edit'), title: t('dt.edit'), 'aria-pressed': 'false', onclick: function () { setEdit(root.dataset.edit !== '1'); }, html: UI.icon('pencil', 20) });
+    hero.appendChild(h('div.dt-top', null, back, h('div.dt-head', null, title, sub), h('div.dt-acts', null, pen, heart)));      // the pencil next to the heart: the size of the picture and the name
     var wx = null;      // the weather screen has two pages: the first fills the hero, the second is the Controls tab (okie-weather)
     if (item.domain === 'weather' && g.OkieMotor.weather && g.OkieMotor.weather.create) { try { wx = g.OkieMotor.weather.create(ctx, item); hero.insertBefore(wx.sky, hero.firstChild); hero.appendChild(wx.hero); } catch (e) { wx = null; } }
     iconBg.innerHTML = UI.icon(UI.domainIcon(item.domain, item.deviceClass, st.state), 170);
@@ -412,6 +415,31 @@
     if (wx) root.dataset.wx = 'true';
     if (DM.usesDial && DM.usesDial(ctx, item)) root.dataset.dial = 'true';      // the wheel runs edge to edge on the Controls tab
     container.appendChild(root);
+    // ---- the pencil: drag the handle to give the picture more or less room, rename the card, put the size back
+    var heroPct = +ctx.settings.get().detailHero || 0, dragHero = false;
+    function applyHero(pc) { root.style.gridTemplateColumns = pc > 0 ? pc + '% 1fr' : ''; }
+    function placeGrip() { grip.style.left = Math.max(0, hero.offsetWidth - 16) + 'px'; }
+    function setEdit(on) { root.dataset.edit = on ? '1' : ''; pen.classList.toggle('ed', on); pen.setAttribute('aria-pressed', on ? 'true' : 'false'); if (on) placeGrip(); }
+    var grip = h('div.dt-grip', { role: 'separator', 'aria-orientation': 'vertical', 'aria-label': t('dt.hero_hint'), title: t('dt.hero_hint') }, h('span'));
+    function openRename() {
+      var own = ctx.settings.get().deviceNames || {}, orig = (ctx.state(id) && ctx.state(id).attributes && ctx.state(id).attributes.friendly_name) || item.name, input = h('input.rm-q', { type: 'text', value: item.name, maxlength: '60', 'aria-label': t('dt.rename'), autocomplete: 'off' }), sheet = null;
+      function save(name) { var o = {}; o[id] = name; ctx.settings.set({ deviceNames: o }); ctx.engine.patch(id, { name: name || orig }); item.name = name || orig; title.textContent = item.name; if (sheet) sheet.close('saved'); }
+      var ok = h('button.rm-mk', { type: 'button', onclick: function () { var v = input.value.trim(); if (!v) { input.focus(); return; } save(v === orig ? '' : v); } }, t('dt.rename_save'));
+      input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); ok.click(); } });
+      var box = h('div', null, h('div.rm-newrow', null, input, ok));
+      if (own[id]) box.appendChild(h('button.rm-pr', { type: 'button', onclick: function () { save(''); } }, h('span.pt', null, h('b', null, t('dt.rename_orig')), h('span', null, orig))));
+      sheet = ctx.sheet({ title: t('dt.rename'), content: function () { return box; } });
+      setTimeout(function () { try { input.focus(); input.select(); } catch (e) { /* no focus */ } }, 60);
+    }
+    var ebar = h('div.dt-ebar', null,
+      h('button.dt-eb', { type: 'button', onclick: openRename, html: UI.icon('pencil', 16) + '<span>' + t('dt.rename') + '</span>' }),
+      h('button.dt-eb', { type: 'button', onclick: function () { heroPct = 0; applyHero(0); ctx.settings.set({ detailHero: 0 }); setTimeout(placeGrip, 30); } }, t('dt.hero_reset')),
+      h('button.dt-eb.pri', { type: 'button', onclick: function () { setEdit(false); } }, t('dt.done')));
+    grip.addEventListener('pointerdown', function (e) { e.preventDefault(); dragHero = true; try { grip.setPointerCapture(e.pointerId); } catch (er) { /* the move still arrives */ } });
+    grip.addEventListener('pointermove', function (e) { if (!dragHero) return; var r = UI.screenRect(root); heroPct = Math.round(Math.max(24, Math.min(74, (e.clientX - r.left) / Math.max(1, r.width) * 100)) * 10) / 10; applyHero(heroPct); placeGrip(); });
+    var endHero = function () { if (!dragHero) return; dragHero = false; ctx.settings.set({ detailHero: heroPct }); };
+    grip.addEventListener('pointerup', endHero); grip.addEventListener('pointercancel', endHero);
+    root.appendChild(grip); root.appendChild(ebar); applyHero(heroPct);
     if (wx) { container.appendChild(wx.dots); wx.watch(root); }
     var sbar = UI.attachScrollbar(body, bodyHost);
 
@@ -501,6 +529,10 @@
     '.dt{display:grid;grid-template-columns:minmax(260px,42%) 1fr;height:100%;min-height:0;}',
     '.dt-hero{position:relative;overflow:hidden;display:flex;flex-direction:column;}',
     '.dt-photo{position:absolute;inset:0;background-size:cover;background-position:center;}',
+    '.dt{position:relative;}.dt-top .dt-acts{display:flex;gap:6px;}.dt-circ.ed{background:#fff;color:#14161a;}',
+    '.dt-grip{display:none;position:absolute;top:0;bottom:0;width:32px;z-index:7;align-items:center;justify-content:center;cursor:col-resize;touch-action:none;}.dt[data-edit="1"] .dt-grip{display:flex;}.dt-grip span{width:6px;height:68px;border-radius:3px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.45);}',
+    '.dt-ebar{display:none;position:absolute;left:16px;bottom:16px;z-index:7;gap:8px;}.dt[data-edit="1"] .dt-ebar{display:flex;}.dt-eb{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 16px;border-radius:9999px;background:rgba(20,22,26,.62);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;font-size:14px;font-weight:600;}.dt-eb.pri{background:#fff;color:#14161a;}',
+    '@media (max-width:640px){.dt-grip{display:none!important;}}',
     '.dt-iconbg{position:absolute;inset:0;display:grid;place-items:center;opacity:.22;}',
     '.dt[data-domain="vacuum"] .dt-iconbg{display:none;}',                                    // the robot of the vacuum screen is the picture
     '.dt-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .6s ease;}',

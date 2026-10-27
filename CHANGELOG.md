@@ -2,6 +2,15 @@
 
 The same entries are shown inside the card (dock > What's new). Newest first.
 
+## 0.55.0 (2026-10-27)
+
+**Add widgets on the right, drop cards on each other to merge, a pencil on every device screen.**
+- In arrange mode the right column has Add or remove widgets under its cards, like Add or remove favorites on the left. Every page (weather, to-do, news, calendar, tips, cameras, sensors, Kindle, AWTRIX, map) can be switched on and gets a card of its own
+- Pull a card of the right column over the middle of another one and let go: its pages join that card and swipe one after the other. A card with several pages loses one by switching it off in its pencil, or in Add or remove widgets, and switching it on again gives it a card of its own again
+- The Split and Merge buttons of 0.54.1 are gone: the cards you have now follow your old settings
+- Every device screen has a pencil next to the heart: drag the handle between the picture and the controls to make the picture bigger or smaller, rename the device, or put the size back
+- View All on a door or window sensor lists every open and close, a day at a time, in a scrollable list
+
 ## 0.54.2 (2026-10-27)
 
 **A sensor lists all its events.**

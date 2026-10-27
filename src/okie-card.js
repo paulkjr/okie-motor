@@ -32,7 +32,7 @@
     topCategory: 'devices', chip: 'all', layout: 'grid',
     squircle: 'none',
     quickEnabled: true, quickControl: L.DEFAULT_QUICK,
-    favorites: [], rooms: [], roomOrder: {}, roomsOrder: [], roomEdits: {}, cardStyle: {}, roomsExtra: [], roomsHidden: [], roomNames: {}, learning: 'normal',
+    favorites: [], detailHero: 0, deviceNames: {}, rooms: [], roomOrder: {}, roomsOrder: [], roomEdits: {}, cardStyle: {}, roomsExtra: [], roomsHidden: [], roomNames: {}, learning: 'normal',
     visibility: { hidden: false, disabled: false, diagnostic: false },
     excluded: ['switch.schedule_*'],     // the Scheduler component's helper switches belong to the Schedules app, not the device list
     limits: { max: 0, areaOnly: true, hideUnavailable: true },
@@ -47,7 +47,7 @@
     zen: { enabled: true, text: 'auto', name: '', quoteEntity: 'sensor.quote_of_the_day', keepOpen: true },
     search: { filterBy: 'categories', columns: 5, recent: 'standard', typewriter: true, context: true, chips: true, filterButton: true, count: true, timeSort: true, ai: true },
     island: { show: true, fold: true, toCapsuleSec: 30, toButtonSec: 60, liveShow: true, live: { timers: true, vacuums: true, covers: true, media: true, scripts: true, climate: false, lights: false, switches: false } },
-    bento: { enabled: true, deckPages: null, swap: false, w1: true, w2: true, w3: 'todos', w4: 'news', w1mode: 'favorites', w1layout: 'list', pages: ['weather', 'todos', 'news', 'calendar', 'tips'], slideSec: 8, news_entity: '', w1height: 0, camerasCard: true, sensorsCard: true, feederCard: true, feederDesign: 'compact', feeder: 'auto', leftWidgets: [], rightCards: [], rightOrder: null, wrheight: 0, oneWidget: true, pagesVer: 0 },
+    bento: { enabled: true, deckPages: null, swap: false, w1: true, w2: true, w3: 'todos', w4: 'news', w1mode: 'favorites', w1layout: 'list', pages: ['weather', 'todos', 'news', 'calendar', 'tips'], slideSec: 8, news_entity: '', w1height: 0, camerasCard: true, sensorsCard: true, stacks: null, feederCard: true, feederDesign: 'compact', feeder: 'auto', leftWidgets: [], rightCards: [], rightOrder: null, wrheight: 0, oneWidget: true, pagesVer: 0 },
     suggest: { enabled: true, max: 10 },
     mobile: { autoOpen: false }, haptic: true, sound: false,
     height: 'auto', top_offset: 0,
@@ -645,7 +645,7 @@
       this._applyLook();
       if (p && p.thermo !== undefined && g.OkieMotor.controls && g.OkieMotor.controls.notifyLook) g.OkieMotor.controls.notifyLook();
       if (p && p.centerView !== undefined) { this._measure(); }
-      if (p && p.bento && p.bento.oneWidget !== undefined) this._rebuildStart();      // one swipeable card or separate ones: the start screen is built again
+      if (p && p.bento && p.bento.oneWidget !== undefined) { this._settings.set({ bento: { stacks: null, rightOrder: null, leftWidgets: [] } }); this._rebuildStart(); }      // one swipeable card or separate ones: the start screen is built again
       if (p && p.language !== undefined) { this._engine.setLang(this._lang()); this._renderDock(); if (this._search) this._search.refreshLabels(); }
       if (p && p.learning) this._engine.setSpeed(p.learning);
       if (p && (p.visibility || p.excluded || p.limits)) this._rebuildCollection(true);
@@ -672,6 +672,7 @@
       items = items.filter(function (i) { var st = hs.states[i.id]; return !(st && st.attributes && Array.isArray(st.attributes.entries)); });   // news feed sensors belong to the News app
       if (g.OkieMotor.gadgets) items = g.OkieMotor.gadgets.apply(items, hs.states, hs.areas);      // the Kindle and the AWTRIX: one tile each instead of dozens of entities
       if (s.limits && s.limits.max > 0) items = items.slice(0, s.limits.max);
+      var dn = s.deviceNames || {}; items.forEach(function (it) { if (dn[it.id]) it.name = dn[it.id]; });      // the names you gave your devices (the pencil of a device screen)
       this._engine.setCollection(items);
       this._engine.setExcluded(s.excluded);
       this._engine.setFilters({ areaOnly: !!(s.limits && s.limits.areaOnly), hideUnavailable: !!(s.limits && s.limits.hideUnavailable) });   // live: area-less sensors still feed the island and alerts
@@ -689,7 +690,7 @@
             if (it) {
               var patch = { state: cur[id].state };
               var fn = cur[id].attributes && cur[id].attributes.friendly_name; if (fn && L.decodeEntities) fn = L.decodeEntities(fn);      // (a name like 50&quot; TV is stored decoded; the raw one would put the entity back into the text)
-              if (fn && fn !== it.name) patch.name = fn;
+              var own = (this._settings.get().deviceNames || {})[id]; if (own) fn = own; if (fn && fn !== it.name) patch.name = fn;
               this._engine.patch(id, patch);
             }
             changed.push({ id: id, old: prev[id] || null, next: cur[id] });
