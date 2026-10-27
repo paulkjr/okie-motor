@@ -2,6 +2,11 @@
 
 The same entries are shown inside the card (dock > What's new). Newest first.
 
+## 0.55.2 (2026-10-27)
+
+**The sliding cards on the right are all the same height.**
+- With two or more sliding cards in the right column they share the room equally (at least 250 px each), so the weather card is no longer squeezed while another card is taller. With favorites in the column every sliding card is 250 px
+
 ## 0.55.1 (2026-10-27)
 
 **Widgets are added from a list, and removed with an x.**

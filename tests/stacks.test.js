@@ -44,6 +44,7 @@ test('after the cards change, the keys of the right column follow them', () => {
 
 test('the grid of the right column knows a third card and more', () => {
   const lay = L.rightLayout({ order: ['w:slider', 'w:deck', 'w:s2', 'w:feeder'] });
-  assert.deepEqual(lay.names, ['w2', 'w34', 'ws2', 'w5']); assert.match(lay.rows, /var\(--w34-row-height,196px\) var\(--w34-row-height,196px\)/);
+  assert.deepEqual(lay.names, ['w2', 'w34', 'ws2', 'w5']); assert.equal(lay.rows, 'minmax(250px,1fr) minmax(250px,1fr) minmax(250px,1fr) var(--okie-feed-h,92px)', 'all the sliding cards are the same height');
+  const withFav = L.rightLayout({ order: ['w:slider', 'w:deck', 'light.lamp'] }); assert.equal(withFav.rows, '250px 250px auto', 'with a favorite in the column: 250px each');
   const two = L.rightLayout({ order: ['w:s2', 'light.lamp'] }); assert.deepEqual(two.names, ['ws2', 'p0']);
 });

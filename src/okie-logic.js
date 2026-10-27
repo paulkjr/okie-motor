@@ -346,18 +346,20 @@
     var NAME = { 'w:slider': 'w2', 'w:deck': 'w34', 'w:feeder': 'w5' };
     var ROW = { 'w:slider': 'minmax(250px,1fr)', 'w:deck': 'var(--w34-row-height,196px)', 'w:feeder': 'var(--okie-feed-h,92px)' };
     var order = o.order || [], names = [], rows = [], n = 0, widgets = [], cards = 0;
-    order.forEach(function (k) { if (!NAME[k] && stackIndex(k) >= 2) { NAME[k] = 'ws' + stackIndex(k); ROW[k] = 'var(--w34-row-height,196px)'; } });      // a third card and more: as high as the second
+    order.forEach(function (k) { if (!NAME[k] && stackIndex(k) >= 2) { NAME[k] = 'ws' + stackIndex(k); ROW[k] = 'var(--w34-row-height,196px)'; } });      // a third card and more
+    var stackKeys = order.filter(function (k) { return stackIndex(k) >= 0; }), multi = stackKeys.length >= 2;
+    if (multi) stackKeys.forEach(function (k) { ROW[k] = order.some(function (x) { return !NAME[x]; }) ? '250px' : 'minmax(250px,1fr)'; });      // several sliding cards are all the same height (with favorites in the column they are 250px each, else they share the room)
     order.forEach(function (k) {
       if (NAME[k]) { names.push(NAME[k]); rows.push(ROW[k]); widgets.push(k); } else { names.push('p' + n++); rows.push('auto'); cards++; }
     });
     var si = order.indexOf('w:slider');
     // o.reserve: the cameras card is a page of the sliding card (one card) - the card keeps the height it had with the cameras card under it
-    var reserve = !!o.reserve && si >= 0 && order.indexOf('w:deck') < 0;
-    if (si >= 0 && cards) {
+    var reserve = !!o.reserve && si >= 0 && order.indexOf('w:deck') < 0 && !multi;
+    if (si >= 0 && cards && !multi) {
       var others = widgets.filter(function (k) { return k !== 'w:slider'; }).map(function (k) { return ' - ' + ROW[k]; }).join('') + (reserve ? ' - ' + ROW['w:deck'] : '');
       rows[si] = 'max(250px,calc(var(--fsc-grid-h,464px)' + others + ' - ' + (24 * (widgets.length - 1 + (reserve ? 1 : 0))) + 'px))';
     } else if (reserve) { names.push('w34r'); rows.push(ROW['w:deck']); }      // a free row at the end: the card takes the rest, as before
-    if (si < 0 && order.length && order[0] === 'w:deck') rows[0] = 'minmax(var(--w34-row-height,196px),1fr)';
+    if (si < 0 && !multi && order.length && order[0] === 'w:deck') rows[0] = 'minmax(var(--w34-row-height,196px),1fr)';
     return { names: names, areas: names.map(function (x) { return '"' + x + '"'; }).join(' '), rows: rows.join(' ') };
   }
   /**

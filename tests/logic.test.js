@@ -445,7 +445,7 @@ test('tile state: the table word for most things, nothing for plain numeric sens
   assert.equal(T('climate.living_room', 'cool', { hvac_action: 'cooling', current_temperature: 71, temperature: 70 }), 'Cooling', 'no temperatures on the tile');
   assert.equal(T('switch.kindle', 'on'), 'On');
   assert.equal(T('script.feed', 'off'), 'Off', 'scripts show on/off, not "Run"');
-  assert.equal(T('vacuum.robo', 'idle'), 'Idle');
+  assert.equal(T('vacuum.jess', 'idle'), 'Idle');
   assert.equal(T('binary_sensor.charging', 'off', { device_class: 'battery_charging' }), 'Not charging');
   assert.equal(T('binary_sensor.door', 'on', { device_class: 'door' }), 'Open');
   assert.equal(T('sensor.kindle_battery', '52', { device_class: 'battery', unit_of_measurement: '%' }), 'Battery OK');
@@ -571,10 +571,10 @@ test('canScroll: only a scroll box with more inside than shows', () => {
 test('rightLayout: the right column lays out the cards that are in it', () => {
   let r = L.rightLayout({ order: ['w:slider', 'w:deck', 'w:feeder'] });
   assert.equal(r.areas, '"w2" "w34" "w5"');
-  assert.equal(r.rows, 'minmax(250px,1fr) var(--w34-row-height,196px) var(--okie-feed-h,92px)');
+  assert.equal(r.rows, 'minmax(250px,1fr) minmax(250px,1fr) var(--okie-feed-h,92px)', 'two sliding cards share the room and are the same height');
   r = L.rightLayout({ order: ['w:deck', 'w:feeder', 'w:slider', 'light.lamp'] });
   assert.equal(r.names.join(), 'w34,w5,w2,p0');
-  assert.ok(/^var\(--w34-row-height,196px\) var\(--okie-feed-h,92px\) max\(250px,calc\(var\(--fsc-grid-h,464px\) - var\(--w34-row-height,196px\) - var\(--okie-feed-h,92px\) - 48px\)\) auto$/.test(r.rows), r.rows);
+  assert.equal(r.rows, '250px var(--okie-feed-h,92px) 250px auto', 'the two sliding cards are the same height, the favorite is as high as it is');
   r = L.rightLayout({ order: ['w:deck', 'w:feeder'] });                   // the sliding card went to the list: the cameras card takes the free height
   assert.equal(r.areas, '"w34" "w5"');
   assert.equal(r.rows.indexOf('minmax(var(--w34-row-height'), 0);
