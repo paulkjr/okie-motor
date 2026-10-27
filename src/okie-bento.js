@@ -18,7 +18,7 @@
 
   core.registerStrings('en', {
     'b.favorites': 'Favorites', 'b.suggestions': 'Suggestions', 'b.nofav': 'Tap the heart in any device to pin it here.',
-    'b.add_widgets': 'Add or remove widgets', 'b.edit_cards': 'Cards on this slider', 'b.slider_name': 'Widgets', 'b.edit_hint': 'Drag the handle to change the order. Switch a card off to hide it and on to bring it back.', 'b.reset': 'Reset', 'b.done': 'Done', 'b.edit': 'Edit cards', 'b.unavailable': 'Nothing to show yet', 'b.kindle_lbl': 'Kindle Fire', 'b.weather': 'Weather', 'b.cameras': 'Cameras', 'b.calendar': 'Calendar', 'b.todos': 'To-do', 'b.news': 'News', 'b.tips': 'Tips', 'b.chronicle': 'Recently in the house',
+    'b.add_widgets': 'Add widgets', 'b.widgets_all': 'Every widget is on a card.', 'b.add_widget_hint': 'Tap a widget to add it as a card of its own. Drop a card onto another one to merge them; the x on a page takes it off its card.', 'b.remove': 'Remove', 'b.edit_cards': 'Cards on this slider', 'b.slider_name': 'Widgets', 'b.edit_hint': 'Drag the handle to change the order. Switch a card off to hide it and on to bring it back.', 'b.reset': 'Reset', 'b.done': 'Done', 'b.edit': 'Edit cards', 'b.unavailable': 'Nothing to show yet', 'b.kindle_lbl': 'Kindle Fire', 'b.weather': 'Weather', 'b.cameras': 'Cameras', 'b.calendar': 'Calendar', 'b.todos': 'To-do', 'b.news': 'News', 'b.tips': 'Tips', 'b.chronicle': 'Recently in the house',
     'b.nothing_yet': 'Nothing yet', 'b.no_events': 'No upcoming events', 'b.no_todos': 'All done', 'b.no_news': 'No articles yet', 'b.overdue': 'overdue',
     'b.no_widgets': 'No widgets to show yet. Add a weather, calendar or to-do entity.', 'b.hl': 'H:{h}°  L:{l}°', 'b.humidity': 'Humidity {h}%',
     'b.view_tiles': 'Tile view', 'b.view_list': 'List view', 'b.resize': 'Change the height of this area', 'b.grip': 'Drag to change the height, double-tap to reset', 'b.pause': 'Pause', 'b.play': 'Play', 'b.page': 'Page {n}',
@@ -27,7 +27,7 @@
   });
   core.registerStrings('de', {
     'b.favorites': 'Favoriten', 'b.suggestions': 'Vorschläge', 'b.nofav': 'Tippe in einem Gerät auf das Herz, um es hier anzuheften.',
-    'b.add_widgets': 'Widgets hinzufügen oder entfernen', 'b.edit_cards': 'Karten dieses Schiebers', 'b.slider_name': 'Widgets', 'b.edit_hint': 'Am Griff ziehen, um die Reihenfolge zu ändern. Eine Karte ausschalten blendet sie aus, einschalten holt sie zurück.', 'b.reset': 'Zurücksetzen', 'b.done': 'Fertig', 'b.edit': 'Karten bearbeiten', 'b.unavailable': 'Noch nichts anzuzeigen', 'b.kindle_lbl': 'Kindle Fire', 'b.weather': 'Wetter', 'b.cameras': 'Kameras', 'b.calendar': 'Kalender', 'b.todos': 'Aufgaben', 'b.news': 'Nachrichten', 'b.tips': 'Tipps', 'b.chronicle': 'Zuletzt im Haus',
+    'b.add_widgets': 'Widgets hinzufügen', 'b.widgets_all': 'Jedes Widget ist auf einer Karte.', 'b.add_widget_hint': 'Tippe auf ein Widget, um es als eigene Karte hinzuzufügen. Ziehe eine Karte auf eine andere, um sie zu verbinden; das x auf einer Seite nimmt sie von der Karte.', 'b.remove': 'Entfernen', 'b.edit_cards': 'Karten dieses Schiebers', 'b.slider_name': 'Widgets', 'b.edit_hint': 'Am Griff ziehen, um die Reihenfolge zu ändern. Eine Karte ausschalten blendet sie aus, einschalten holt sie zurück.', 'b.reset': 'Zurücksetzen', 'b.done': 'Fertig', 'b.edit': 'Karten bearbeiten', 'b.unavailable': 'Noch nichts anzuzeigen', 'b.kindle_lbl': 'Kindle Fire', 'b.weather': 'Wetter', 'b.cameras': 'Kameras', 'b.calendar': 'Kalender', 'b.todos': 'Aufgaben', 'b.news': 'Nachrichten', 'b.tips': 'Tipps', 'b.chronicle': 'Zuletzt im Haus',
     'b.nothing_yet': 'Noch nichts', 'b.no_events': 'Keine anstehenden Termine', 'b.no_todos': 'Alles erledigt', 'b.no_news': 'Noch keine Artikel', 'b.overdue': 'überfällig',
     'b.no_widgets': 'Noch nichts anzuzeigen. Füge eine Wetter-, Kalender- oder Aufgaben-Entität hinzu.', 'b.hl': 'H:{h}°  T:{l}°', 'b.humidity': 'Feuchte {h}%',
     'b.view_tiles': 'Kachelansicht', 'b.view_list': 'Listenansicht', 'b.resize': 'Höhe dieses Bereichs ändern', 'b.grip': 'Ziehen, um die Höhe zu ändern, doppeltippen zum Zurücksetzen', 'b.pause': 'Pause', 'b.play': 'Abspielen', 'b.page': 'Seite {n}',
@@ -62,6 +62,8 @@
     '.stage .w1-widgets>.gdeck{height:240px;}.stage:not([data-mobile="true"]):not([data-hoehe="boden"]) .w1-widgets>.gdeck{height:240px;}',
     '.wright>.fv-item{min-width:0;}',
     '.w2,.gdeck,.fdc{position:relative;}',
+    '.wm-pages{display:flex;gap:6px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;}.wm-pages::-webkit-scrollbar{display:none;}.wm-chip{display:inline-flex;align-items:center;gap:6px;flex:none;padding:4px 4px 4px 10px;border-radius:9999px;background:rgba(255,255,255,.16);font-size:12px;font-weight:600;color:#fff;}.wm-ci{display:grid;opacity:.85;}.wm-x{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.22);color:#fff;}.wm-x:hover{background:#ff5a5f;}',
+    '.wa-hint{margin:0 0 10px;font-size:13px;line-height:1.45;color:var(--okie-text-dim,rgba(255,255,255,.7));}.wa-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}.wa-row{display:flex;align-items:center;gap:12px;width:100%;padding:10px 14px 10px 10px;border-radius:18px;background:rgba(255,255,255,.08);text-align:left;color:inherit;min-height:56px;}.wa-row:hover{background:rgba(255,255,255,.14);}.wa-ic{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.12);}.wa-t{flex:1;min-width:0;display:flex;flex-direction:column;}.wa-t b{font-size:16px;font-weight:600;}.wa-t span{font-size:12px;opacity:.65;}.wa-add{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#14161a;}.wa-none{padding:18px 6px;font-size:14px;opacity:.7;}',
     '.bento.arranging .wright>.wr-add{display:flex;}.wright>.wr-add{margin:0;}.xzone.merge{border-radius:24px;box-shadow:0 0 0 3px #fff,0 0 28px rgba(255,255,255,.5);background:rgba(255,255,255,.12);}',
     // while the arrangement is edited: a veil over the right-column cards with the arrow that takes the card to the other column
     '.bento .wm.fv-sw{display:none;z-index:30;border-radius:inherit;background:rgba(20,18,16,.8);}.bento.arranging .wm.fv-sw{display:flex;}',
@@ -398,8 +400,17 @@
         if (wm.dataset.dest === dest) return;
         wm.dataset.dest = dest; wm.innerHTML = '';
         var grip = RM.gripButton(ctx); bindCarry(grip, spec, { free: true, any: true });
-        wm.appendChild(grip); wm.appendChild(h('b', null, spec.label));
-        if (id !== 'feeder') wm.appendChild(h('button.mv.fv-edit', { type: 'button', 'aria-label': t('b.edit_cards'), title: t('b.edit_cards'), html: UI.icon('pencil', 18), onclick: function (e) { e.stopPropagation(); if (ctx.haptic) ctx.haptic(8); editStack(L.stackIndex('w:' + id)); } }));      // which pages this card shows
+        wm.appendChild(grip);
+        if (id === 'feeder') wm.appendChild(h('b', null, spec.label));
+        else {      // the pages of this card, each with an x that takes it off the card
+          var chips = h('div.wm-pages'), si = L.stackIndex('w:' + id);
+          (stacks[si] || []).forEach(function (pid) {
+            var info = pageInfo(pid);
+            chips.appendChild(h('span.wm-chip', null, h('span.wm-ci', { html: UI.icon(info.icon, 14) }), h('span', null, info.label),
+              h('button.wm-x', { type: 'button', 'aria-label': t('b.remove') + ' ' + info.label, title: t('b.remove'), html: UI.icon('close', 12), onclick: function (e) { e.stopPropagation(); if (ctx.haptic) ctx.haptic(8); saveStacks(L.removePage(stacks, pid)); } })));
+          });
+          wm.appendChild(chips);
+        }
         if (id === 'feeder' && FDm && FDm.openPicker) wm.appendChild(h('button.mv.fv-edit', { type: 'button', 'aria-label': core.t('fd.edit', ctx.lang()), title: core.t('fd.edit', ctx.lang()), html: UI.icon('pencil', 18), onclick: function (e) { e.stopPropagation(); if (ctx.haptic) ctx.haptic(8); FDm.openPicker(ctx, feederCard); } }));      // the look of the feeder card
         wm.appendChild(RM.sideButton(ctx, { dir: dest, onMove: function () { place('w:' + id, dest, null); } }));
       });
@@ -759,7 +770,7 @@
         pager.innerHTML = ''; pager.classList.toggle('single', pages.length < 2);
         pages.forEach(function (p, i) { pager.appendChild(h('button.hsp-dot' + (i === idx ? '.on' : ''), { 'aria-label': t('b.page', { n: i + 1 }) + ', ' + labelOf(p), 'aria-current': i === idx ? 'true' : null, onclick: function () { go(i); } })); });
         if (pages.length > 1) pager.appendChild(h('button.hsp-pp', { 'aria-label': userPaused ? t('b.play') : t('b.pause'), onclick: function () { userPaused = !userPaused; setPaused(paused); drawPager(); }, html: UI.icon(userPaused ? 'play' : 'pause', 12) }));
-        pager.appendChild(h('button.hsp-ed', { 'aria-label': t('b.edit'), title: t('b.edit'), onclick: function (e) { e.stopPropagation(); editStack(k); }, html: UI.icon('pencil', 13) }));
+        pager.appendChild(h('button.hsp-ed', { 'aria-label': t('b.edit'), title: t('b.edit'), onclick: function (e) { e.stopPropagation(); setEditing(true); }, html: UI.icon('pencil', 13) }));
         pager.dataset.paused = (paused || userPaused) ? 'true' : 'false';
       }
       function drawFoot() {
@@ -786,7 +797,7 @@
       pages = buildPages(ids);
       if (!pages.length) {
         bgs.appendChild(h('div.w2-bg.on', { style: { background: 'linear-gradient(160deg,rgb(74,144,226),rgb(42,108,178))' } })); track.appendChild(h('div.w2-page', null, h('div.empty-pg', null, t('b.no_widgets'))));
-        pager.appendChild(h('button.hsp-ed', { 'aria-label': t('b.edit'), title: t('b.edit'), onclick: function (e) { e.stopPropagation(); editStack(k); }, html: UI.icon('pencil', 13) }));
+        pager.appendChild(h('button.hsp-ed', { 'aria-label': t('b.edit'), title: t('b.edit'), onclick: function (e) { e.stopPropagation(); setEditing(true); }, html: UI.icon('pencil', 13) }));
       } else {
         pages.forEach(function (p) {
           var b = BRAND[p.id] || (p.id.indexOf('d:') === 0 ? BRAND.cameras : BRAND.weather);
@@ -1103,20 +1114,25 @@
       sliders = stacks.map(function (ids, i) { return makeSlider(ids, i); });
       if (built) drawRight();      // the first time the cards are placed when the list is drawn
     }
-    // Add or remove widgets: every page there is, on or off. A page switched on gets a card of its own (drop it on another card to merge them); off takes it from its card.
+    // Add widgets: the pages that are on no card, as a list. A tap adds one as a card of its own (merge it into another one later by dropping it there; take a page off a card with the x on it).
     function openWidgets() {
-      function itemsFor() { var on = L.cleanStacks(stacks, catalog().map(function (x) { return x.id; })).reduce(function (a, st) { return a.concat(st); }, []); return catalog().map(function (x) { return Object.assign({ on: on.indexOf(x.id) >= 0 }, x); }).sort(function (a, b) { return (b.on ? 1 : 0) - (a.on ? 1 : 0); }); }
-      openEditor({ title: t('b.add_widgets'), items: itemsFor(), minOn: 0,
-        onChange: function (idsOn) { var next = stacks.map(function (st) { return st.slice(); }); catalog().forEach(function (x) { var on = idsOn.indexOf(x.id) >= 0, now = next.some(function (st) { return st.indexOf(x.id) >= 0; }); if (on && !now) next = L.addPage(next, x.id); else if (!on && now) next = L.removePage(next, x.id); }); saveStacks(next); },
-        onReset: function () { ctx.settings.set({ bento: { stacks: null, rightOrder: null, leftWidgets: [] } }); loadStacks(); rebuildSliders(); return itemsFor(); } });
-    }
-    // The pages of one card: switch them on or off, and the order they come in. Pages that are on no card can be added here too.
-    function editStack(k) {
-      var mine = (stacks[k] || []).slice(), others = []; stacks.forEach(function (st, i) { if (i !== k) others = others.concat(st); });
-      function itemsFor(on) { var rest = catalog().filter(function (x) { return on.indexOf(x.id) < 0 && others.indexOf(x.id) < 0; }); return on.map(pageInfo).map(function (x) { return Object.assign({ on: true }, x); }).concat(rest.map(function (x) { return Object.assign({ on: false }, x); })); }
-      openEditor({ title: t('b.edit_cards'), items: itemsFor(mine), minOn: 1,
-        onChange: function (idsOn) { var next = stacks.map(function (st) { return st.slice(); }); next[k] = idsOn.slice(); saveStacks(next.filter(function (st) { return st.length; })); },
-        onReset: function () { ctx.settings.set({ bento: { stacks: null, rightOrder: null, leftWidgets: [] } }); loadStacks(); rebuildSliders(); return itemsFor((stacks[0] || []).slice()); } });
+      var RM = g.OkieMotor.rooms;
+      ctx.sheet({ title: t('b.add_widgets'), width: 'min(440px,100%)', content: function (close) {
+        var box = h('div'), list = h('div.wa-list');
+        function draw() {
+          list.innerHTML = '';
+          var onCards = stacks.reduce(function (a, st) { return a.concat(st); }, []), free = catalog().filter(function (x) { return onCards.indexOf(x.id) < 0; });
+          if (!free.length) list.appendChild(h('div.wa-none', null, t('b.widgets_all')));
+          free.forEach(function (x) {
+            list.appendChild(h('button.wa-row', { type: 'button', onclick: function () { if (ctx.haptic) ctx.haptic(8); saveStacks(L.addPage(stacks, x.id)); draw(); } },
+              h('span.wa-ic', { html: UI.icon(x.icon, 20) }), h('span.wa-t', null, h('b', null, x.label), x.note ? h('span', null, x.note) : null), h('span.wa-add', { html: UI.icon('plus', 18) })));
+          });
+        }
+        draw();
+        box.appendChild(h('p.wa-hint', null, t('b.add_widget_hint'))); box.appendChild(list);
+        box.appendChild(h('div.pe-foot', null, h('button', { type: 'button', onclick: function () { ctx.settings.set({ bento: { stacks: null, rightOrder: null, leftWidgets: [] } }); loadStacks(); rebuildSliders(); draw(); } }, t('b.reset')), h('button.done', { type: 'button', onclick: function () { close(); } }, t('b.done'))));
+        return box;
+      } });
     }
     // ---------------------------------------------------------- build ----
     var c0 = cfg();

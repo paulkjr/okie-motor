@@ -2,6 +2,13 @@
 
 The same entries are shown inside the card (dock > What's new). Newest first.
 
+## 0.55.1 (2026-10-27)
+
+**Widgets are added from a list, and removed with an x.**
+- Add widgets (under the right column in arrange mode) is now a list of the widgets that are on no card: tap one and it becomes a card of its own. Merge it into another card later by dropping it there, or leave it alone
+- Every card shows its pages as chips with an x: the x takes the page off the card (and puts it back in the Add widgets list). The toggles are gone
+- The pencil in the corner of a card starts the arrangement
+
 ## 0.55.0 (2026-10-27)
 
 **Add widgets on the right, drop cards on each other to merge, a pencil on every device screen.**
