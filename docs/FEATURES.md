@@ -11,7 +11,7 @@
 | **Quick control** | The icon is the switch: tap safe devices, press and hold risky ones (unlocking, opening). Amber hold ring, haptic, per-device-type Off / Tap / Hold. |
 | **Detail view** | Controls, Context, History, Schedule, Settings. Spring-animated **circular dials** (touch, mouse, keyboard) for lights, climate, fans, humidifiers; controls for covers, locks, media players, vacuums, cameras, alarms, scenes / scripts / automations, sensors, weather. **Video backgrounds** with a fall-back chain (`light_on.mp4`, `binary_sensor_motion.mp4`, `default_1..10.mp4`, then an icon). |
 | **Thermostat** | The dial with a colour scale you set, modes, presets, fan, a weekly **schedule** with profiles (Comfort, Sleep, Eco, Away) when the Scheduler component is installed. |
-| **Music** | Players in three sizes: a row, a tall card, and a large cover card (cover, title, artist, a progress line you can tap, previous / play / next). Spotify gets its logo. |
+| **Music** | A Spotify library browser (open it from the grid button), play on this tablet, synced lyrics. Players in three sizes: a row, a tall card, and a large cover card (cover, title, artist, a progress line you can tap, previous / play / next). Spotify gets its logo. |
 | **Light modes** | A card of one-tap modes (a script, a scene, some lights or a whole room), side by side, stacked or icons only, with an editor and schedules. |
 | **History** | 24 h / 7 d / 30 d: line chart with readout, min / avg / max, state timeline, time in each state, time-of-day bars, change count. |
 | **Schedule** | With the [Scheduler component](https://github.com/nielsfaber/scheduler-component): list, pause, delete (6 s undo), new schedule with iOS-style wheel pickers and day chips. |

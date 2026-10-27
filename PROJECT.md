@@ -14,7 +14,7 @@ It has three parts that share one design:
 | **Okie Home**, the iOS app | SwiftUI, a WKWebView that loads the card, a JavaScript bridge, native WidgetKit widgets, about 6,500 lines of Swift | [`ios-app/`](ios-app) |
 | **Widgets for people without Xcode** | [Scriptable](https://scriptable.app) JavaScript scripts | [`widget/`](widget) |
 
-Around them: a browser **harness** with a mock Home Assistant, **440 unit tests** plus an end-to-end smoke script, a one-file **installer** for the [Hemma](https://github.com/willsanderson/Hemma) dashboard framework, an **offline demo**, and a mock Home Assistant server for the app.
+Around them: a browser **harness** with a mock Home Assistant, **464 unit tests** plus an end-to-end smoke script, a one-file **installer** for the [Hemma](https://github.com/willsanderson/Hemma) dashboard framework, an **offline demo**, and a mock Home Assistant server for the app.
 
 ## 2. What the user sees
 
@@ -93,7 +93,7 @@ Real `backdrop-filter` glass with settings for blur, tint, edges and card style;
 README.md  PROJECT.md  CHANGELOG.md  CONTRIBUTING.md  LICENSE  NOTICE.md  hacs.json  info.md  package.json
 dist/        okie-motor.js (HACS), okie-install.py (Hemma), okie-demo.html (offline demo), okie-version.json
 src/         the card, 49 modules                      -> table below
-tests/       39 files, 440 tests (node:test), no dependencies
+tests/       43 files, 464 tests (node:test), no dependencies
 harness/     browser harness: index.html (src), bundle.html (dist), mock-hass.js, smoke.js (end-to-end), zoom tests
 tools/       build.py, make-demo.py, serve.js, installer_template.py, gen-squircle.py, widget and font builders
 widget/      Scriptable widgets (thermostat, weather, feeder, shortcuts) and their pages
@@ -215,7 +215,7 @@ hemma/       edits.json: what the Hemma installer changes
 ## 7. Build, test, develop
 
 ```bash
-npm test                         # 440 tests; 4 installer tests need a Hemma clone and are skipped without one
+npm test                         # 464 tests; 4 installer tests need a Hemma clone and are skipped without one
 npm run build                    # = python3 tools/build.py   (--no-hemma if there is no Hemma clone next to this folder)
 npm run demo                     # dist/okie-demo.html: the whole card with a pretend Home Assistant, one file
 npm run serve                    # http://127.0.0.1:4651/harness/index.html

@@ -37,7 +37,7 @@ More screenshots (iPad, iPhone, rooms, energy, light modes) are in [docs/screens
 | [`widget/`](widget) | Home screen widgets as [Scriptable](https://scriptable.app) scripts (thermostat, weather, feeder, shortcuts) for people who do not want to build the app. |
 | [`demo/`](demo) | **Demo settings** you can import into the card, and example dashboards. |
 | [`docs/`](docs) | Guides, the feature list, architecture notes. |
-| [`tests/`](tests), [`harness/`](harness) | 440 unit tests and a browser harness with a mock Home Assistant. |
+| [`tests/`](tests), [`harness/`](harness) | 464 unit tests and a browser harness with a mock Home Assistant. |
 
 The whole project in one page: [PROJECT.md](PROJECT.md).
 
@@ -68,11 +68,12 @@ Having trouble? [docs/guides/09-TROUBLESHOOTING.md](docs/guides/09-TROUBLESHOOTI
 ## What it does
 
 * **Lock page and start screen**: clock, weather and power, a greeting or a quote, a status island that opens into notifications, and a start screen with your favorites and suggestions, one swipeable *Widgets* card (weather, to-dos, news, calendar, tips, cameras, Kindle, AWTRIX, home map), a cameras card and a pet-feeder card. It lays itself out for desktop, tablet and phone.
-* **Arrange by touch**: hold a card, drag it to the other column, pick its size (Row, Tall, and a big-cover *Large* size for music players), set the height of each column; tap away to finish. Rooms arrange the same way.
+* **Arrange by touch**: hold a card, drag it to the other column, add widgets to the right column as cards of their own and drop one card on another to merge them, pick its size (Row, Tall, and a big-cover *Large* size for music players), set the height of each column; tap away to finish. Rooms arrange the same way.
 * **Search that understands you**: fuzzy search, intent parsing ("kitchen light"), chip input with completion, usage learning, filters, and an **assistant** mode that talks to your Home Assistant Assist agent. The microphone sends your question by itself when you stop talking.
 * **Detail views** for lights, climate (a circular thermostat dial and a weekly schedule), fans, covers, locks, media players, vacuums, cameras, sensors, weather and more, with history charts and optional video backgrounds.
 * **Apps**: Calendar (day / week / month / year, create and edit events), To-do, Energy (reads HA's Energy dashboard), Schedules, News, Light modes, Server links, Assistant, Tips, What's new and a full Settings app.
-* **Music cards** for Spotify and other players, in three sizes.
+* **Music**: cards for Spotify and other players in three sizes, a Music screen with synced lyrics, and a **Spotify library** (playlists, albums, artists, Liked songs; play on this tablet through Home Assistant's Spotify integration).
+* **Sensors**: a Sensors menu (doors, windows, motion, water, smoke and readings, what needs a look first), a screen for each door or window sensor with its recent events, a blinds screen, and a sensors card in the slider.
 * **Wall tablet mode**: screensaver, deep rest, wake on motion or a doorbell, quiet hours.
 * **Same settings everywhere**: favorites, rooms, look and layout are stored in Home Assistant for your user, so the browser, the phone, the iPad and the wall tablet show the same thing.
 * **Okie Home (iOS)**: full-screen app, sign in once, haptics, voice, widgets (thermostat, weather, calendar, lights, feeder), stays on the screen you were on when you come back to it.
@@ -104,7 +105,7 @@ The iPhone and iPad app gives your sign-in only to the page of your own Home Ass
 ## Develop
 
 ```bash
-npm test             # 440 unit tests (node >= 18, no dependencies; 4 installer tests need a Hemma clone next to the folder and are skipped without one)
+npm test             # 464 unit tests (node >= 18, no dependencies; 4 installer tests need a Hemma clone next to the folder and are skipped without one)
 npm run serve        # browser harness: http://127.0.0.1:4651/harness/index.html  (add ?zen=0 to skip the lock page)
 npm run build        # dist/okie-motor.js, dist/okie-version.json, dist/okie-install.py   (python3 tools/build.py --no-hemma when you have no Hemma clone)
 npm run demo         # dist/okie-demo.html
