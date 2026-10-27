@@ -133,10 +133,11 @@
     function recompute() {
       var c = cfg();
       var items = ctx.engine.all();
-      derived = c.alerts ? deriveAlerts(items, ctx.hass().states, { lang: lang(), batteryThreshold: c.batteryThreshold, numericBattery: !!c.battery, isExcluded: ctx.engine.isExcluded }).filter(function (n) { return c.battery || n.source !== 'battery'; }) : [];
+      derived = c.alerts ? deriveAlerts(items, ctx.hass().states, { lang: lang(), batteryThreshold: c.batteryThreshold, numericBattery: !!c.battery, isExcluded: function (it) { return ctx.engine.isExcluded(it) || (ctx.store.get('sensors.mute', null) || []).indexOf(it.id) >= 0; } }).filter(function (n) { return c.battery || n.source !== 'battery'; }) : [];
       var s = all().map(function (n) { return n.id; }).join('|');
       if (s !== sig) { sig = s; ctx.bus.emit('notes', all()); }
     }
+    if (ctx.bus && ctx.bus.on) ctx.bus.on('sensors-mute', recompute);      // the Notifications switch of a sensor screen
     // Home Assistant persistent notifications over the websocket
     try {
       var conn = ctx.hass().connection;

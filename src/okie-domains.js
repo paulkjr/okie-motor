@@ -213,6 +213,8 @@
     var t = T(ctx), a0 = attrs(ctx, item.id), f = a0.supported_features || 0;
     var canPos = L.has(f, 4), canStop = L.has(f, 8), canTilt = L.has(f, 128);
     var send = CT.throttle(function (v) { svc(ctx, item, 'cover', 'set_cover_position', { position: Math.round(v) }).catch(noop); }, 250);
+    var SN = g.OkieMotor.sensors;
+    if (!o.compact && SN && SN.blindSvg) return blindsControl(ctx, item, o, canPos, canStop);      // the blinds screen: the name, a window with its shade, what it is doing, three round keys
     var root = h('div.dctl' + (o.compact ? '.compact' : ''));
     var slider = null;
     if (canPos) {
@@ -237,6 +239,27 @@
       if (tilt && st.attributes.current_tilt_position != null) tilt.set(st.attributes.current_tilt_position);
     } };
   };
+
+  /** The screen of a cover with a position (blinds, shades): name and room, a window whose shade follows the position, what it is doing, open / stop / close. */
+  function blindsControl(ctx, item, o, canPos, canStop) {
+    var t = T(ctx), SN = g.OkieMotor.sensors, art = h('div.bl-art'), status = h('div.bl-status');
+    var run = function (s) { return function () { ctx.haptic && ctx.haptic(10); svc(ctx, item, 'cover', s).catch(noop); }; };
+    var kOpen = h('button.bl-k', { type: 'button', 'aria-label': t('d.open'), title: t('d.open'), onclick: run('open_cover'), html: UI.icon('prev', 26) });
+    var kStop = h('button.bl-k', { type: 'button', 'aria-label': t('d.stop'), title: t('d.stop'), onclick: run('stop_cover'), html: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2.5" fill="currentColor"/></svg>' });
+    var kClose = h('button.bl-k', { type: 'button', 'aria-label': t('d.close'), title: t('d.close'), onclick: run('close_cover'), html: UI.icon('next', 26) });
+    if (!canStop) kStop.hidden = true;
+    var send = CT.throttle(function (v) { svc(ctx, item, 'cover', 'set_cover_position', { position: Math.round(v) }).catch(noop); }, 250);
+    var slider = canPos ? CT.createSlider({ min: 0, max: 100, step: 1, value: 0, ariaLabel: t('d.position'), format: pctFmt, color: '#ffffff', onInput: send, onChange: function (v) { send.cancel(); svc(ctx, item, 'cover', 'set_cover_position', { position: Math.round(v) }).catch(noop); } }) : null;
+    var root = h('div.dctl.bl-ctl', null, h('div.bl-name', null, item.name), h('div.bl-room', null, item.area || ''), art, status, h('div.bl-keys', null, kOpen, kStop, kClose), slider ? h('div.bl-pos', null, slider.el) : null);
+    return { el: root, dispose: function () { send.cancel(); }, update: function (st) {
+      var p = st.attributes.current_position, dir = st.state === 'opening' ? 'opening' : st.state === 'closing' ? 'closing' : '', n = item.name;
+      var open = p != null ? p : (st.state === 'open' || st.state === 'opening' ? 100 : 0);
+      art.innerHTML = SN.blindSvg(open, dir);
+      status.textContent = dir === 'opening' ? t('sn.blind_opening', { n: n }) : dir === 'closing' ? t('sn.blind_closing', { n: n }) : (p != null && p > 0 && p < 100 ? t('sn.blind_at', { n: n, p: Math.round(p) }) : t(open > 0 ? 'sn.blind_open' : 'sn.blind_closed', { n: n }));
+      kOpen.classList.toggle('on', dir === 'opening'); kClose.classList.toggle('on', dir === 'closing');
+      if (slider && p != null) slider.set(p);
+    } };
+  }
 
   // ------------------------------------------------------------------ fan ----
   D.fan = function (ctx, item, o) {
@@ -518,7 +541,8 @@
       loadSpark();
     } };
   };
-  D.binary_sensor = function (ctx, item) {
+  D.binary_sensor = function (ctx, item, o) {
+    if (!(o && o.compact) && g.OkieMotor.sensors && g.OkieMotor.sensors.control) return g.OkieMotor.sensors.control(ctx, item, o || {});      // the sensor screen (okie-sensors)
     var big = h('div.bigval'), lbl = h('div.lbl');
     return { el: h('div.dctl', null, big, lbl), dispose: noop, update: function (st) {
       var dc = st.attributes.device_class, on = st.state === 'on';

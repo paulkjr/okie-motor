@@ -47,7 +47,7 @@
     zen: { enabled: true, text: 'auto', name: '', quoteEntity: 'sensor.quote_of_the_day', keepOpen: true },
     search: { filterBy: 'categories', columns: 5, recent: 'standard', typewriter: true, context: true, chips: true, filterButton: true, count: true, timeSort: true, ai: true },
     island: { show: true, fold: true, toCapsuleSec: 30, toButtonSec: 60, liveShow: true, live: { timers: true, vacuums: true, covers: true, media: true, scripts: true, climate: false, lights: false, switches: false } },
-    bento: { enabled: true, deckPages: null, swap: false, w1: true, w2: true, w3: 'todos', w4: 'news', w1mode: 'favorites', w1layout: 'list', pages: ['weather', 'todos', 'news', 'calendar', 'tips'], slideSec: 8, news_entity: '', w1height: 0, camerasCard: true, feederCard: true, feederDesign: 'compact', feeder: 'auto', leftWidgets: [], rightCards: [], rightOrder: null, wrheight: 0, oneWidget: true, pagesVer: 0 },
+    bento: { enabled: true, deckPages: null, swap: false, w1: true, w2: true, w3: 'todos', w4: 'news', w1mode: 'favorites', w1layout: 'list', pages: ['weather', 'todos', 'news', 'calendar', 'tips'], slideSec: 8, news_entity: '', w1height: 0, camerasCard: true, sensorsCard: true, feederCard: true, feederDesign: 'compact', feeder: 'auto', leftWidgets: [], rightCards: [], rightOrder: null, wrheight: 0, oneWidget: true, pagesVer: 0 },
     suggest: { enabled: true, max: 10 },
     mobile: { autoOpen: false }, haptic: true, sound: false,
     height: 'auto', top_offset: 0,
@@ -755,6 +755,7 @@
       DK.DEFAULT_ORDER.forEach(function (id) {
         if (id === 'home') return;
         if (id === 'weather') { if (self._weatherEntity()) avail.push(id); }
+        else if (id === 'sensors') { var SNd = g.OkieMotor.sensors; if (SNd && SNd.any && SNd.any(self._ctx)) avail.push(id); }      // the Sensors menu shows up when the home has sensors
         else if (A.get(id === 'settings' ? 'settings' : id)) avail.push(id);
       });
       var saved = this._settings.get().sidebar.items;

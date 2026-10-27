@@ -2,6 +2,14 @@
 
 The same entries are shown inside the card (dock > What's new). Newest first.
 
+## 0.54.0 (2026-10-27)
+
+**A Sensors menu, a blinds screen and a sensors card.**
+- A new Sensors item in the menu lists the doors, windows, motion, water and smoke sensors of your home and the readings (temperature, humidity and so on): the ones that need a look first, then room by room. A tap opens the sensor
+- The screen of a door or window sensor shows what it says, since when, a switch for its notifications and the recent events of your doors and windows, next to a photo
+- The blinds screen shows a window with its shade, what it is doing (Opening, Closing, Open) and three round keys: open, stop, close
+- The sensors card is a new page of the top-right slider, like the cameras card: a photo, the door or window it shows, a bell with the number of open ones and View Sensors. Settings > Widgets can switch it off
+
 ## 0.53.0 (2026-10-27)
 
 **Browse your Spotify and play it on the tablet.**

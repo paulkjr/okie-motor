@@ -62,6 +62,8 @@
 <script src="../src/okie-apps.js"></script>
 <script src="../src/okie-server.js"></script>
 <script src="../src/okie-music.js"></script>
+<script src="../src/okie-sensors-art.js"></script>
+<script src="../src/okie-sensors.js"></script>
 <script src="../src/okie-energy.js"></script>
 <script src="../src/okie-cameras-art.js"></script>
 <script src="../src/okie-cameras.js"></script>
@@ -75,6 +77,7 @@
 <script src="../src/okie-splash.js"></script>
 <script src="../src/okie-card.js"></script>
 <script src="mock-robomap.js"></script>
+<script>if (/[?&]realplan=1/.test(location.search)) document.write('<script src="floorplan-card.real.js"><\/script>');</script>
 <script src="mock-hass.js"></script>
 <script>
   var q = new URLSearchParams(location.search); window.__lang = q.get('lang') || 'en'; if (q.get('bfshim') === '1') window.__okieBfShim = true;      // ?bfshim=1: take the Safari path (plain backdrop values) in any browser

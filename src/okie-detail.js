@@ -390,6 +390,9 @@
     var heart = h('button.dt-circ', { 'aria-label': t('dt.fav_add'), 'aria-pressed': 'false', onclick: function () { var on = ctx.favorites.toggle(id); heart.classList.toggle('on', on); heart.setAttribute('aria-pressed', on ? 'true' : 'false'); } }, h('span', { html: UI.icon('heart', 20) }));
     heart.classList.toggle('on', ctx.favorites.has(id));
     var title = h('div.dt-title', null, item.name), sub = h('div.dt-sub');
+    var SN = g.OkieMotor.sensors, pk = SN && SN.photo ? (item.domain === 'binary_sensor' ? SN.photoKey(SN.kindOf((st.attributes || {}).device_class || item.deviceClass, item.name)) : (item.domain === 'cover' ? SN.coverPhotoKey((st.attributes || {}).device_class || item.deviceClass) : null)) : null;
+    var photoUrl = pk ? SN.photo(pk) : '';      // sensors and blinds have a photo of their own behind the (optional) video
+    if (photoUrl) { hero.appendChild(h('div.dt-photo', { style: { backgroundImage: 'url("' + photoUrl + '")' } })); iconBg.style.display = 'none'; }
     hero.appendChild(iconBg); hero.appendChild(vidA); hero.appendChild(vidB);
     hero.appendChild(h('div.dt-top', null, back, h('div.dt-head', null, title, sub), heart));
     var wx = null;      // the weather screen has two pages: the first fills the hero, the second is the Controls tab (okie-weather)
@@ -497,6 +500,7 @@
   var CSS = [
     '.dt{display:grid;grid-template-columns:minmax(260px,42%) 1fr;height:100%;min-height:0;}',
     '.dt-hero{position:relative;overflow:hidden;display:flex;flex-direction:column;}',
+    '.dt-photo{position:absolute;inset:0;background-size:cover;background-position:center;}',
     '.dt-iconbg{position:absolute;inset:0;display:grid;place-items:center;opacity:.22;}',
     '.dt[data-domain="vacuum"] .dt-iconbg{display:none;}',                                    // the robot of the vacuum screen is the picture
     '.dt-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .6s ease;}',

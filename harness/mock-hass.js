@@ -23,7 +23,11 @@
     ent('light.living_room_lamp', 'Living Room Lamp', 'on', { brightness: 90, supported_color_modes: ['brightness'] }, { area_id: 'living_room' }),
     ent('light.living_room_strip', 'Living Room LED Strip', 'off', {}, { area_id: 'living_room' }),
     ent('climate.living_room', 'Living Room Thermostat', 'heat', { current_temperature: 21.5, temperature: 22, hvac_modes: ['off', 'heat', 'cool', 'auto', 'heat_cool'], preset_modes: ['none', 'eco'], preset_mode: 'none', min_temp: 16, max_temp: 30, target_temp_step: 0.5 }, { area_id: 'living_room' }),
-    ent('cover.living_room_blinds', 'Living Room Blinds', 'open', { current_position: 40 }, { area_id: 'living_room' }),
+    ent('cover.living_room_blinds', 'Living Room Blinds', 'open', { current_position: 40, device_class: 'blind', supported_features: 15 }, { area_id: 'living_room' }),
+    ent('binary_sensor.front_door', 'Front Door', 'off', { device_class: 'door' }, { area_id: 'hallway' }),
+    ent('binary_sensor.living_room_window', 'Living Room Window', 'on', { device_class: 'window' }, { area_id: 'living_room' }),
+    ent('binary_sensor.kitchen_window', 'Kitchen Window', 'off', { device_class: 'window' }, { area_id: 'kitchen' }),
+    ent('binary_sensor.garden_door', 'Garden Door', 'off', { device_class: 'door' }, { area_id: 'garden' }),
     ent('media_player.living_room_tv', 'Living Room TV', 'playing', { media_title: 'Planet Earth', volume_level: 0.4, device_class: 'tv', source_list: ['TV', 'HDMI', 'Netflix', 'Disney Plus', 'Apple TV', 'Max'], supported_features: 152461 }, { area_id: 'living_room' }),
     ent('remote.living_room_tv', 'Living Room TV', 'on', {}, {}),
     ent('vacuum.robo', 'Robo Vacuum', 'docked', { favorites: [{ id: 'f1', name: 'Vacuum and Mop Everywhere' }, { id: 'f2', name: 'Around Litter box' }, { id: 'f3', name: 'Vacuum Everywhere' }], supported_features: 13084, bin_full: false, bin_present: true, detected_pad: 'reusableWet', tank_level: 70, tank_present: true }, { area_id: 'living_room', device_id: 'dev_robo', platform: 'roomba_plus' }),
@@ -347,6 +351,10 @@
           var rowsL = [], nowL = Date.now();
           msg.entity_ids.forEach(function (id, i) {
             if (/^script\./.test(id)) { rowsL.push({ when: (nowL - (2 + i) * 3600000) / 1000, entity_id: id, name: id, message: 'started', context_user_id: 'u1' }); rowsL.push({ when: (nowL - (26 + i) * 3600000) / 1000, entity_id: id, name: id, message: 'started', context_domain: 'automation', context_event_type: 'automation_triggered' }); }
+          });
+          var names = { 'binary_sensor.front_door': 'Front Door', 'binary_sensor.living_room_window': 'Living Room Window', 'binary_sensor.kitchen_window': 'Kitchen Window', 'binary_sensor.garden_door': 'Garden Door' };
+          [[0.1, 'binary_sensor.front_door', 'off'], [1.2, 'binary_sensor.living_room_window', 'on'], [15, 'binary_sensor.front_door', 'on'], [20, 'binary_sensor.living_room_window', 'off'], [30, 'binary_sensor.kitchen_window', 'on']].forEach(function (r) {
+            if (msg.entity_ids.indexOf(r[1]) >= 0) rowsL.push({ when: (nowL - r[0] * 3600000) / 1000, entity_id: r[1], state: r[2], name: names[r[1]] });
           });
           return Promise.resolve(rowsL);
         }

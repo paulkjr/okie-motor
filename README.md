@@ -16,6 +16,10 @@ companion app, in the **Okie Home** iOS app, and on a wall tablet.
 | **Ask anything**: your Assist agent in the search bar. The devices it touched appear as tiles. | **Detail view** with a circular dial, history, schedule and context. |
 | ![Calendar](docs/screenshots/calendar-2191.jpg) | ![Settings](docs/screenshots/settings.jpg) |
 | **Calendar**: day, week, month, year, with an endless date strip you scroll with a finger (this demo runs in the year 2191, just for fun). | **Settings** with search, tabs and a "Changed" badge. Export and import them as a file. |
+| ![Sensor](docs/screenshots/sensor-screen.jpg) | ![Blinds](docs/screenshots/blinds-screen.jpg) |
+| A door or window sensor: state, last update, notifications and recent events. | The blinds screen: the shade follows the position, with open, stop and close. |
+| ![Sensors menu](docs/screenshots/sensors-menu.jpg) | ![Sensors card](docs/screenshots/sensors-card.jpg) |
+| The Sensors menu: what needs a look first, then room by room. | The sensors card, a page of the top-right slider. |
 
 More screenshots (iPad, iPhone, rooms, energy, light modes) are in [docs/screenshots](docs/screenshots).
 

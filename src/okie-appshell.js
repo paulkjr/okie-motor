@@ -36,6 +36,7 @@
     var hero = h('div.dt-hero', { style: { background: 'linear-gradient(160deg,' + grad[0] + ',' + grad[1] + ')' } },
       h('div.dt-iconbg', { html: UI.icon(o.icon || 'grid', 170) }), vid,
       h('div.dt-top', null, back, h('div.dt-head', null, title, sub), acts.children.length ? acts : h('span', { style: { width: '40px' } })));
+    if (o.photo) { hero.insertBefore(h('div.dt-photo', { style: { backgroundImage: 'url("' + o.photo + '")' } }), hero.firstChild); var ib = hero.querySelector('.dt-iconbg'); if (ib) ib.style.display = 'none'; }      // a picture instead of the big icon
     var bar = h('div.dt-bar', { role: 'tablist' });
     var body = h('div.dt-body.okie-scroll');
     var host = h('div.dt-bodyhost', null, body);

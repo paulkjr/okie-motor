@@ -1085,11 +1085,13 @@
     var wr = h('div.wright');                                  // the right side: the sliding card, the cameras card, the feeder card
     var camCard = null, CMod = g.OkieMotor.cameras;
     if (c0.camerasCard !== false && CMod && CMod.buildCard && CMod.cameras(ctx, true).length) camCard = CMod.buildCard(ctx);
+    var SNm = g.OkieMotor.sensors, sensCard = c0.sensorsCard !== false && SNm && SNm.buildCard && SNm.count(ctx) ? SNm.buildCard(ctx) : null;      // the sensors card: a page after the cameras
     // the cameras card and, beside or under it, the Kindle, the AWTRIX and the home map
     var GDm = g.OkieMotor.gadgets, gcards = c0.gadgetCards !== false && GDm && GDm.buildCards ? GDm.buildCards(ctx) : [];
     // the cameras card, the Kindle, the AWTRIX and the home map are the pages of one card: one at a time, the same pager as the weather card (dots, and the pencil)
     var deck = null, dTrack = null, dPager = null, dAll = [], dOn = [], dIdx = 0, deckDefault = [];
     if (camCard) dAll.push({ id: 'cameras', label: t('b.cameras'), icon: 'camera', el: camCard.el });
+    if (sensCard) dAll.push({ id: 'sensors', label: core.t('app.sensors', ctx.lang()), icon: 'door', el: sensCard.el });
     gcards.forEach(function (c) { var id = c.el.dataset.gadget; dAll.push({ id: id, label: c.el.getAttribute('aria-label') || id, icon: id === 'map' ? 'home' : 'gadget', el: c.el }); });
     deckDefault = dAll.map(function (x) { return x.id; });
     var one = c0.oneWidget !== false && !!c0.w2 && dAll.length > 0;      // one swipeable card: the sliding card's pages and the cameras, Kindle, AWTRIX and map as more pages of it (Settings: Widgets)
@@ -1172,12 +1174,12 @@
         pages.forEach(function (p) { if (p.inst && p.inst.update) p.inst.update(); });
         tiles.forEach(function (x) { if (x._upd) x._upd(); });
         drawW1(false);
-        if (camCard) camCard.update(); gcards.forEach(function (c) { c.update(); }); if (feederCard) feederCard.update();
+        if (camCard) camCard.update(); if (sensCard) sensCard.update(); gcards.forEach(function (c) { c.update(); }); if (feederCard) feederCard.update();
         if (pages.length) drawFoot();
       },
       show: function () { drawW1(false); pages.forEach(function (p) { if (p.inst && p.inst.reload) p.inst.reload(); }); fadeSoon(); },      // back on the start screen: the list is redrawn only when something in it changed (settings and states keep it current while it is away)
       stagger: function () { root.classList.add('stagger'); setTimeout(function () { root.classList.remove('stagger'); }, 2000); },
-      dispose: function () { clearInterval(slideTimer); timers.forEach(clearInterval); if (camCard) camCard.dispose(); if (feederCard) feederCard.dispose(); if (ro) ro.disconnect(); disposers.forEach(function (d) { d(); }); },
+      dispose: function () { clearInterval(slideTimer); timers.forEach(clearInterval); if (camCard) camCard.dispose(); if (sensCard) sensCard.dispose(); if (feederCard) feederCard.dispose(); if (ro) ro.disconnect(); disposers.forEach(function (d) { d(); }); },
       _go: go,
     };
   }
