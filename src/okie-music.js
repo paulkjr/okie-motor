@@ -14,7 +14,7 @@
   var isNode = typeof module !== 'undefined' && module.exports;
 
   // media_player supported_features bits
-  var F = { pause: 1, seek: 2, volume: 4, mute: 8, prev: 16, next: 32, source: 2048, play: 16384, shuffle: 32768, repeat: 262144 };
+  var F = { pause: 1, seek: 2, volume: 4, mute: 8, prev: 16, next: 32, playMedia: 512, source: 2048, play: 16384, shuffle: 32768, browse: 131072, repeat: 262144 };
   function has(features, bit) { return !!((features || 0) & bit); }
   var LIVE = { playing: 1, paused: 1, buffering: 1, idle: 1, on: 1 };
 
@@ -51,10 +51,63 @@
       state: st.state, playing: playing, title: a.media_title || '', artist: a.media_artist || '', album: a.media_album_name || '', art: a.entity_picture || a.entity_picture_local || '',
       duration: dur, position: pos, volume: isFinite(parseFloat(a.volume_level)) ? parseFloat(a.volume_level) : null, muted: !!a.is_volume_muted, shuffle: !!a.shuffle, repeat: a.repeat || 'off',
       source: a.source || '', sources: Array.isArray(a.source_list) ? a.source_list.slice() : [], app: a.app_name || '',
+      browse: canBrowse(f), phase: libraryPhase(st),
       can: { seek: has(f, F.seek), volume: has(f, F.volume), prev: has(f, F.prev), next: has(f, F.next), source: has(f, F.source), shuffle: has(f, F.shuffle), repeat: has(f, F.repeat), pause: has(f, F.pause) || has(f, F.play) },
     };
   }
   function repeatNext(mode) { return mode === 'off' ? 'all' : mode === 'all' ? 'one' : 'off'; }
+
+  // ---- the library (what Home Assistant lets you browse on the Spotify player) ----
+  /** Home Assistant offers browsing and playing from the library only while a Spotify device is active and has something loaded: both feature bits are then on. */
+  function canBrowse(features) { return has(features, F.browse) && has(features, F.playMedia); }
+  /** How far the player is from the library: 'ready' · 'open' (no device is running anywhere: Spotify lists only running ones) · 'pick' (devices are known, none is active) · 'load' (a device is active, nothing is loaded yet) · 'offline' · 'none'. */
+  function libraryPhase(st) {
+    if (!st) return 'none';
+    if (st.state === 'unavailable' || st.state === 'unknown') return 'offline';
+    var a = st.attributes || {};
+    if (canBrowse(a.supported_features)) return 'ready';
+    if (!(Array.isArray(a.source_list) && a.source_list.length)) return 'open';
+    return a.source ? 'load' : 'pick';
+  }
+  /** The kind of screen the card runs on and how Spotify names it in its device list: { re, phone } or null (a computer). */
+  function deviceKind(ua, touch) {
+    ua = String(ua || '');
+    if (/iPhone/.test(ua)) return { re: /iphone/i, phone: true };
+    if (/iPad/.test(ua) || (/Macintosh/.test(ua) && touch)) return { re: /ipad/i, phone: false };
+    if (/Android/.test(ua)) return { re: /android|tablet|galaxy|pixel|fire/i, phone: /Mobile/.test(ua) };
+    return null;
+  }
+  /** This screen's own entry in the list of Spotify devices, or null. */
+  function hereSource(sources, kind) {
+    if (!kind) return null;
+    for (var i = 0; i < (sources || []).length; i++) if (kind.re.test(sources[i])) return sources[i];
+    return null;
+  }
+  /** A browse_media answer -> { title, id, type, cls, kidsCls, playable, expandable, art, kids, hidden }. The id and the type are kept exactly as Home Assistant sent them: playing hands them straight back. */
+  function browseNode(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    var one = function (r) {
+      return { title: String(r.title || ''), id: r.media_content_id == null ? '' : String(r.media_content_id), type: String(r.media_content_type || ''), cls: String(r.media_class || ''), kidsCls: String(r.children_media_class || ''),
+        playable: !!r.can_play, expandable: !!r.can_expand, art: typeof r.thumbnail === 'string' && /^(https:|\/|data:image\/)/.test(r.thumbnail) ? r.thumbnail : '' };
+    };
+    var n = one(raw);
+    n.kids = Array.isArray(raw.children) ? raw.children.filter(function (c) { return c && typeof c === 'object' && c.media_content_id != null; }).map(one) : [];
+    n.hidden = raw.not_shown > 0 ? raw.not_shown : 0;
+    return n;
+  }
+  /** A level with one folder and nothing else (an account) is skipped: you land on your library. Returns that folder or null. */
+  function stepInto(node) { return node && node.kids.length === 1 && node.kids[0].expandable && !node.kids[0].playable ? node.kids[0] : null; }
+  /** Pictures for playlists, albums and the like; plain rows for songs and folders. */
+  function layoutOf(node) { return /^(playlist|album|artist|podcast|show|genre|season)$/.test(node && node.kidsCls) ? 'grid' : 'list'; }
+  /** The icon that stands in for a missing picture. */
+  function iconFor(cls) { return ({ playlist: 'list', album: 'music', artist: 'person', podcast: 'mic', show: 'mic', track: 'notefill', music: 'notefill', episode: 'notefill', directory: 'folder', app: 'folder' })[cls] || 'music'; }
+  /** What went wrong when a browse call failed: 'asleep' (the player stopped offering it: Spotify went to sleep), 'login' (Home Assistant lost the Spotify login) or 'other'. */
+  function browseProblem(err) {
+    var m = String(err && (err.message || err.code) || err || '').toLowerCase();
+    if (/does not support browsing|not supported/.test(m)) return 'asleep';
+    if (/auth|token|unauthor|forbidden|401|403|premium|login|log in/.test(m)) return 'login';
+    return 'other';
+  }
   function fmtClock(sec) { sec = Math.max(0, Math.round(sec || 0)); var m = Math.floor(sec / 60), s = sec % 60; return m + ':' + (s < 10 ? '0' : '') + s; }
 
   // ---- synced lyrics (LRC): [mm:ss.xx] words ----
@@ -107,7 +160,7 @@
     return [dark(0.74), dark(0.5)];
   }
 
-  var api = { pickPlayer: pickPlayer, isMusic: isMusic, nowPlaying: nowPlaying, repeatNext: repeatNext, fmtClock: fmtClock, parseLrc: parseLrc, lineAt: lineAt, lrclibUrl: lrclibUrl, pickLyrics: pickLyrics, averageColor: averageColor, tintPair: tintPair, FEATURES: F };
+  var api = { pickPlayer: pickPlayer, isMusic: isMusic, nowPlaying: nowPlaying, repeatNext: repeatNext, canBrowse: canBrowse, libraryPhase: libraryPhase, deviceKind: deviceKind, hereSource: hereSource, browseNode: browseNode, stepInto: stepInto, layoutOf: layoutOf, iconFor: iconFor, browseProblem: browseProblem, fmtClock: fmtClock, parseLrc: parseLrc, lineAt: lineAt, lrclibUrl: lrclibUrl, pickLyrics: pickLyrics, averageColor: averageColor, tintPair: tintPair, FEATURES: F };
   if (isNode) { module.exports = api; return; }
   if (typeof document === 'undefined') return;
   g.OkieMotor = g.OkieMotor || {}; g.OkieMotor.music = api;
@@ -121,7 +174,14 @@
     'mu.full': 'Full screen', 'mu.full_off': 'Close', 'mu.here': 'This tablet', 'mu.here_p': 'This phone', 'mu.here_t': 'Play on this tablet', 'mu.here_b': 'Open the Spotify app on this tablet once. It then shows up in this list; pick it and the sound comes out of the tablet or the Bluetooth speaker connected to it.', 'mu.open_spotify': 'Open Spotify',
     'mu.setup_t': 'Connect Spotify', 'mu.setup_b': 'Home Assistant can show and control your Spotify. You make a free Spotify app once, then log in from Home Assistant yourself; nothing here sees your password.',
     'mu.s1': 'Open developer.spotify.com/dashboard, log in and create an app. Redirect URI: https://my.home-assistant.io/redirect/oauth (tick Web API).', 'mu.s2': 'Copy its Client ID and Client secret.', 'mu.s3': 'Tap Set up in Home Assistant, paste them when asked, and log in to Spotify.',
-    'mu.s_btn': 'Set up in Home Assistant', 'mu.s_dev': 'Open the Spotify developer page', 'mu.s_note': 'Spotify Premium is needed for the controls; the picture, title and lyrics work without.',
+    'mu.s_btn': 'Set up in Home Assistant', 'mu.s_dev': 'Open the Spotify developer page', 'mu.s_note': 'Spotify Premium is needed, both to create the Spotify app and to control the music from here.',
+    'mu.library': 'Library', 'mu.browse': 'Browse your Spotify', 'mu.back': 'Back', 'mu.play_all': 'Play', 'mu.shuffle_play': 'Shuffle', 'mu.playing_on': 'Playing on {d}', 'mu.play_here': 'Play here', 'mu.loading': 'Loading…', 'mu.empty': 'Nothing here.',
+    'mu.err': 'This could not be loaded.', 'mu.err_login': 'Home Assistant is not logged in to Spotify any more.', 'mu.retry': 'Try again', 'mu.refresh': 'Refresh', 'mu.relogin': 'Log in to Spotify again', 'mu.not_shown': '{n} more are not shown.',
+    'mu.g_open_t': 'Open Spotify on this tablet', 'mu.g_open_b': 'Spotify only lists devices that are running. Open the Spotify app here and start any song for a second; this page notices by itself.',
+    'mu.g_pick_t': 'Choose where it plays', 'mu.g_pick_b': 'Spotify knows these devices. Pick this tablet to send the sound to its speaker.',
+    'mu.g_load_t': 'Start one song first', 'mu.g_load_b': 'Spotify is on {d}, but nothing is loaded yet. Play any song in the Spotify app once and your library opens here.',
+    'mu.g_off_t': 'Spotify is not reachable', 'mu.g_off_b': 'Home Assistant cannot reach Spotify right now. If this stays, log in again.',
+    'mu.g_sleep_t': 'Spotify went to sleep', 'mu.g_sleep_b': 'Open the Spotify app again; the library comes back by itself.', 'mu.dev_fail': 'That device did not answer. Open Spotify on it and try again.', 'mu.starting': 'Starting {d}…',
   });
   core.registerStrings('de', {
     'app.music': 'Musik', 'mu.nothing': 'Es läuft nichts', 'mu.nothing_sub': 'Starte ein Lied in Spotify, dann erscheint es hier.', 'mu.devices': 'Wiedergabe auf', 'mu.volume': 'Lautstärke', 'mu.mute': 'Stumm', 'mu.more': 'Mehr', 'mu.shuffle': 'Zufall', 'mu.repeat': 'Wiederholen', 'mu.r_off': 'Aus', 'mu.r_all': 'Alle', 'mu.r_one': 'Eins',
@@ -129,7 +189,14 @@
     'mu.full': 'Vollbild', 'mu.full_off': 'Schließen', 'mu.here': 'Dieses Tablet', 'mu.here_p': 'Dieses Handy', 'mu.here_t': 'Auf diesem Tablet abspielen', 'mu.here_b': 'Öffne einmal die Spotify-App auf diesem Tablet. Dann erscheint es in dieser Liste; wähle es aus, und der Ton kommt aus dem Tablet oder dem damit verbundenen Bluetooth-Lautsprecher.', 'mu.open_spotify': 'Spotify öffnen',
     'mu.setup_t': 'Spotify verbinden', 'mu.setup_b': 'Home Assistant kann dein Spotify anzeigen und steuern. Du legst einmal eine kostenlose Spotify-App an und meldest dich dann selbst in Home Assistant an; hier sieht niemand dein Passwort.',
     'mu.s1': 'developer.spotify.com/dashboard öffnen, anmelden und eine App anlegen. Redirect-URI: https://my.home-assistant.io/redirect/oauth (Web API anhaken).', 'mu.s2': 'Client-ID und Client-Secret kopieren.', 'mu.s3': 'Auf In Home Assistant einrichten tippen, beides einfügen und bei Spotify anmelden.',
-    'mu.s_btn': 'In Home Assistant einrichten', 'mu.s_dev': 'Spotify-Entwicklerseite öffnen', 'mu.s_note': 'Für die Steuerung braucht es Spotify Premium; Bild, Titel und Songtext gehen auch ohne.',
+    'mu.s_btn': 'In Home Assistant einrichten', 'mu.s_dev': 'Spotify-Entwicklerseite öffnen', 'mu.s_note': 'Es braucht Spotify Premium, sowohl um die Spotify-App anzulegen als auch um die Musik von hier aus zu steuern.',
+    'mu.library': 'Bibliothek', 'mu.browse': 'Dein Spotify durchsuchen', 'mu.back': 'Zurück', 'mu.play_all': 'Abspielen', 'mu.shuffle_play': 'Zufall', 'mu.playing_on': 'Wiedergabe auf {d}', 'mu.play_here': 'Hier abspielen', 'mu.loading': 'Lädt…', 'mu.empty': 'Hier ist nichts.',
+    'mu.err': 'Das konnte nicht geladen werden.', 'mu.err_login': 'Home Assistant ist nicht mehr bei Spotify angemeldet.', 'mu.retry': 'Nochmal versuchen', 'mu.refresh': 'Aktualisieren', 'mu.relogin': 'Bei Spotify neu anmelden', 'mu.not_shown': '{n} weitere werden nicht angezeigt.',
+    'mu.g_open_t': 'Spotify auf diesem Tablet öffnen', 'mu.g_open_b': 'Spotify listet nur Geräte, auf denen es läuft. Öffne hier die Spotify-App und starte kurz irgendein Lied; diese Seite merkt das von selbst.',
+    'mu.g_pick_t': 'Wähle, wo es spielt', 'mu.g_pick_b': 'Spotify kennt diese Geräte. Wähle dieses Tablet, damit der Ton aus seinem Lautsprecher kommt.',
+    'mu.g_load_t': 'Starte zuerst ein Lied', 'mu.g_load_b': 'Spotify ist auf {d}, aber es ist noch nichts geladen. Spiele einmal irgendein Lied in der Spotify-App ab, dann öffnet sich hier deine Bibliothek.',
+    'mu.g_off_t': 'Spotify ist nicht erreichbar', 'mu.g_off_b': 'Home Assistant erreicht Spotify gerade nicht. Wenn das so bleibt, melde dich neu an.',
+    'mu.g_sleep_t': 'Spotify ist eingeschlafen', 'mu.g_sleep_b': 'Öffne die Spotify-App noch einmal; die Bibliothek kommt von selbst zurück.', 'mu.dev_fail': 'Das Gerät hat nicht geantwortet. Öffne Spotify darauf und versuche es nochmal.', 'mu.starting': '{d} startet…',
   });
 
   function renderMusic(container, ctx) {
@@ -156,9 +223,11 @@
     var devBtn = h('button.mu-rb', { type: 'button', 'aria-label': t('mu.devices'), onclick: openDevices, html: UI.icon('notefill', 22) });
     var volBtn = h('button.mu-pill-b', { type: 'button', 'aria-label': t('mu.volume'), onclick: openVolume, html: UI.icon('volume', 24) });
     var castBtn = h('button.mu-pill-b', { type: 'button', 'aria-label': t('mu.devices'), onclick: openDevices, html: UI.icon('cast', 24) });
-    var top = h('div.mu-top', null, devBtn, h('div.mu-pill', null, castBtn, volBtn));
+    var libBtn = h('button.mu-pill-b', { type: 'button', 'aria-label': t('mu.library'), title: t('mu.library'), onclick: openLib, html: UI.icon('grid', 24), hidden: true });
+    var top = h('div.mu-top', null, devBtn, h('div.mu-pill', null, libBtn, castBtn, volBtn));
     var art = h('div.mu-art'), artImg = h('img', { alt: '', decoding: 'async', draggable: false }), title = h('div.mu-t'), artist = h('div.mu-a'), moreBtn = h('button.mu-more', { type: 'button', 'aria-label': t('mu.more'), onclick: openMore, html: UI.icon('more', 20) });
     art.appendChild(artImg); art.appendChild(h('div.mu-frost'));
+    art.appendChild(h('button.mu-cta', { type: 'button', onclick: openLib, html: UI.icon('grid', 20) + '<span>' + t('mu.browse') + '</span>' }));      // an empty player offers your Spotify instead of a blank picture
     var ti = h('div.mu-ti', null, h('div.mu-txt', null, title, artist), moreBtn);
     var lyBox = h('div.mu-ly', { hidden: true }), lyHead = h('div.mu-lh'), lyList = h('div.mu-ll');
     lyBox.appendChild(lyHead); lyBox.appendChild(lyList);
@@ -203,13 +272,7 @@
 
     // ---- sheets
     /** The kind of screen this card runs on, and what its Spotify player is called in the list (Spotify names it after the device). */
-    function thisDevice() {
-      var nav = g.navigator || {}, ua = nav.userAgent || '', touch = (nav.maxTouchPoints || 0) > 1;
-      if (/iPhone/.test(ua)) return { re: /iphone/i, phone: true };
-      if (/iPad/.test(ua) || (/Macintosh/.test(ua) && touch)) return { re: /ipad/i, phone: false };
-      if (/Android/.test(ua)) return { re: /android|tablet|galaxy|pixel|fire/i, phone: /Mobile/.test(ua) };
-      return null;
-    }
+    function thisDevice() { var nav = g.navigator || {}; return deviceKind(nav.userAgent, (nav.maxTouchPoints || 0) > 1); }
     function openDevices() {
       ctx.sheet({ title: t('mu.devices'), width: 'min(420px,100%)', content: function (close) {
         var states = ctx.hass().states, others = Object.keys(states).filter(function (id) { return id.indexOf('media_player.') === 0 && isMusic(id, states[id]) && states[id].state !== 'unavailable'; });
@@ -249,6 +312,157 @@
         if (!box.children.length) box.appendChild(h('div.note-l', null, '–'));
         return box;
       } });
+    }
+
+    // ---- the library: your Spotify (what Home Assistant lets you browse), opened from the grid button or from an empty player.
+    // Home Assistant offers browsing and playing only while a Spotify device is active and has something loaded (two feature bits). Until then a short guide leads there (open Spotify
+    // on this tablet, pick the tablet, start one song) and the library opens by itself as soon as the bits appear. Every update is checked, not only the first: Spotify lets an idle
+    // device go after a while, and then the library says so instead of failing.
+    var libEl = null, libStack = [], libCache = {}, libToken = 0, libState = null, libView = '', libAsleep = false, libHold = 0, gateSig = '', liveSig = '', pollT = 0, pollN = 0, libPending = '', pendingFrom = '', pendingT = 0, kindHere = thisDevice();
+    function refreshSpotify() { if (playerId) ctx.call('homeassistant', 'update_entity', { entity_id: playerId }).catch(function () { /* the next poll of Home Assistant brings the state anyway */ }); }
+    function startPoll() {
+      if (pollT) return; pollN = 0; refreshSpotify();
+      pollT = setInterval(function () { if (disposed || !libEl || (np && np.browse) || ++pollN > 20) { stopPoll(); return; } refreshSpotify(); }, 8000);      // asks Home Assistant to look again every 8 seconds, for about 2.5 minutes while the guide is open
+    }
+    function stopPoll() { if (pollT) { clearInterval(pollT); pollT = 0; } }
+    function tap(el, fn) { el.addEventListener('click', fn); el.addEventListener('keydown', function (e) { if (e.target === el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); fn(e); } }); return el; }
+    function mediaUrl(u) { return /^\//.test(u) && ctx.hass().hassUrl ? ctx.hass().hassUrl(u) : u; }
+    function topOf() { return libStack[libStack.length - 1]; }
+    function liveKey() { return [np.title, np.artist, np.state, np.art, libPending, np.source, np.sources.join()].join('|'); }
+
+    function openLib() {
+      if (disposed || libEl || !playerId) return;
+      libEl = h('div.mu-lib', { role: 'dialog', 'aria-label': t('mu.library') }); root.appendChild(libEl);
+      libStack = []; libState = null; libView = ''; libAsleep = false; libHold = 0; gateSig = ''; liveSig = ''; libSync(true);
+    }
+    function closeLib() { stopPoll(); clearTimeout(pendingT); libToken++; libPending = ''; if (libEl && libEl.parentNode) libEl.parentNode.removeChild(libEl); libEl = null; }
+    /** Called on every update: which view the library is in follows the two feature bits. */
+    function libSync(force) {
+      if (!libEl || !np) return;
+      if (np.browse) {
+        stopPoll();
+        if (libView !== 'browse') { if (Date.now() < libHold) return; libView = 'browse'; libAsleep = false; if (libStack.length) drawLib(); else startRoot(); return; }
+        if (libAsleep) { libAsleep = false; drawLib(); return; }
+        if (force) drawLib(); else paintLibLive(false);
+        return;
+      }
+      startPoll();
+      if (libView === 'browse') { if (!libAsleep) { libAsleep = true; drawLib(); } return; }      // it was open and the player stopped offering it: what you were looking at stays, with a note on top
+      libView = 'gate';
+      var sig = [np.phase, np.source, np.sources.join('|')].join('~'); if (force || sig !== gateSig) { gateSig = sig; drawGate(); }
+    }
+    function openSpotifyLink() { return h('a.act.primary', { href: 'spotify://' }, t('mu.open_spotify')); }
+    function refreshBtn() { return h('button.act', { type: 'button', onclick: function () { stopPoll(); startPoll(); } }, t('mu.refresh')); }
+    function reloginLink() { return h('a.mu-relog', { href: '/config/integrations/integration/spotify', target: '_top' }, t('mu.relogin')); }
+    /** Send the music to a device of the list, then wait until Spotify really reports it (an unknown name is ignored by Home Assistant without an error). */
+    function useDevice(name) {
+      ctx.haptic(10); call('select_source', { source: name });
+      var until = Date.now() + 7000;
+      (function wait() {
+        if (disposed) return; var s = ctx.hass().states[playerId];
+        if (s && s.attributes.source === name) { refreshSpotify(); return; }
+        if (Date.now() > until) { ctx.toast('error', t('mu.dev_fail')); return; }
+        setTimeout(wait, 500);
+      })();
+    }
+    function libHead(label, extra) { return h('div.mu-lh2', null, h('button.mu-lb', { type: 'button', 'aria-label': t('mu.back'), onclick: libBack, html: UI.icon('chevleft', 22) }), h('div.mu-lt0', null, label), extra || null); }
+    function drawGate() {
+      if (!libEl) return; libEl.innerHTML = '';
+      var ph = np.phase, here = hereSource(np.sources, kindHere), box = h('div.mu-gate'), btns = h('div.mu-gb'), tt = 'mu.g_open_t', bb = 'mu.g_open_b';
+      if (ph === 'pick') { tt = 'mu.g_pick_t'; bb = 'mu.g_pick_b'; } else if (ph === 'load') { tt = 'mu.g_load_t'; bb = 'mu.g_load_b'; } else if (ph === 'offline') { tt = 'mu.g_off_t'; bb = 'mu.g_off_b'; } else if (ph === 'ready') { tt = 'mu.g_sleep_t'; bb = 'mu.g_sleep_b'; }      // 'ready' here: the features say yes but the browse call said no
+      box.appendChild(h('div.mu-si', { html: UI.icon('music', 44) })); box.appendChild(h('div.t', null, t(tt))); box.appendChild(h('p', null, t(bb, { d: np.source || '' })));
+      if (ph === 'pick') np.sources.slice().sort(function (a, b) { return (a === here ? 0 : 1) - (b === here ? 0 : 1); }).forEach(function (s) {      // this tablet first
+        box.appendChild(h('button.mu-row', { type: 'button', onclick: function () { useDevice(s); } }, h('span', null, s, s === here ? h('em.mu-here-b', null, t(kindHere && kindHere.phone ? 'mu.here_p' : 'mu.here')) : null)));
+      });
+      if (ph === 'load' && here && np.source !== here) btns.appendChild(h('button.act.primary', { type: 'button', onclick: function () { useDevice(here); } }, t('mu.here_t')));
+      if (ph !== 'offline') btns.appendChild(openSpotifyLink());
+      btns.appendChild(refreshBtn()); box.appendChild(btns); box.appendChild(reloginLink());
+      libEl.appendChild(libHead(t('mu.library'))); libEl.appendChild(box);
+    }
+    function sleepBanner() { return h('div.mu-sleep', null, h('div.t', null, t('mu.g_sleep_t')), h('p', null, t('mu.g_sleep_b')), h('div.mu-gb', null, openSpotifyLink(), refreshBtn())); }
+    function devStrip() {
+      var here = hereSource(np.sources, kindHere);
+      return h('div.mu-ls', null, h('button.mu-lsb', { type: 'button', onclick: openDevices }, t('mu.playing_on', { d: np.source || '–' })), here && np.source !== here ? h('button.mu-chip', { type: 'button', onclick: function () { useDevice(here); } }, t('mu.play_here')) : null);
+    }
+    function miniBar() {
+      var url = np.art ? mediaUrl(np.art) : '', play = h('button.mu-k', { type: 'button', 'aria-label': np.playing ? t('mu.pause') : t('mu.play'), disabled: !np.can.pause, html: UI.icon(np.playing ? 'pausefill' : 'playfill', 28), onclick: function (e) { e.stopPropagation(); call(np.playing ? 'media_pause' : 'media_play'); } });
+      return tap(h('div.mu-mini', { role: 'button', tabindex: '0', 'aria-label': t('app.music') }, url ? h('img', { src: url, alt: '', draggable: false }) : h('span.mu-ph', { html: UI.icon('music', 20) }),
+        h('div.mu-mt', null, h('b', null, libPending ? t('mu.starting', { d: libPending }) : (np.title || t('mu.nothing'))), h('span', null, libPending ? '' : np.artist)), play), closeLib);      // a tap anywhere else on it goes back to the player
+    }
+    function paintLibLive(force) {
+      if (!libEl || libView !== 'browse' || !np) return;
+      if (libPending && pendingFrom !== [np.title, np.state, np.artist].join('|')) libPending = '';      // the song changed: it started
+      var key = liveKey(); if (!force && key === liveSig) return; liveSig = key;
+      var ls = libEl.querySelector('.mu-ls'), mn = libEl.querySelector('.mu-mini'); if (ls) ls.replaceWith(devStrip()); if (mn) mn.replaceWith(miniBar());
+    }
+    function drawLib() {
+      if (!libEl || !np) return; libEl.innerHTML = '';
+      var cur = topOf(), n = cur && cur.n, acts = null;
+      if (!libState && n && n.playable && np.browse) acts = h('div.mu-lacts', null,
+        h('button.mu-chip.pri', { type: 'button', onclick: function () { playNode(n, false); }, html: UI.icon('playfill', 16) + '<span>' + t('mu.play_all') + '</span>' }),
+        h('button.mu-chip', { type: 'button', onclick: function () { playNode(n, true); }, html: UI.icon('shuffle', 16) + '<span>' + t('mu.shuffle_play') + '</span>' }));
+      libEl.appendChild(libHead(libState && libState.loading ? libState.loading : (n && n.title) || t('mu.library'), acts));
+      if (libAsleep) libEl.appendChild(sleepBanner());
+      libEl.appendChild(devStrip());
+      var body = h('div.mu-lbody');
+      if (libState && libState.loading) body.appendChild(h('div.mu-lm', null, t('mu.loading')));
+      else if (libState && libState.error) body.appendChild(errBox());
+      else if (n) fillNode(body, n);
+      libEl.appendChild(body); body.scrollTop = (!libState && cur && cur.top) || 0;
+      libEl.appendChild(miniBar()); liveSig = liveKey();
+    }
+    function errBox() {
+      var box = h('div.mu-gate'); box.appendChild(h('p', null, t(libState.error === 'login' ? 'mu.err_login' : 'mu.err')));
+      box.appendChild(h('div.mu-gb', null, h('button.act.primary', { type: 'button', onclick: libState.retry }, t('mu.retry')))); if (libState.error === 'login') box.appendChild(reloginLink());
+      return box;
+    }
+    function fillNode(body, n) {
+      if (!n.kids.length) { body.appendChild(h('div.mu-lm', null, t('mu.empty'))); return; }
+      var grid = layoutOf(n) === 'grid', wrap = h(grid ? 'div.mu-grid' : 'div.mu-list');
+      n.kids.forEach(function (c) { wrap.appendChild(grid ? tileFor(c) : rowFor(c)); });
+      body.appendChild(wrap); if (n.hidden) body.appendChild(h('div.mu-lm.small', null, t('mu.not_shown', { n: n.hidden })));
+    }
+    function artOf(c, size) { return c.art ? h('img', { src: mediaUrl(c.art), alt: '', loading: 'lazy', decoding: 'async', referrerpolicy: 'no-referrer', draggable: false }) : h('span.mu-ph', { html: UI.icon(iconFor(c.cls), size) }); }
+    function playChip(c) { return c.playable && c.expandable ? h('button.mu-tp', { type: 'button', 'aria-label': t('mu.play_all') + ' ' + c.title, html: UI.icon('playfill', 18), onclick: function (e) { e.stopPropagation(); playNode(c); } }) : null; }
+    function openItem(c) { if (c.expandable) openNode(c); else if (c.playable) playNode(c); }
+    function tileFor(c) { return tap(h('div.mu-tile', { role: 'button', tabindex: '0' }, h('div.mu-tc', null, artOf(c, 34), playChip(c)), h('div.mu-tn', null, c.title)), function () { openItem(c); }); }
+    function rowFor(c) { return tap(h('div.mu-row.mu-lr', { role: 'button', tabindex: '0' }, h('span.mu-rc', null, artOf(c, 20)), h('span.mu-rt', null, c.title), playChip(c) || (c.expandable ? h('span.mu-chev', { html: UI.icon('chevron', 16) }) : null)), function () { openItem(c); }); }
+
+    /** One level of the library: the answer is kept for as long as this screen is open. The id and the type go to Home Assistant exactly as it gave them. */
+    function browseAt(id, type) {
+      var key = type + '|' + id; if (libCache[key]) return Promise.resolve(libCache[key]);
+      var msg = { type: 'media_player/browse_media', entity_id: playerId }; if (id) { msg.media_content_id = id; msg.media_content_type = type; }
+      return ctx.callWS(msg).then(function (raw) { var n = browseNode(raw); if (!n) throw new Error('empty'); libCache[key] = n; return n; });
+    }
+    function descend(n) { var s = stepInto(n); return s ? browseAt(s.id, s.type).then(descend) : n; }
+    function startRoot() {
+      var my = ++libToken; libState = { loading: t('mu.library') }; libStack = []; drawLib();
+      browseAt('', '').then(descend).then(function (n) { if (my !== libToken || !libEl) return; libState = null; libStack = [{ n: n, top: 0 }]; drawLib(); }, function (e) { if (my === libToken && libEl) libFail(e, startRoot); });
+    }
+    function openNode(c) {
+      var my = ++libToken, sc = libEl && libEl.querySelector('.mu-lbody'); if (topOf() && sc) topOf().top = sc.scrollTop;
+      libState = { loading: c.title }; drawLib();
+      browseAt(c.id, c.type).then(function (n) { if (my !== libToken || !libEl) return; libState = null; libStack.push({ n: n, top: 0 }); drawLib(); }, function (e) { if (my === libToken && libEl) libFail(e, function () { openNode(c); }); });
+    }
+    function libFail(e, retry) {
+      var k = browseProblem(e);
+      if (k === 'asleep') { libState = null; libHold = Date.now() + 5000; refreshSpotify(); startPoll(); if (libStack.length) { libAsleep = true; drawLib(); } else { libView = 'gate'; gateSig = ''; drawGate(); } return; }
+      libState = { error: k, retry: function () { libState = null; retry(); } }; drawLib();
+    }
+    function libBack() {
+      if (libState) { libToken++; libState = null; if (!libStack.length) { closeLib(); return; } drawLib(); return; }
+      if (libStack.length > 1) { libStack.pop(); drawLib(); return; }
+      closeLib();
+    }
+    /** Play a song, a playlist, an album, your Liked songs: Home Assistant is handed the item exactly as it listed it. A song plays on its own; a list plays from its start (shuffled when asked). */
+    function playNode(c, shuffle) {
+      if (!np || !np.browse) { libSync(true); return; }
+      ctx.haptic(10);
+      var pre = shuffle != null && shuffle !== !!np.shuffle ? ctx.call('media_player', 'shuffle_set', { entity_id: playerId, shuffle: shuffle }) : Promise.resolve();
+      pre.then(function () {
+        libPending = c.title; pendingFrom = [np.title, np.state, np.artist].join('|'); clearTimeout(pendingT); pendingT = setTimeout(function () { libPending = ''; paintLibLive(true); }, 6000); paintLibLive(true);
+        return ctx.call('media_player', 'play_media', { entity_id: playerId, media_content_id: c.id, media_content_type: c.type });
+      }).catch(function () { libPending = ''; paintLibLive(true); ctx.toast('error', t('mu.err')); });
     }
 
     // ---- lyrics
@@ -357,10 +571,11 @@
       if (!st) { var any = Object.keys(states).filter(function (id) { return /^media_player\.spotify/.test(id); })[0]; if (any) st = states[any]; }      // Spotify is set up but not reachable right now: show the quiet player, not the set-up help
       np = st ? nowPlaying(st, Date.now()) : null;
       var empty = !np || (!np.title && np.state !== 'playing' && np.state !== 'paused');
-      player.hidden = !np; setup.hidden = !!np; paintHeart(); if (!np) return;
+      player.hidden = !np; setup.hidden = !!np; paintHeart(); if (!np) { closeLib(); return; }
       root.dataset.empty = empty ? '1' : '';
+      libBtn.hidden = !(playerId && /spotify/i.test(playerId)); if (libBtn.hidden && libEl) closeLib(); else libSync(false);      // checked on every update, not once: the two feature bits come and go with Spotify's active device
       var url = np.art ? (ctx.hass().hassUrl ? ctx.hass().hassUrl(np.art) : np.art) : '';
-      var key = [np.title, np.artist, url, np.state, np.shuffle, np.repeat, np.volume, np.can.seek, np.sources.join()].join('|');
+      var key = [np.title, np.artist, url, np.state, np.shuffle, np.repeat, np.volume, np.can.seek, np.sources.join(), np.source, np.phase].join('|');
       if (force || key !== lastPaintKey) {
         lastPaintKey = key;
         title.textContent = np.title || t('mu.nothing'); artist.textContent = np.title ? np.artist : t('mu.nothing_sub');
@@ -387,7 +602,7 @@
     }
     paint(true);
     var timer = setInterval(tick, 250);
-    return { update: function () { paint(false); }, dispose: function () { disposed = true; closeLyricsFull(); clearInterval(timer); if (roSize) roSize.disconnect(); shell.dispose(); } };
+    return { update: function () { paint(false); }, dispose: function () { disposed = true; closeLib(); closeLyricsFull(); clearInterval(timer); if (roSize) roSize.disconnect(); shell.dispose(); } };
   }
 
   g.OkieMotor.apps.register({ id: 'music', nameKey: 'app.music', name: 'Music', icon: 'music', color: '#1db954', order: 45, category: 'system', render: renderMusic });
@@ -427,6 +642,18 @@
     '.mu-lfui{bottom:0;padding:34px max(7vw,26px) calc(max(env(safe-area-inset-bottom,0px),18px) + 12px);background:linear-gradient(transparent,rgba(0,0,0,.34));}.mu-lfui .mu-tm{font-size:13px;}.mu-lfk{display:flex;align-items:center;justify-content:center;gap:clamp(20px,6vw,64px);margin-top:4px;}',
     '.mu-lf[data-ui="0"] .mu-lftop{opacity:0;transform:translateY(-14px);pointer-events:none;}.mu-lf[data-ui="0"] .mu-lfui{opacity:0;transform:translateY(14px);pointer-events:none;}',
     '.mu-dev{display:flex;flex-direction:column;gap:8px;}.mu-row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:13px 16px;border-radius:16px;background:rgba(255,255,255,.08);text-align:left;font-size:15px;}.mu-row.on{background:rgba(255,255,255,.2);font-weight:600;}.mu-ri{display:grid;margin-right:4px;}.mu-vol{padding:6px 4px 10px;}',
+    // the library
+    '.mu-cta{display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;align-items:center;gap:8px;padding:13px 22px;border-radius:9999px;background:#1db954;color:#06210f;font-size:15px;font-weight:700;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.35);}.mu[data-empty="1"] .mu-cta{display:inline-flex;}.mu-cta svg{width:20px;height:20px;}',
+    '.mu-lib{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;border-radius:inherit;overflow:hidden;background:linear-gradient(170deg,var(--mu-a),var(--mu-b));color:#fff;}',
+    '.mu-lh2{flex:none;display:flex;align-items:center;gap:10px;padding:14px 14px 8px;}.mu-lb{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.2);color:#fff;}.mu-lt0{flex:1;min-width:0;font-size:20px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.mu-lacts{display:flex;gap:8px;flex:none;}',
+    '.mu-chip{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 15px;border-radius:9999px;background:rgba(255,255,255,.2);color:#fff;font-size:14px;font-weight:600;white-space:nowrap;}.mu-chip.pri{background:#fff;color:#14301f;}.mu-chip svg{flex:none;}',
+    '.mu-ls{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 14px 6px;padding:6px 6px 6px 12px;border-radius:14px;background:rgba(255,255,255,.1);font-size:13px;color:rgba(255,255,255,.85);}.mu-lsb{min-height:32px;text-align:left;color:inherit;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}',
+    '.mu-lbody{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:6px 14px 14px;}',
+    '.mu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:16px 12px;}.mu-tile{cursor:pointer;min-width:0;}.mu-tc{position:relative;aspect-ratio:1;border-radius:14px;overflow:hidden;background:rgba(255,255,255,.12);display:grid;place-items:center;}.mu-tc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}.mu-tn{margin-top:6px;font-size:13px;font-weight:600;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}',
+    '.mu-tp{position:absolute;right:8px;bottom:8px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#1db954;color:#06210f;box-shadow:0 3px 10px rgba(0,0,0,.4);}',
+    '.mu-list{display:flex;flex-direction:column;gap:6px;}.mu-lr{justify-content:flex-start;gap:12px;padding:8px 10px;cursor:pointer;min-height:56px;}.mu-rc{position:relative;flex:none;width:44px;height:44px;border-radius:8px;overflow:hidden;display:grid;place-items:center;background:rgba(255,255,255,.12);}.mu-rc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}.mu-rt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px;}.mu-lr .mu-tp{position:static;width:38px;height:38px;flex:none;}.mu-chev{flex:none;opacity:.6;display:grid;}.mu-ph{display:grid;place-items:center;color:rgba(255,255,255,.7);}',
+    '.mu-mini{flex:none;display:flex;align-items:center;gap:12px;margin:0 12px 12px;padding:8px 10px;border-radius:18px;background:rgba(0,0,0,.28);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);cursor:pointer;}.mu-mini>img,.mu-mini>.mu-ph{flex:none;width:44px;height:44px;border-radius:8px;object-fit:cover;background:rgba(255,255,255,.12);}.mu-mt{flex:1;min-width:0;}.mu-mt b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.mu-mt span{display:block;font-size:12px;color:rgba(255,255,255,.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.mu-mini .mu-k{flex:none;width:48px;height:48px;}',
+    '.mu-lib>.mu-gate{flex:1;min-height:0;}.mu-gate,.mu-sleep{padding:18px 18px 22px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;}.mu-sleep{flex:none;margin:0 14px 8px;padding:14px 16px;border-radius:16px;background:rgba(0,0,0,.28);gap:6px;}.mu-gate .t,.mu-sleep .t{font-size:22px;font-weight:700;}.mu-sleep .t{font-size:16px;}.mu-gate p,.mu-sleep p{margin:0;font-size:14px;line-height:1.5;color:rgba(255,255,255,.8);}.mu-gb{display:flex;flex-wrap:wrap;gap:10px;margin-top:2px;}.mu-gb .act{text-decoration:none;}.mu-relog{align-self:flex-start;font-size:13px;color:rgba(255,255,255,.75);text-decoration:underline;padding:6px 0;}',
   ].join('\n');
   g.OkieMotor.extraCss = (g.OkieMotor.extraCss || []).concat([CSS]);
 })(typeof globalThis !== 'undefined' ? globalThis : window);

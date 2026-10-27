@@ -163,7 +163,7 @@
     ent('update.hass_n8n_update', 'n8n Update', 'on', { installed_version: '1.2.0', latest_version: '1.3.1' }, {}),
     ent('update.home_assistant_core_update', 'Home Assistant Core Update', 'on', { installed_version: '2026.10.0', latest_version: '2026.10.2' }, {}),
     ent('update.jellyfin_update', 'Jellyfin Update', 'off', { installed_version: '10.9', latest_version: '10.9' }, {}),
-    ent('media_player.spotify_alex', 'Spotify Alex', 'playing', { media_title: 'Chapter Test', media_artist: 'Test Band', media_album_name: 'Waking the Test', media_duration: 337, media_position: 4, media_position_updated_at: new Date().toISOString(), media_content_type: 'music', app_name: 'Spotify', volume_level: 0.5, is_volume_muted: false, shuffle: false, repeat: 'off', source: 'iPhone', source_list: ['iPhone', 'Living Room TV'], supported_features: 1 + 2 + 4 + 16 + 32 + 2048 + 16384 + 32768 + 262144, entity_picture: 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect width="300" height="300" fill="#2a1f3d"/><circle cx="150" cy="150" r="110" fill="#7a4cc9"/><circle cx="150" cy="150" r="40" fill="#f2c14e"/></svg>') }, {}),
+    ent('media_player.spotify_alex', 'Spotify Alex', 'playing', { media_title: 'Chapter Test', media_artist: 'Test Band', media_album_name: 'Waking the Test', media_duration: 337, media_position: 4, media_position_updated_at: new Date().toISOString(), media_content_type: 'music', app_name: 'Spotify', volume_level: 0.5, is_volume_muted: false, shuffle: false, repeat: 'off', source: 'iPhone', source_list: ['iPhone', 'iPad', 'Living Room TV'], supported_features: 1 + 2 + 4 + 16 + 32 + 512 + 2048 + 16384 + 32768 + 131072 + 262144, entity_picture: 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect width="300" height="300" fill="#2a1f3d"/><circle cx="150" cy="150" r="110" fill="#7a4cc9"/><circle cx="150" cy="150" r="40" fill="#f2c14e"/></svg>') }, {}),
     ent('calendar.work', 'Work', 'off', { supported_features: 0 }, {}),
     ent('calendar.birthdays', 'Birthdays', 'off', { supported_features: 0 }, {}),
     ent('calendar.family', 'Familie', 'off', { supported_features: 7, message: 'Dinner', start_time: new Date(Date.now() + 3600e3).toISOString().slice(0, 19).replace('T', ' '), end_time: new Date(Date.now() + 7200e3).toISOString().slice(0, 19).replace('T', ' ') }, {}),
@@ -185,10 +185,11 @@
         return Promise.resolve(function () {});
       } },
       callService: function (domain, service, data) {
-        if (domain === 'media_player' && /^(media_seek|volume_set|shuffle_set|repeat_set|select_source|media_next_track|media_previous_track|media_pause|media_play)$/.test(service) && /spotify/.test(String(data.entity_id))) {
+        if (domain === 'media_player' && /^(media_seek|volume_set|shuffle_set|repeat_set|select_source|media_next_track|media_previous_track|media_pause|media_play|play_media)$/.test(service) && /spotify/.test(String(data.entity_id))) {
           (g.__musicCalls = g.__musicCalls || []).push([service, JSON.parse(JSON.stringify(data))]);
           var cur0 = hass.states[data.entity_id], a0 = Object.assign({}, cur0.attributes), st0 = cur0.state;
           if (service === 'media_pause') st0 = 'paused'; else if (service === 'media_play') st0 = 'playing';
+          else if (service === 'play_media') { var pm = mockSpotifyTitle(data.media_content_id); st0 = 'playing'; a0.media_title = pm.title; a0.media_artist = pm.artist; a0.media_position = 0; a0.media_position_updated_at = new Date().toISOString(); }
           else if (service === 'media_seek') { a0.media_position = data.seek_position; a0.media_position_updated_at = new Date().toISOString(); }
           else if (service === 'volume_set') a0.volume_level = data.volume_level; else if (service === 'shuffle_set') a0.shuffle = !!data.shuffle; else if (service === 'repeat_set') a0.repeat = data.repeat; else if (service === 'select_source') a0.source = data.source;
           var ns0 = Object.assign({}, hass.states); ns0[data.entity_id] = Object.assign({}, cur0, { state: st0, attributes: a0, last_updated: new Date().toISOString() }); hass = Object.assign({}, hass, { states: ns0 }); onChange(hass);
@@ -307,6 +308,13 @@
         return Promise.resolve([rows]);
       },
       callWS: function (msg) {
+        if (msg.type === 'media_player/browse_media') {
+          (g.__browseCalls = g.__browseCalls || []).push([msg.media_content_id || null, msg.media_content_type || null]);
+          var bst = hass.states[msg.entity_id];
+          if (!bst || !(bst.attributes.supported_features & 131072)) return Promise.reject({ code: 'unknown_error', message: 'Player does not support browsing media' });
+          if (g.__browseFail) return Promise.reject({ code: 'unknown_error', message: g.__browseFail });
+          return new Promise(function (r) { setTimeout(function () { r(mockSpotifyBrowse(msg.media_content_id, msg.media_content_type)); }, 120); });
+        }
         if (msg.type === 'scheduler') return Promise.resolve(JSON.parse(JSON.stringify((g.__schedules || []).map(function (sc) { return Object.assign({}, sc, { entity_id: 'switch.schedule_' + sc.schedule_id, tags: [] }); }))));
         if (msg.type === 'config/entity_registry/get') return Promise.resolve({ entity_id: msg.entity_id, platform: msg.entity_id === 'media_player.living_room_tv' ? 'samsungtv' : 'cast', device_id: 'dev-' + msg.entity_id.split('.')[1] });
         if (msg.type === 'config/entity_registry/list') return Promise.resolve([{ entity_id: 'media_player.living_room_tv', platform: 'samsungtv', device_id: 'dev-living_room_tv' }, { entity_id: 'remote.living_room_tv', platform: 'samsungtv', device_id: 'dev-living_room_tv' }].concat(Object.keys(hass.states).filter(function (id) { return /(^|\.)robo(_|$)/.test(id); }).map(function (id) { return { entity_id: id, platform: 'roomba', device_id: 'dev-robo' }; })));
@@ -369,6 +377,11 @@
         return Promise.resolve({});
       },
     };
+    g.__spotifySet = function (fn) {      // dev/test hook: change the pretend Spotify player the way Home Assistant would (fn gets a copy of its attributes and returns them, or { attrs, state })
+      var sid = 'media_player.spotify_alex', cur = hass.states[sid], a = Object.assign({}, cur.attributes), r = fn(a) || a, ns = Object.assign({}, hass.states);
+      ns[sid] = Object.assign({}, cur, { state: r.state || cur.state, attributes: r.attrs || r, last_updated: new Date().toISOString() });
+      hass = Object.assign({}, hass, { states: ns }); onChange(hass);
+    };
     return { get hass() { return hass; } };
   }
   // a stand-in for the floor plan card of the Overview dashboard (Home Assistant loads the real one as a dashboard resource)
@@ -388,6 +401,46 @@ function applyDemoParams(q, card, m) {
     if (st) hs.states['climate.living_room'] = Object.assign({}, st, { state: 'cool', attributes: Object.assign({}, st.attributes, { temperature: 73, current_temperature: 73, min_temp: 50, max_temp: 90, target_temp_step: 1,
       hvac_modes: ['off', 'heat', 'cool', 'heat_cool'], hvac_action: 'cooling', preset_modes: ['none', 'eco'], preset_mode: 'none', fan_modes: ['on', 'off'], fan_mode: 'off' }) });
   }
+  var sp = q.get('spotify');      // ?spotify=open|pick|load: Spotify as Home Assistant shows it before the library is unlocked (nothing running / devices known, none active / a device active, nothing loaded)
+  if (sp) {
+    var sid = 'media_player.spotify_alex', was0 = hs.states[sid], A = Object.assign({}, was0.attributes);
+    ['media_title', 'media_artist', 'media_album_name', 'media_duration', 'media_position', 'media_position_updated_at', 'entity_picture', 'volume_level', 'shuffle', 'repeat', 'source', 'source_list'].forEach(function (k) { delete A[k]; });
+    A.supported_features = 2048; if (sp === 'pick' || sp === 'load') A.source_list = ['iPad', 'iPhone']; if (sp === 'load') A.source = 'iPad';
+    hs.states[sid] = Object.assign({}, was0, { state: 'idle', attributes: A });
+  }
   var open = q.get('open');
   if (open) setTimeout(function () { try { if (card._locked) card._setLocked(false, true); card._openDetail(open); } catch (e) { /* the device does not exist in the sample data */ } }, 1500);
 }
+
+/** A small pretend Spotify library for the Music screen: the same shape Home Assistant answers with (ids and types as the Spotify integration writes them). */
+var SPOTIFY_MOCK = (function () {
+  var art = function (c) { return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="' + c + '"/><circle cx="100" cy="100" r="58" fill="rgba(255,255,255,.3)"/></svg>'); };
+  var colors = ['#7a4cc9', '#c94c7a', '#4c9ac9', '#c9a14c', '#4cc98a', '#c96a4c'];
+  var node = function (title, id, type, cls, kids, o) { return Object.assign({ title: title, media_content_id: id, media_content_type: 'spotify://' + type, media_class: cls, children_media_class: kids || null, can_play: false, can_expand: false, thumbnail: null }, o || {}); };
+  var track = function (id, n) { return node(n, 'spotify:track:' + id, 'track', 'track', null, { can_play: true }); };
+  var listOf = function (prefix, names, type, cls, kids) { return names.map(function (n, i) { return node(n, 'spotify:' + prefix + ':' + (i + 1), type, cls, kids, { can_play: true, can_expand: true, thumbnail: art(colors[i % 6]) }); }); };
+  var songs = function (p, n) { var a = []; for (var i = 1; i <= n; i++) a.push(track(p + '_' + i, 'Song ' + i + ' of ' + p)); return a; };
+  var sections = [['Playlists', 'current_user_playlists', 'playlist'], ['Artists', 'current_user_followed_artists', 'artist'], ['Albums', 'current_user_saved_albums', 'album'], ['Liked songs', 'current_user_saved_tracks', 'track'], ['Podcasts', 'current_user_saved_shows', 'podcast'], ['Recently played', 'current_user_recently_played', 'track'], ['Top Artists', 'current_user_top_artists', 'artist'], ['Top Tracks', 'current_user_top_tracks', 'track']];
+  var data = {
+    current_user_playlists: listOf('playlist', ['Morning Drive', 'Focus', 'Chill Beats', 'Party Mix', 'Gym', 'Road Trip'], 'playlist', 'playlist', 'track'),
+    current_user_followed_artists: listOf('artist', ['The Test Band', 'Mock Quartet', 'Sample Singer'], 'artist', 'artist', 'album'),
+    current_user_saved_albums: listOf('album', ['Waking the Test', 'Second Album', 'Live in Harness', 'Greatest Mocks'], 'album', 'album', 'track'),
+    current_user_saved_tracks: songs('liked', 14),
+  };
+  data.current_user_top_artists = data.current_user_followed_artists; data.current_user_recently_played = songs('recent', 5); data.current_user_top_tracks = songs('top', 5); data.current_user_saved_shows = [];
+  return { sections: sections, data: data, node: node, songs: songs, listOf: listOf };
+})();
+function mockSpotifyBrowse(id, type) {
+  var M = SPOTIFY_MOCK, t = String(type || '').replace(/^spotify:\/\//, '');
+  if (!id || t === 'library') {
+    return M.node('Media Library', 'library', 'library', 'directory', 'directory', { can_expand: true, children: M.sections.map(function (x) { return M.node(x[0], x[1], x[1], 'directory', x[2], { can_expand: true, can_play: x[1] === 'current_user_saved_tracks' }); }) });
+  }
+  var kids = M.data[id], title = id, kc = null;
+  if (!kids) {
+    var m = /^spotify:(playlist|album|artist):(\d+)$/.exec(id);
+    if (m) { kids = m[1] === 'artist' ? M.listOf('album', ['Waking the Test', 'Second Album'], 'album', 'album', 'track') : M.songs(m[1] + m[2], 8); title = { playlist: 'Playlist ', album: 'Album ', artist: 'Artist ' }[m[1]] + m[2]; kc = m[1] === 'artist' ? 'album' : 'track'; }
+  } else { M.sections.forEach(function (x) { if (x[1] === id) { title = x[0]; kc = x[2]; } }); }
+  if (!kids) return { title: 'Unknown', media_content_id: id, media_content_type: type, media_class: 'directory', can_play: false, can_expand: true, children: [] };
+  return M.node(title, id, t, 'directory', kc, { can_expand: true, can_play: ['playlist', 'album', 'artist', 'current_user_saved_tracks'].indexOf(t) >= 0, children: kids });
+}
+function mockSpotifyTitle(id) { var m = /^spotify:track:(.+)$/.exec(String(id || '')); return { title: m ? m[1].replace(/_/g, ' ').replace(/^(\w+) (\d+)$/, 'Song $2 of $1') : 'Mock ' + id, artist: 'Mock Artist' }; }

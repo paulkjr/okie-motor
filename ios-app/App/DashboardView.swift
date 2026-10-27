@@ -337,8 +337,21 @@ struct DashboardWeb: UIViewRepresentable {
 
         /// A link that wants a new window opens in the same page.
         func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
+            if openInApp(navigationAction) { return nil }
             if navigationAction.targetFrame == nil, let url = navigationAction.request.url { webView.load(URLRequest(url: url)) }
             return nil
+        }
+
+        /// The card's "Open Spotify" button links to spotify://, which a web view cannot open by itself: hand it to iOS. Only the schemes listed here, and only when the tap came from a page of your own Home Assistant.
+        private static let appSchemes: Set<String> = ["spotify"]
+        private func openInApp(_ action: WKNavigationAction) -> Bool {
+            guard let url = action.request.url, let scheme = url.scheme?.lowercased(), Self.appSchemes.contains(scheme) else { return false }
+            if isOwnPage(action.sourceFrame) { UIApplication.shared.open(url) }
+            return true
+        }
+
+        func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+            decisionHandler(openInApp(navigationAction) ? .cancel : .allow)
         }
 
         func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {

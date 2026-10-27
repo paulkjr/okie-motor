@@ -2,6 +2,16 @@
 
 The same entries are shown inside the card (dock > What's new). Newest first.
 
+## 0.53.0 (2026-10-27)
+
+**Browse your Spotify and play it on the tablet.**
+- The Music screen has a Library button (and a Browse your Spotify button when nothing is playing): your playlists, artists, albums, Liked songs and more. Tap a playlist or album to open it, tap a song to play it, or use Play and Shuffle on a list
+- Play here sends the music to this tablet speaker; Playing on shows where it plays now
+- Home Assistant only offers browsing while a Spotify device is active, so a short guide leads there: open the Spotify app on the tablet, play any song once, and the library opens by itself
+- If Spotify goes to sleep the library says so instead of failing, and a link logs in to Spotify again
+- The iPhone and iPad app opens the Spotify app from the Open Spotify button
+- The Spotify set-up note now says that Premium is needed
+
 ## 0.52.7 (2026-10-24)
 
 The start screen is no longer pushed to the top on a tablet.

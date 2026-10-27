@@ -65,3 +65,60 @@ test('the colour behind the picture: the average of its pixels, pulled dark enou
   assert.ok(lum(a) < 125 && lum(b) < lum(a), 'white is pulled down, the second colour is darker'); assert.match(a, /^rgb\(\d+,\d+,\d+\)$/);
   const bright = M.tintPair([20, 10, 5]); assert.ok(lum(bright[0]) > 8, 'a dark picture is lifted a little instead of going black');
 });
+
+test('the library opens only when Home Assistant offers both browsing and playing, and the phase says what is missing on the way there', () => {
+  const B = M.FEATURES.browse, P = M.FEATURES.playMedia, S = M.FEATURES.source;
+  assert.equal(B, 131072); assert.equal(P, 512);
+  assert.equal(M.canBrowse(B | P | S), true); assert.equal(M.canBrowse(B), false, 'browsing without playing is not enough'); assert.equal(M.canBrowse(S), false); assert.equal(M.canBrowse(undefined), false);
+  const idle = (a, state) => st(state || 'idle', Object.assign({ supported_features: S }, a));
+  assert.equal(M.libraryPhase(null), 'none');
+  assert.equal(M.libraryPhase(idle({}, 'unavailable')), 'offline');
+  assert.equal(M.libraryPhase(idle({})), 'open', 'Spotify lists only running devices: none known');
+  assert.equal(M.libraryPhase(idle({ source_list: [] })), 'open');
+  assert.equal(M.libraryPhase(idle({ source_list: ['iPad', 'iPhone'] })), 'pick', 'devices known, none active');
+  assert.equal(M.libraryPhase(idle({ source_list: ['iPad'], source: 'iPad' })), 'load', 'a device is active, nothing is loaded');
+  assert.equal(M.libraryPhase(idle({ supported_features: B | P | S, source_list: ['iPad'], source: 'iPad' }, 'paused')), 'ready');
+  const p = M.nowPlaying(idle({ supported_features: B | P | S, source_list: ['iPad'], source: 'iPad' }, 'playing'), 0); assert.equal(p.browse, true); assert.equal(p.phase, 'ready');
+  const q = M.nowPlaying(idle({}), 0); assert.equal(q.browse, false); assert.equal(q.phase, 'open');
+});
+
+test('this tablet\'s own entry in the Spotify device list is found by the kind of screen, this tablet first', () => {
+  const ipadUa = 'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15', desktopSafariOnIpad = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/17.0 Safari/605.1.15';
+  assert.equal(M.deviceKind(ipadUa, true).phone, false); assert.equal(M.deviceKind(desktopSafariOnIpad, true).phone, false, 'an iPad that says Macintosh but has a touch screen');
+  assert.equal(M.deviceKind(desktopSafariOnIpad, false), null, 'a real Mac is not a tablet');
+  assert.equal(M.deviceKind('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0)', true).phone, true);
+  assert.equal(M.deviceKind('Mozilla/5.0 (Linux; Android 13; SM-X700) AppleWebKit', true).phone, false); assert.equal(M.deviceKind('Mozilla/5.0 (Linux; Android 13; Pixel 7) Mobile Safari', true).phone, true);
+  assert.equal(M.deviceKind('', false), null); assert.equal(M.deviceKind(undefined, true), null);
+  const list = ['Living Room TV', 'Pauls iPad', 'iPhone'];
+  assert.equal(M.hereSource(list, M.deviceKind(ipadUa, true)), 'Pauls iPad'); assert.equal(M.hereSource(list, M.deviceKind('iPhone', false)), 'iPhone');
+  assert.equal(M.hereSource(['Living Room TV'], M.deviceKind(ipadUa, true)), null); assert.equal(M.hereSource(list, null), null); assert.equal(M.hereSource(undefined, M.deviceKind(ipadUa, true)), null);
+});
+
+test('a browse answer is read into plain nodes; the id and the type are kept exactly as Home Assistant wrote them, so playing can hand them straight back', () => {
+  const raw = { title: 'Playlists', media_class: 'directory', media_content_id: 'current_user_playlists', media_content_type: 'spotify://current_user_playlists', children_media_class: 'playlist', can_play: false, can_expand: true, not_shown: 3,
+    children: [
+      { title: 'Focus', media_class: 'playlist', media_content_id: 'spotify:playlist:37i9dQ', media_content_type: 'spotify://playlist', children_media_class: 'track', can_play: true, can_expand: true, thumbnail: 'https://i.scdn.co/image/abc' },
+      { title: 'No id', media_class: 'playlist', media_content_type: 'spotify://playlist', can_play: true },
+      { title: 'Odd picture', media_class: 'track', media_content_id: 'spotify:track:1', media_content_type: 'spotify://track', can_play: true, thumbnail: 'javascript:alert(1)' },
+      null, 'x',
+    ] };
+  const n = M.browseNode(raw);
+  assert.equal(n.title, 'Playlists'); assert.equal(n.id, 'current_user_playlists'); assert.equal(n.type, 'spotify://current_user_playlists'); assert.equal(n.kidsCls, 'playlist'); assert.equal(n.hidden, 3); assert.equal(n.expandable, true); assert.equal(n.playable, false);
+  assert.equal(n.kids.length, 2, 'an item without an id, and junk, is dropped');
+  assert.deepEqual([n.kids[0].id, n.kids[0].type, n.kids[0].playable, n.kids[0].expandable, n.kids[0].art], ['spotify:playlist:37i9dQ', 'spotify://playlist', true, true, 'https://i.scdn.co/image/abc']);
+  assert.equal(n.kids[1].art, '', 'a picture address that is not https, a path or an image is not used'); assert.equal(n.kids[1].expandable, false);
+  assert.equal(M.browseNode(null), null); assert.equal(M.browseNode('x'), null); assert.deepEqual(M.browseNode({ title: 'Empty' }).kids, []); assert.equal(M.browseNode({ title: 'Empty' }).hidden, 0);
+  assert.equal(M.browseNode({ children: [{ media_content_id: 0, title: 'zero' }] }).kids[0].id, '0', 'an id of 0 is still an id');
+});
+
+test('an account level with one folder is skipped, pictures go to playlists and albums and plain rows to songs, and a failed browse is told apart', () => {
+  const folder = { title: 'Account', id: 'a', type: 'spotify://library', expandable: true, playable: false }, kids = k => ({ kids: k });
+  assert.equal(M.stepInto(kids([folder])), folder); assert.equal(M.stepInto(kids([folder, folder])), null, 'two folders: you choose');
+  assert.equal(M.stepInto(kids([Object.assign({}, folder, { playable: true })])), null, 'one playable thing is not an account'); assert.equal(M.stepInto(kids([Object.assign({}, folder, { expandable: false })])), null); assert.equal(M.stepInto(kids([])), null); assert.equal(M.stepInto(null), null);
+  ['playlist', 'album', 'artist', 'podcast'].forEach(c => assert.equal(M.layoutOf({ kidsCls: c }), 'grid', c));
+  ['track', 'episode', 'directory', '', undefined].forEach(c => assert.equal(M.layoutOf({ kidsCls: c }), 'list', String(c))); assert.equal(M.layoutOf(null), 'list');
+  assert.equal(M.iconFor('playlist'), 'list'); assert.equal(M.iconFor('artist'), 'person'); assert.equal(M.iconFor('nonsense'), 'music');
+  assert.equal(M.browseProblem({ code: 'unknown_error', message: 'Player does not support browsing media' }), 'asleep');
+  assert.equal(M.browseProblem({ message: 'Spotify authentication failed (401)' }), 'login'); assert.equal(M.browseProblem(new Error('Token refresh failed')), 'login'); assert.equal(M.browseProblem({ message: 'Premium required' }), 'login');
+  assert.equal(M.browseProblem({ message: 'timeout' }), 'other'); assert.equal(M.browseProblem(null), 'other'); assert.equal(M.browseProblem('boom'), 'other');
+});
