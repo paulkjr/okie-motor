@@ -285,13 +285,13 @@
     '.dial-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;gap:4px;}',
     '.dial-val{font-size:54px;font-weight:300;letter-spacing:-.03em;line-height:1;}',
     '.dial-lbl{font-size:13px;color:var(--okie-text-dim);text-transform:uppercase;letter-spacing:.08em;}',
-    '.slider{position:relative;height:56px;border-radius:9999px;background:rgba(255,255,255,.12);overflow:hidden;touch-action:none;cursor:pointer;flex:1;}',
+    '.slider{position:relative;height:56px;border-radius:9999px;background:rgba(120,120,128,.3);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);overflow:hidden;touch-action:none;cursor:pointer;flex:1;}',
     '.slider.v{width:64px;height:220px;flex:none;}',
-    '.sl-fill{position:absolute;left:0;bottom:0;background:var(--sl,#fff);height:100%;width:0;}',
-    '.sl-glow{position:absolute;left:0;bottom:0;background:linear-gradient(90deg,var(--sl,#fff) 0,var(--sl,#fff) calc(100% - var(--gf,0px)),transparent 100%);height:100%;width:0;pointer-events:none;}',      // light that spills from the filled part into the track (the dial look)
+    '.sl-fill{position:absolute;left:0;bottom:0;background:var(--sl,#fff);height:100%;width:0;}',      // iOS style: the fill is the track cut straight, no handle, no glow
+    '.sl-glow{display:none;position:absolute;left:0;bottom:0;background:linear-gradient(90deg,var(--sl,#fff) 0,var(--sl,#fff) calc(100% - var(--gf,0px)),transparent 100%);height:100%;width:0;pointer-events:none;}',      // light that spills from the filled part into the track (the dial look)
     '.slider.v .sl-fill,.slider.v .sl-glow{width:100%;}.slider.v .sl-glow{height:0;background:linear-gradient(0deg,var(--sl,#fff) 0,var(--sl,#fff) calc(100% - var(--gf,0px)),transparent 100%);}',
-    '.sl-knob{position:absolute;background:rgba(0,0,0,.28);border-radius:3px;width:6px;top:14px;bottom:14px;}',
-    '.slider.v .sl-knob{height:6px;width:auto;left:14px;right:14px;top:auto;}',
+    '.sl-knob{display:none;position:absolute;background:rgba(0,0,0,.3);border-radius:3px;width:4px;top:50%;height:24px;margin:-12px 0 0 -16px;pointer-events:none;}',
+    '.slider.v .sl-knob{height:4px;width:24px;left:50%;right:auto;top:auto;margin:0 0 0 -12px;transform:translateY(18px);}',
     '.sl-val{position:absolute;left:20px;top:50%;transform:translateY(-50%);font-weight:600;color:#1d1b19;mix-blend-mode:normal;pointer-events:none;}',
     '.slider.dis{opacity:.45;}',
     '.power{width:76px;height:76px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.12);color:var(--okie-text);transition:background .2s,color .2s,transform .12s;flex:none;}',

@@ -33,7 +33,9 @@ if (q.get('fresh') === '1') { try { Object.keys(localStorage).filter(function (k
 var card = document.getElementById('card');
 var m = makeMockHass(function (h) { card.hass = h; });
 card.setConfig({ squircle: q.get('squircle') || 'none', start: q.get('start') || 'bento', zen: { enabled: q.get('zen') !== '0' }, language: window.__lang, splash: q.get('splash') || 'none', power_entity: 'sensor.house_power', weather_entity: 'weather.home', videos: { enabled: false } });
-applyDemoParams(q, card, m); card.hass = m.hass; var hh = m.hass; hh.language = window.__lang; hh.locale = { language: hh.language };
+applyDemoParams(q, card, m); card.hass = m.hass;
+setTimeout(function () { try { var ss = card._settings; if (ss && q.get('fresh') !== '1' && !(ss.get().favorites || []).length) ss.set({ favorites: ['media_player.spotify_paul', 'light.living_room_lamp', 'cover.living_room_blinds', 'binary_sensor.front_door', 'light.kitchen_ceiling'], cardStyle: { 'media_player.spotify_paul': 'large' }, bento: { w1mode: 'favorites' } }); } catch (e) { /* the demo still runs without its starter favorites */ } }, 3500);      // the demo starts with a music card (large), the blinds and a door sensor among the favorites
+ var hh = m.hass; hh.language = window.__lang; hh.locale = { language: hh.language };
 </script></body></html>
 """ % {"img": img, "bundle": bundle.replace("</script>", "<\\/script>"), "mock": mock.replace("</script>", "<\\/script>")}
 out = ROOT / "dist/okie-demo.html"

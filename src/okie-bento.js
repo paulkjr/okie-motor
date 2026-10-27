@@ -18,7 +18,7 @@
 
   core.registerStrings('en', {
     'b.favorites': 'Favorites', 'b.suggestions': 'Suggestions', 'b.nofav': 'Tap the heart in any device to pin it here.',
-    'b.edit_cards': 'Cards on this slider', 'b.slider_name': 'Widgets', 'b.edit_hint': 'Drag the handle to change the order. Switch a card off to hide it and on to bring it back.', 'b.reset': 'Reset', 'b.done': 'Done', 'b.edit': 'Edit cards', 'b.unavailable': 'Nothing to show yet', 'b.kindle_lbl': 'Kindle Fire', 'b.weather': 'Weather', 'b.cameras': 'Cameras', 'b.calendar': 'Calendar', 'b.todos': 'To-do', 'b.news': 'News', 'b.tips': 'Tips', 'b.chronicle': 'Recently in the house',
+    'b.split': 'Split', 'b.merge': 'Merge', 'b.edit_cards': 'Cards on this slider', 'b.slider_name': 'Widgets', 'b.edit_hint': 'Drag the handle to change the order. Switch a card off to hide it and on to bring it back.', 'b.reset': 'Reset', 'b.done': 'Done', 'b.edit': 'Edit cards', 'b.unavailable': 'Nothing to show yet', 'b.kindle_lbl': 'Kindle Fire', 'b.weather': 'Weather', 'b.cameras': 'Cameras', 'b.calendar': 'Calendar', 'b.todos': 'To-do', 'b.news': 'News', 'b.tips': 'Tips', 'b.chronicle': 'Recently in the house',
     'b.nothing_yet': 'Nothing yet', 'b.no_events': 'No upcoming events', 'b.no_todos': 'All done', 'b.no_news': 'No articles yet', 'b.overdue': 'overdue',
     'b.no_widgets': 'No widgets to show yet. Add a weather, calendar or to-do entity.', 'b.hl': 'H:{h}°  L:{l}°', 'b.humidity': 'Humidity {h}%',
     'b.view_tiles': 'Tile view', 'b.view_list': 'List view', 'b.resize': 'Change the height of this area', 'b.grip': 'Drag to change the height, double-tap to reset', 'b.pause': 'Pause', 'b.play': 'Play', 'b.page': 'Page {n}',
@@ -27,7 +27,7 @@
   });
   core.registerStrings('de', {
     'b.favorites': 'Favoriten', 'b.suggestions': 'Vorschläge', 'b.nofav': 'Tippe in einem Gerät auf das Herz, um es hier anzuheften.',
-    'b.edit_cards': 'Karten dieses Schiebers', 'b.slider_name': 'Widgets', 'b.edit_hint': 'Am Griff ziehen, um die Reihenfolge zu ändern. Eine Karte ausschalten blendet sie aus, einschalten holt sie zurück.', 'b.reset': 'Zurücksetzen', 'b.done': 'Fertig', 'b.edit': 'Karten bearbeiten', 'b.unavailable': 'Noch nichts anzuzeigen', 'b.kindle_lbl': 'Kindle Fire', 'b.weather': 'Wetter', 'b.cameras': 'Kameras', 'b.calendar': 'Kalender', 'b.todos': 'Aufgaben', 'b.news': 'Nachrichten', 'b.tips': 'Tipps', 'b.chronicle': 'Zuletzt im Haus',
+    'b.split': 'Teilen', 'b.merge': 'Verbinden', 'b.edit_cards': 'Karten dieses Schiebers', 'b.slider_name': 'Widgets', 'b.edit_hint': 'Am Griff ziehen, um die Reihenfolge zu ändern. Eine Karte ausschalten blendet sie aus, einschalten holt sie zurück.', 'b.reset': 'Zurücksetzen', 'b.done': 'Fertig', 'b.edit': 'Karten bearbeiten', 'b.unavailable': 'Noch nichts anzuzeigen', 'b.kindle_lbl': 'Kindle Fire', 'b.weather': 'Wetter', 'b.cameras': 'Kameras', 'b.calendar': 'Kalender', 'b.todos': 'Aufgaben', 'b.news': 'Nachrichten', 'b.tips': 'Tipps', 'b.chronicle': 'Zuletzt im Haus',
     'b.nothing_yet': 'Noch nichts', 'b.no_events': 'Keine anstehenden Termine', 'b.no_todos': 'Alles erledigt', 'b.no_news': 'Noch keine Artikel', 'b.overdue': 'überfällig',
     'b.no_widgets': 'Noch nichts anzuzeigen. Füge eine Wetter-, Kalender- oder Aufgaben-Entität hinzu.', 'b.hl': 'H:{h}°  T:{l}°', 'b.humidity': 'Feuchte {h}%',
     'b.view_tiles': 'Kachelansicht', 'b.view_list': 'Listenansicht', 'b.resize': 'Höhe dieses Bereichs ändern', 'b.grip': 'Ziehen, um die Höhe zu ändern, doppeltippen zum Zurücksetzen', 'b.pause': 'Pause', 'b.play': 'Abspielen', 'b.page': 'Seite {n}',
@@ -62,6 +62,7 @@
     '.stage .w1-widgets>.gdeck{height:240px;}.stage:not([data-mobile="true"]):not([data-hoehe="boden"]) .w1-widgets>.gdeck{height:240px;}',
     '.wright>.fv-item{min-width:0;}',
     '.w2,.gdeck,.fdc{position:relative;}',
+    '.wm .mv.sp{width:auto;padding:0 12px 0 10px;gap:6px;display:inline-flex;align-items:center;font-size:13px;font-weight:600;}',
     // while the arrangement is edited: a veil over the right-column cards with the arrow that takes the card to the other column
     '.bento .wm.fv-sw{display:none;z-index:30;border-radius:inherit;background:rgba(20,18,16,.8);}.bento.arranging .wm.fv-sw{display:flex;}',
     '.bento.arranging .wright>.fv-item .fv-sw{display:flex;}.bento.arranging .wright>.fv-item>:first-child{pointer-events:none;}.bento.arranging .wright>.fv-item>.fv-x{display:grid;}',
@@ -379,12 +380,17 @@
         var dest = left.indexOf(id) >= 0 ? 'right' : 'left', spec = carrySpec('w:' + id);
         var wm = [].filter.call(el.children, function (c) { return c.classList && c.classList.contains('wm'); })[0];
         if (!wm) { wm = h('div.fv-sw.wm'); el.appendChild(wm); bindCarry(wm, spec); holdArrange(el, spec); }
-        if (wm.dataset.dest === dest) return;
-        wm.dataset.dest = dest; wm.innerHTML = '';
+        if (wm.dataset.dest === dest && wm.dataset.one === (one ? '1' : '0')) return;
+        wm.dataset.dest = dest; wm.dataset.one = one ? '1' : '0'; wm.innerHTML = '';
         var grip = RM.gripButton(ctx); bindCarry(grip, spec, { free: true, any: true });
         wm.appendChild(grip); wm.appendChild(h('b', null, spec.label));
         if (id === 'slider' || id === 'deck') wm.appendChild(h('button.mv.fv-edit', { type: 'button', 'aria-label': t('b.edit_cards'), title: t('b.edit_cards'), html: UI.icon('pencil', 18), onclick: function (e) { e.stopPropagation(); if (ctx.haptic) ctx.haptic(8); (id === 'slider' ? editSlider : editDeck)(); } }));      // which cards the slider shows
         if (id === 'feeder' && FDm && FDm.openPicker) wm.appendChild(h('button.mv.fv-edit', { type: 'button', 'aria-label': core.t('fd.edit', ctx.lang()), title: core.t('fd.edit', ctx.lang()), html: UI.icon('pencil', 18), onclick: function (e) { e.stopPropagation(); if (ctx.haptic) ctx.haptic(8); FDm.openPicker(ctx, feederCard); } }));      // the look of the feeder card
+        // merge or split: the cameras, sensors, Kindle and map pages ride inside the sliding card (one card) or sit in a card of their own (two cards)
+        if (dAll && dAll.length && c0.w2 && (id === 'deck' || id === 'slider') && (one ? id === 'slider' : true)) {
+          var label = t(one ? 'b.split' : 'b.merge');
+          wm.appendChild(h('button.mv.fv-edit.sp', { type: 'button', 'aria-label': label, title: label, html: UI.icon(one ? 'rows' : 'grid', 18) + '<span>' + label + '</span>', onclick: function (e) { e.stopPropagation(); if (ctx.haptic) ctx.haptic(8); ctx.settings.set({ bento: { oneWidget: !one } }); } }));
+        }
         wm.appendChild(RM.sideButton(ctx, { dir: dest, onMove: function () { place('w:' + id, dest, null); } }));
       });
     }

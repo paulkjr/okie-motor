@@ -2,6 +2,13 @@
 
 The same entries are shown inside the card (dock > What's new). Newest first.
 
+## 0.54.1 (2026-10-27)
+
+**Split or merge the cards on the right, a music card in the demo, cleaner sliders.**
+- In arrange mode the Widgets card has a Split button: the cameras, sensors and other pages leave the slider and become a card of their own. A Merge button on the cards puts them back into one swipeable card
+- The browser demo now starts with a large music card, the blinds and a door sensor among its favorites
+- Sliders (volume, brightness and the rest) look like the iOS Control Center ones: a straight white fill on a dark frosted track, no handle and no smeared glow
+
 ## 0.54.0 (2026-10-27)
 
 **A Sensors menu, a blinds screen and a sensors card.**
