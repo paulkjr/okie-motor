@@ -59,3 +59,10 @@ test('when an event happened: the time today, Yesterday with the time, a weekday
   assert.match(S.whenLabel(new Date(2026, 9, 26, 20, 41, 0).getTime(), now, 'en'), /^Yesterday .*8:41/); assert.match(S.whenLabel(new Date(2026, 9, 26, 20, 41, 0).getTime(), now, 'de'), /^Gestern /);
   assert.match(S.whenLabel(new Date(2026, 9, 22, 18, 22, 0).getTime(), now, 'en'), /^[A-Z][a-z]{2} .*6:22/);
 });
+
+test('the heading of a day in the history list', () => {
+  const now = new Date(2026, 9, 27, 15, 0, 0).getTime();
+  assert.equal(S.dayLabel(new Date(2026, 9, 27, 1, 0).getTime(), now, 'en'), 'Today'); assert.equal(S.dayLabel(new Date(2026, 9, 26, 23, 0).getTime(), now, 'en'), 'Yesterday');
+  assert.equal(S.dayLabel(new Date(2026, 9, 26, 23, 0).getTime(), now, 'de'), 'Gestern'); assert.equal(S.dayLabel(new Date(2026, 9, 27, 1, 0).getTime(), now, 'de'), 'Heute');
+  assert.match(S.dayLabel(new Date(2026, 9, 20, 12, 0).getTime(), now, 'en'), /Oct/);
+});

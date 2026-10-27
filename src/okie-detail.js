@@ -444,7 +444,7 @@
         }, { label: 'controls ' + item.domain, text: t('dt.control_broke'), retry: t('dt.retry') }));
         active = { dispose: function () { if (control && control.dispose) control.dispose(); }, update: function () { if (control) control.update(ctx.state(id) || st); } };
       } else if (id2 === 'context') active = renderContext(ctx, item, wrap);
-      else if (id2 === 'history') active = renderHistory(ctx, item, wrap);
+      else if (id2 === 'history') active = (item.domain === 'binary_sensor' && g.OkieMotor.sensors && g.OkieMotor.sensors.historyView) ? g.OkieMotor.sensors.historyView(ctx, item, wrap) : renderHistory(ctx, item, wrap);      // a sensor lists its events instead of charts
       else if (id2 === 'schedule') active = renderSchedule(ctx, item, wrap);
       else active = renderSettings(ctx, item, wrap);
       requestAnimationFrame(function () { sbar.update(); });

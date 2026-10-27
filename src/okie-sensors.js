@@ -99,7 +99,14 @@
     return d.toLocaleDateString(loc, { weekday: 'short' }) + ' ' + time(false);
   }
 
-  var api = { kindOf: kindOf, wordsOf: wordsOf, stateWord: stateWord, list: list, readings: readings, attention: attention, byArea: byArea, photoKey: photoKey, coverPhotoKey: coverPhotoKey, eventRows: eventRows, whenLabel: whenLabel };
+  /** The heading of a day in the history list: Today, Yesterday, else "Monday, Oct 20". */
+  function dayLabel(ts, now, lang) {
+    var de = lang === 'de', d = new Date(ts), n = new Date(now), day = function (x) { return new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime(); }, diff = Math.round((day(n) - day(d)) / 86400000);
+    if (diff <= 0) return de ? 'Heute' : 'Today'; if (diff === 1) return de ? 'Gestern' : 'Yesterday';
+    return d.toLocaleDateString(de ? 'de-DE' : 'en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+  }
+
+  var api = { dayLabel: dayLabel, kindOf: kindOf, wordsOf: wordsOf, stateWord: stateWord, list: list, readings: readings, attention: attention, byArea: byArea, photoKey: photoKey, coverPhotoKey: coverPhotoKey, eventRows: eventRows, whenLabel: whenLabel };
   if (isNode) { module.exports = api; return; }
   if (typeof document === 'undefined') return;
   g.OkieMotor = g.OkieMotor || {}; g.OkieMotor.sensors = api;
@@ -173,6 +180,30 @@
     }
     return '';
   }
+  function eventRow(e, lang, timeOnly) {
+    var when = timeOnly ? new Date(e.ts).toLocaleTimeString(lang === 'de' ? 'de-DE' : 'en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' }) : whenLabel(e.ts, Date.now(), lang);
+    return h('div.sn-ev', null, h('span.sn-eic', { html: UI.icon(KIND_ICON[e.kind] || 'pulse', 22) }), h('span.sn-etx', null, h('b', null, e.name), h('span', null, e.word)), h('span.sn-etm', null, when), h('i.sn-edot', { dataset: { on: e.on ? '1' : '' } }));
+  }
+  /** The History tab of a sensor: every change of the doors and windows (and this sensor), newest first, a day at a time, in a list that scrolls. */
+  function historyView(ctx, item, wrap) {
+    var t = T(ctx), lang = ctx.lang(), range = 7, dead = false, token = 0, CT = g.OkieMotor.controls;
+    var seg = CT.createSegment({ options: [{ id: '1', label: core.t('dt.24h', lang) }, { id: '7', label: core.t('dt.7d', lang) }, { id: '30', label: core.t('dt.30d', lang) }], value: String(range), ariaLabel: t('sn.events'), onChange: function (v) { range = +v; load(); } });
+    var box = h('div.sn-hist'); wrap.appendChild(h('div.sn-histbar', null, seg.el)); wrap.appendChild(box);
+    function load() {
+      var kinds = {}, my = ++token, now = Date.now(); sensorsOf(ctx).forEach(function (r) { if (r.kind === 'door' || r.kind === 'window' || r.id === item.id) kinds[r.id] = r.kind; });
+      var own = ctx.state(item.id); kinds[item.id] = kinds[item.id] || kindOf(own && own.attributes.device_class, item.name);
+      box.innerHTML = ''; box.appendChild(h('div.sn-noev', null, core.t('dt.loading', lang)));
+      Promise.resolve(ctx.callWS({ type: 'logbook/get_events', start_time: new Date(now - range * 86400000).toISOString(), end_time: new Date(now).toISOString(), entity_ids: Object.keys(kinds) })).then(function (r) {
+        if (dead || my !== token) return; var evs = eventRows(Array.isArray(r) ? r : [], kinds, lang, 300); box.innerHTML = '';
+        if (!evs.length) { box.appendChild(h('div.sn-noev', null, t('sn.no_events'))); return; }
+        var day = ''; evs.forEach(function (e) { var dl = dayLabel(e.ts, Date.now(), lang); if (dl !== day) { day = dl; box.appendChild(h('div.sn-day', null, dl)); } box.appendChild(eventRow(e, lang, true)); });
+      }, function () { if (!dead && my === token) { box.innerHTML = ''; box.appendChild(h('div.sn-noev', null, core.t('dt.history_failed', lang))); } });
+    }
+    load();
+    return { dispose: function () { dead = true; } };
+  }
+  api.historyView = historyView;
+
   function binaryControl(ctx, item, o) {
     var t = T(ctx), lang = ctx.lang(), st0 = ctx.state(item.id) || { state: item.state, attributes: {} };
     var kind = kindOf(st0.attributes.device_class || item.deviceClass, item.name), contact = kind === 'door' || kind === 'window';
@@ -196,9 +227,7 @@
     function drawEvents(evs) {
       evBox.innerHTML = '';
       if (!evs.length) { evBox.appendChild(h('div.sn-noev', null, t('sn.no_events'))); return; }
-      evs.forEach(function (e) {
-        evBox.appendChild(h('div.sn-ev', null, h('span.sn-eic', { html: UI.icon(KIND_ICON[e.kind] || 'pulse', 22) }), h('span.sn-etx', null, h('b', null, e.name), h('span', null, e.word)), h('span.sn-etm', null, whenLabel(e.ts, Date.now(), lang)), h('i.sn-edot', { dataset: { on: e.on ? '1' : '' } })));
-      });
+      evs.forEach(function (e) { evBox.appendChild(eventRow(e, lang)); });
     }
     paintNotif();
     return { el: root, dispose: function () { dead = true; }, update: function (st) {
@@ -263,6 +292,7 @@
     '.sn-notif{display:flex;align-items:center;gap:12px;align-self:flex-start;min-width:260px;max-width:100%;padding:8px 16px 8px 8px;border-radius:999px;background:rgba(255,255,255,.1);color:#fff;font-size:15px;}.sn-nic{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#2f7bff;}.sn-notif[data-off="1"] .sn-nic{background:rgba(255,255,255,.22);}.sn-notif>span:nth-child(2){flex:1;text-align:left;}',
     '.sn-evh{display:flex;align-items:center;justify-content:space-between;margin-top:6px;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.62);}.sn-evh button{font-size:14px;text-transform:none;letter-spacing:0;color:rgba(255,255,255,.7);}',
     '.sn-evs{display:flex;flex-direction:column;gap:8px;}.sn-ev{display:flex;align-items:center;gap:14px;padding:10px 16px 10px 12px;border-radius:16px;background:rgba(255,255,255,.07);}.sn-eic{flex:none;display:grid;place-items:center;width:34px;}.sn-etx{flex:1;min-width:0;display:flex;flex-direction:column;}.sn-etx b{font-size:16px;font-weight:600;}.sn-etx span{font-size:14px;color:rgba(255,255,255,.66);}.sn-etm{flex:none;font-size:13px;color:rgba(255,255,255,.66);font-variant-numeric:tabular-nums;}',
+    '.tabwrap>.sn-histbar,.tabwrap>.sn-hist{width:100%;box-sizing:border-box;align-self:stretch;}.sn-histbar{margin-bottom:12px;display:flex;justify-content:center;}.sn-hist{display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}.sn-day{margin:12px 0 2px;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.62);}',
     '.sn-edot{flex:none;width:12px;height:12px;border-radius:50%;background:#34c759;}.sn-edot[data-on="1"]{background:#4a8dff;}.sn-noev{padding:14px 4px;font-size:14px;color:rgba(255,255,255,.6);}',
     '.sn-chip{position:absolute;left:14px;top:14px;display:flex;align-items:center;gap:12px;padding:8px 18px 8px 12px;border-radius:18px;background:rgba(0,0,0,.34);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);max-width:calc(100% - 100px);}.sn-chip[hidden]{display:none;}.sn-cic{flex:none;display:grid;place-items:center;}.sn-ctx{display:flex;flex-direction:column;min-width:0;}.sn-cn{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:600;letter-spacing:.01em;}.sn-cn b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.sn-cn .sn-dot{width:11px;height:11px;box-shadow:none;}.sn-ctx>span{font-size:15px;color:rgba(255,255,255,.82);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}',
     '.dctl.sn-ctl{align-items:stretch;}',

@@ -2,6 +2,11 @@
 
 The same entries are shown inside the card (dock > What's new). Newest first.
 
+## 0.54.2 (2026-10-27)
+
+**A sensor lists all its events.**
+- View All on a door or window sensor opens its History tab as a scrollable list of every open and close, a day at a time, newest first, for 24 hours, 7 days or 30 days (the same rows as on the sensor screen)
+
 ## 0.54.1 (2026-10-27)
 
 **Split or merge the cards on the right, a music card in the demo, cleaner sliders.**
