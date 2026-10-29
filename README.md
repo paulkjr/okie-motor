@@ -1,27 +1,72 @@
+<p align="center"><img src="docs/screenshots/showcase/hero.jpg" alt="Okie Motor: Home Assistant that feels like an Apple home" width="100%"></p>
+
 # Okie Motor
 
-**A search-and-control dashboard for Home Assistant that feels like an app.** One JavaScript card, plus an optional native iPhone / iPad app and home screen widgets.
+**A search-and-control dashboard for Home Assistant that feels like an app.** One JavaScript card, plus an optional native iPhone / iPad app, an Apple Watch companion and home screen widgets.
 
 It starts on a lock page with a clock, has one search bar that finds any device, room or app (and can ask your Assist agent, by typing or by voice), a start screen you
 arrange by touch, detail views with circular dials, and its own Calendar, To-do, Energy, Schedules, News and Settings apps. It runs in a browser, in the Home Assistant
 companion app, in the **Okie Home** iOS app, and on a wall tablet.
 
-| | |
-|---|---|
-| ![Lock page](docs/screenshots/lock-page.jpg) | ![Start screen](docs/screenshots/home.jpg) |
-| **Lock page**: clock, weather, power, a greeting or quote. Tap the microphone and talk to the assistant right there. | **Start screen**: favorites, a swipeable Widgets card, cameras, a feeder card, search, the dock on the left. |
-| ![Arrange](docs/screenshots/arrange.jpg) | ![Search](docs/screenshots/search.jpg) |
-| **Hold any card to arrange**: drag between the two columns, pick Row / Tall / Large for a card, set the height of each column. | **Search**: typo-tolerant, understands "living room light", offers chips as you type. |
-| ![Assistant](docs/screenshots/assistant.jpg) | ![Thermostat](docs/screenshots/thermostat.jpg) |
-| **Ask anything**: your Assist agent in the search bar. The devices it touched appear as tiles. | **Detail view** with a circular dial, history, schedule and context. |
-| ![Calendar](docs/screenshots/calendar-2191.jpg) | ![Settings](docs/screenshots/settings.jpg) |
-| **Calendar**: day, week, month, year, with an endless date strip you scroll with a finger (this demo runs in the year 2191, just for fun). | **Settings** with search, tabs and a "Changed" badge. Export and import them as a file. |
-| ![Sensor](docs/screenshots/sensor-screen.jpg) | ![Blinds](docs/screenshots/blinds-screen.jpg) |
-| A door or window sensor: state, last update, notifications and recent events. | The blinds screen: the shade follows the position, with open, stop and close. |
-| ![Sensors menu](docs/screenshots/sensors-menu.jpg) | ![Sensors card](docs/screenshots/sensors-card.jpg) |
-| The Sensors menu: what needs a look first, then room by room. | The sensors card, a page of the top-right slider. |
+## Start screen
 
-More screenshots (iPad, iPhone, rooms, energy, light modes) are in [docs/screenshots](docs/screenshots).
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/showcase/home.webp" alt="Start screen with favorites, calendar and feeder card"><br><b>Your favorites at a glance.</b> A big music player, lamps, blinds and light modes on the left; a swipeable Widgets card (calendar, weather, news, tips) and the feeder card on the right.</td>
+<td width="50%"><img src="docs/screenshots/showcase/home-widgets.webp" alt="Start screen with thermostat, weather and tips"><br><b>Thermostat, weather and tips.</b> Tall cards where you want them. Hold any card to arrange: drag between the columns, pick Row / Tall / Large, set the height of each column.</td>
+</tr>
+</table>
+
+## Devices with real controls
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/showcase/thermostat.webp" alt="Thermostat with a circular dial"><br><b>Thermostat.</b> A big circular dial, heating / cooling / auto modes, history and a smart schedule.</td>
+<td width="50%"><img src="docs/screenshots/showcase/music.webp" alt="Music player"><br><b>Music.</b> Cover art, progress, queue, lyrics and room selection.</td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/screenshots/showcase/tv-remote.webp" alt="TV remote"><br><b>TV remote.</b> A volume ring, d-pad and app shortcuts with real logos.</td>
+<td width="50%"><img src="docs/screenshots/showcase/office-ac.webp" alt="Air conditioner with min and max"><br><b>Air conditioning.</b> Heat / Cool ranges, modes and one-hold power off.</td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/screenshots/showcase/garage.webp" alt="Garage door"><br><b>Garage and blinds.</b> The drawing follows the position, with open, stop and close.</td>
+<td width="50%"><img src="docs/screenshots/showcase/sensor.webp" alt="Window sensor with recent events"><br><b>Sensors.</b> State, last update, notifications and the recent events of a door or window.</td>
+</tr>
+</table>
+
+## Built-in apps
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/showcase/calendar.webp" alt="Calendar month view"><br><b>Calendar.</b> Day, week, month and year, with an endless date strip you scroll with a finger.</td>
+<td width="50%"><img src="docs/screenshots/showcase/weather.webp" alt="Weather"><br><b>Weather.</b> Hourly, daily and every detail side by side.</td>
+</tr>
+<tr>
+<td width="50%" colspan="2"><img src="docs/screenshots/showcase/schedules.webp" alt="Schedules overview" width="50%"><br><b>Schedules.</b> Timers, light schedules and robot vacuum cleanings in one list.</td>
+</tr>
+</table>
+
+## On iPad, iPhone and Apple Watch
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/showcase/ipad-home.webp" alt="Okie Home on iPad"><br><b>iPad.</b> The suggestions shelf mixes lamps, climate, blinds, TV, locks and more, next to the weather card.</td>
+<td width="50%"><img src="docs/screenshots/showcase/ipad-assistant.webp" alt="Ask anything"><br><b>Ask anything.</b> Your Assist agent lives in the search bar.</td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/screenshots/showcase/ipad-assistant-answer.webp" alt="Assistant answer with the device it touched"><br><b>Answers with devices.</b> The devices it touched appear as tiles you can use right away.</td>
+<td width="50%"><img src="docs/screenshots/showcase/ipad-hero-width.webp" alt="Adjustable hero width in edit mode"><br><b>Your layout.</b> Every screen keeps its own picture width: tap the pencil and drag the grip.</td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/screenshots/showcase/ipad-lights.webp" alt="Lights screen"><br><b>Lights.</b> Tiles by room, scenes and one-tap all on / off.</td>
+<td width="50%"><img src="docs/screenshots/showcase/share-iphone.jpg" alt="Okie Home on iPhone"><br><b>iPhone.</b> The whole dashboard, on a phone-sized layout.</td>
+</tr>
+<tr>
+<td colspan="2"><img src="docs/screenshots/showcase/share-watch.jpg" alt="Okie Watch" width="50%"><br><b>Apple Watch.</b> Turn the Digital Crown to turn the thermostat wheel: one click, one degree. Lights, the robot vacuum and light modes are one swipe away.</td>
+</tr>
+</table>
+
+More screenshots (rooms, energy, light modes, settings) are in [docs/screenshots](docs/screenshots).
 
 > The pictures are the browser demo with made-up sample data. Open [`dist/okie-demo.html`](dist/okie-demo.html) (double-click, no server) to try the whole card against a pretend Home Assistant.
 
