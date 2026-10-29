@@ -8,6 +8,23 @@ It starts on a lock page with a clock, has one search bar that finds any device,
 arrange by touch, detail views with circular dials, and its own Calendar, To-do, Energy, Schedules, News and Settings apps. It runs in a browser, in the Home Assistant
 companion app, in the **Okie Home** iOS app, and on a wall tablet.
 
+<table>
+<tr>
+<td width="44%"><img src="docs/screenshots/showcase/lifestyle-iphone.jpg" alt="Okie Home on an iPhone in a living room, with a wall tablet behind"></td>
+<td valign="top">
+
+### Your whole home, one calm screen.
+
+- **One search bar** finds any device, room or app, and asks your Assist agent by typing or by voice
+- **A start screen you arrange by touch**: favorites, widgets, cameras, a feeder card
+- **Big circular dials** for thermostats, lights, blinds and TV volume
+- **Built-in apps**: Calendar, To-do, Energy, Schedules, News and Settings
+- **Everywhere you are**: browser, the Home Assistant companion app, iPhone and iPad, Apple Watch and a wall tablet
+
+</td>
+</tr>
+</table>
+
 ## Start screen
 
 <table>
