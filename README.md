@@ -25,7 +25,27 @@ companion app, in the **Okie Home** iOS app, and on a wall tablet.
 </tr>
 </table>
 
-## Start screen
+## See it in your home
+
+<table>
+<tr>
+<td width="33%"><img src="docs/screenshots/showcase/lifestyle-wrist.jpg" alt="Okie Home on an iPhone and Okie Watch on the wrist"></td>
+<td width="33%"><img src="docs/screenshots/showcase/lifestyle-wall.jpg" alt="Okie Motor on a wall tablet in the kitchen"></td>
+<td width="33%"><img src="docs/screenshots/showcase/lifestyle-kitchen.jpg" alt="Okie Home on an iPhone in the kitchen"></td>
+</tr>
+<tr>
+<td align="center"><b>Phone and wrist.</b> Turn the Digital Crown to turn the thermostat.</td>
+<td align="center"><b>On the wall.</b> A tablet by the kitchen door, always on.</td>
+<td align="center"><b>In your hand.</b> The whole dashboard on the iPhone.</td>
+</tr>
+</table>
+
+## Screenshots
+
+Tap a section to open or close it.
+
+<details open>
+<summary><b>Start screen</b> &nbsp;·&nbsp; <sub>Favorites, widgets and the feeder card</sub></summary>
 
 <table>
 <tr>
@@ -34,7 +54,10 @@ companion app, in the **Okie Home** iOS app, and on a wall tablet.
 </tr>
 </table>
 
-## Devices with real controls
+</details>
+
+<details>
+<summary><b>Devices with real controls</b> &nbsp;·&nbsp; <sub>Thermostat, music, TV remote, AC, garage, sensors</sub></summary>
 
 <table>
 <tr>
@@ -51,7 +74,10 @@ companion app, in the **Okie Home** iOS app, and on a wall tablet.
 </tr>
 </table>
 
-## Built-in apps
+</details>
+
+<details>
+<summary><b>Built-in apps</b> &nbsp;·&nbsp; <sub>Calendar, weather and schedules</sub></summary>
 
 <table>
 <tr>
@@ -63,7 +89,10 @@ companion app, in the **Okie Home** iOS app, and on a wall tablet.
 </tr>
 </table>
 
-## On iPad, iPhone and Apple Watch
+</details>
+
+<details>
+<summary><b>On iPad, iPhone and Apple Watch</b> &nbsp;·&nbsp; <sub>Tablet, phone and wrist, the assistant and your own layout</sub></summary>
 
 <table>
 <tr>
@@ -82,6 +111,8 @@ companion app, in the **Okie Home** iOS app, and on a wall tablet.
 <td colspan="2"><img src="docs/screenshots/showcase/share-watch.jpg" alt="Okie Watch" width="50%"><br><b>Apple Watch.</b> Turn the Digital Crown to turn the thermostat wheel: one click, one degree. Lights, the robot vacuum and light modes are one swipe away.</td>
 </tr>
 </table>
+
+</details>
 
 More screenshots (rooms, energy, light modes, settings) are in [docs/screenshots](docs/screenshots).
 
