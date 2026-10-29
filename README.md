@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/screenshots/showcase/hero.jpg" alt="Okie Motor: Home Assistant that feels like an Apple home" width="100%"></p>
+<p align="center"><img src="docs/screenshots/showcase/hero.jpg" alt="Okie Motor: search it, dial it, done" width="100%"></p>
 
 # Okie Motor
 
