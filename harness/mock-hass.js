@@ -1,5 +1,33 @@
 /* Mock Home Assistant `hass` for the browser harness. Not shipped. */
 (function (g) {
+  // pretend assistant for the demo: canned answers for the questions people actually try
+  function demoAnswer(tx) {
+    var q = tx.toLowerCase(), place = /\b(?:in|at|for)\s+([a-z][a-z .'-]{2,24}?)\s*(?:\?|$|today|tonight|tomorrow|now|right now)/.exec(q);
+    if (/\bwho(?:'s| is)?\s+(?:home|here|in)\b|\banyone\s+(?:home|in)\b|\bis\s+(?:alex|anyone)\s+(?:home|in)\b/.test(q)) return 'Alex is home. Nobody else is in.';
+    if (/weather|forecast|rain|snow|sunny|how (?:warm|cold)/.test(q)) {
+      if (place && !/^(?:the )?(?:house|home|kitchen|living room|bedroom|garden|patio)$/.test(place[1])) { var pl = place[1].replace(/\b[a-z]/g, function (c) { return c.toUpperCase(); }); return 'In ' + pl + ' it is sunny and about 21° right now, with a light southerly wind. Dry all day.'; }
+      if (/tonight|evening|night/.test(q)) return 'Tonight stays dry and clear. It cools from 16° at dusk to about 9° by midnight, with a light breeze from the north-west. A jacket for the patio is a good idea.';
+      return 'Tomorrow looks mostly sunny. It starts around 11° in the morning and reaches 17° by the afternoon, with a light breeze from the north-west. Dry all day, so the patio is a good bet.';
+    }
+    if (/temperature|thermostat|heating|\bhow (?:warm|cold)/.test(q)) return 'It is 21.5° in the living room and the heating is on, aiming for 22°.';
+    if (/\b(?:door|doors|window|windows|garage)\b/.test(q)) return 'The front door is locked and all windows are closed. The garage door is open.';
+    if (/energy|electric|usage|\bwatts?\b|\bpower\b/.test(q)) return 'The house is using 412 W right now. Today you have used 6.8 kWh, a little less than yesterday.';
+    if (/calendar|appointment|dentist|schedule|\bevents?\b|my day|\btoday\b/.test(q)) return 'You have a dentist appointment at 3 PM and dinner with friends at 7:30 PM.';
+    if (/to-?do|\btasks?\b|chores?/.test(q)) return 'Two tasks are overdue: Test and Take out trash. Pay rent is due in two days.';
+    if (/\b(?:joke|funny)\b/.test(q)) return 'Why did the smart bulb go to therapy? It had too many unresolved switches.';
+    return 'That one is outside my house. I am the home assistant, so I can help with your lights, climate, doors, energy, calendar and the weather.';
+  }
+  function mockShopping() { return g.__shop || (g.__shop = [{ uid: 's1', summary: 'Milk', status: 'needs_action' }, { uid: 's2', summary: 'Bread', status: 'completed' }]); }
+  function mockTodos() {
+    var d = function (o) { return new Date(Date.now() + o * 86400e3).toISOString().slice(0, 10); };
+    return g.__todos || (g.__todos = [
+      { uid: 't1', summary: 'Test', status: 'needs_action', due: d(-126) },
+      { uid: 't2', summary: 'Pay rent', status: 'needs_action', due: d(2) },
+      { uid: 't3', summary: 'Take out trash', status: 'needs_action', due: d(-3) },
+      { uid: 't4', summary: 'Take out trash', status: 'needs_action', due: d(-2) },
+      { uid: 't5', summary: 'Water plants', status: 'needs_action' },
+    ]);
+  }
   'use strict';
   function ent(id, name, state, attrs, reg) { return { id: id, st: { entity_id: id, state: state, attributes: Object.assign({ friendly_name: name }, attrs || {}), last_changed: new Date().toISOString(), last_updated: new Date().toISOString() }, reg: reg || {} }; }
   var A = function (id, name) { return { area_id: id, _n: name }; };
@@ -10,23 +38,52 @@
     ent('binary_sensor.anziehraum_smoke', 'Anziehraum Smoke Sensor 9', 'off', { device_class: 'smoke' }, { area_id: 'anziehraum' }),
     ent('sensor.anziehraum_temp', 'Anziehraum Temperatur', '21.5', { device_class: 'temperature', unit_of_measurement: '°C' }, { area_id: 'anziehraum' }),
     ent('sensor.anziehraum_hum', 'Anziehraum Feuchte', '62', { device_class: 'humidity', unit_of_measurement: '%' }, { area_id: 'anziehraum' }),
-    ent('light.arbeitszimmer_decke', 'Arbeitszimmer Decke', 'off', {}, { area_id: 'arbeitszimmer' }),
-    ent('fan.arbeitszimmer_klima', 'Arbeitszimmer Klima Climate', 'off', {}, { area_id: 'arbeitszimmer' }),
-    ent('cover.arbeitszimmer_rollade', 'Arbeitszimmer Rollade', 'open', { current_position: 100 }, { area_id: 'arbeitszimmer' }),
-    ent('binary_sensor.arbeitszimmer_smoke', 'Arbeitszimmer Smoke Sensor 10', 'off', { device_class: 'smoke' }, { area_id: 'arbeitszimmer' }),
-    ent('sensor.arbeitszimmer_temp', 'Arbeitszimmer Temperatur', '22.0', { device_class: 'temperature', unit_of_measurement: '°C' }, { area_id: 'arbeitszimmer' }),
-    ent('sensor.arbeitszimmer_hum', 'Arbeitszimmer Feuchte', '62', { device_class: 'humidity', unit_of_measurement: '%' }, { area_id: 'arbeitszimmer' }),
+    ent('light.study_decke', 'Arbeitszimmer Decke', 'off', {}, { area_id: 'arbeitszimmer' }),
+    ent('fan.study_klima', 'Arbeitszimmer Klima Climate', 'off', {}, { area_id: 'arbeitszimmer' }),
+    ent('cover.study_rollade', 'Arbeitszimmer Rollade', 'open', { current_position: 100 }, { area_id: 'arbeitszimmer' }),
+    ent('binary_sensor.study_smoke', 'Arbeitszimmer Smoke Sensor 10', 'off', { device_class: 'smoke' }, { area_id: 'arbeitszimmer' }),
+    ent('sensor.study_temp', 'Arbeitszimmer Temperatur', '22.0', { device_class: 'temperature', unit_of_measurement: '°C' }, { area_id: 'arbeitszimmer' }),
+    ent('sensor.study_hum', 'Arbeitszimmer Feuchte', '62', { device_class: 'humidity', unit_of_measurement: '%' }, { area_id: 'arbeitszimmer' }),
     ent('light.kitchen_ceiling', 'Kitchen Ceiling', 'on', { brightness: 180, supported_color_modes: ['color_temp', 'xy'], color_temp_kelvin: 2700 }, { area_id: 'kitchen' }),
     ent('light.kitchen_counter', 'Kitchen Counter', 'off', {}, { area_id: 'kitchen' }),
     ent('switch.coffee_machine', 'Kitchen Coffee Machine', 'off', {}, { area_id: 'kitchen' }),
     ent('media_player.kitchen_speaker', 'Kitchen Speaker', 'idle', { device_class: 'speaker' }, { area_id: 'kitchen' }),
     ent('light.living_room_lamp', 'Living Room Lamp', 'on', { brightness: 90, supported_color_modes: ['brightness'] }, { area_id: 'living_room' }),
+    ent('light.living_room_floor', 'Living Room Floor Lamp', 'on', { brightness: 140, supported_color_modes: ['color_temp'], color_temp_kelvin: 2400 }, { area_id: 'living_room' }),
+    ent('light.living_room_shelf', 'Living Room Shelf Light', 'on', { brightness: 200, supported_color_modes: ['xy'] }, { area_id: 'living_room' }),
+    ent('light.kitchen_island', 'Kitchen Island Pendants', 'on', { brightness: 220, supported_color_modes: ['brightness'] }, { area_id: 'kitchen' }),
+    ent('light.bedroom_left', 'Bedroom Left Lamp', 'on', { brightness: 80, supported_color_modes: ['color_temp'], color_temp_kelvin: 2200 }, { area_id: 'bedroom' }),
+    ent('light.bedroom_right', 'Bedroom Right Lamp', 'on', { brightness: 80, supported_color_modes: ['color_temp'], color_temp_kelvin: 2200 }, { area_id: 'bedroom' }),
+    ent('light.hallway_ceiling', 'Hallway Light', 'on', { brightness: 255, supported_color_modes: ['brightness'] }, { area_id: 'hallway' }),
+    ent('light.study_desk', 'Arbeitszimmer Desk Lamp', 'on', { brightness: 255, supported_color_modes: ['color_temp'], color_temp_kelvin: 4000 }, { area_id: 'arbeitszimmer' }),
+    ent('light.garden_path', 'Garden Path Lights', 'on', { brightness: 120, supported_color_modes: ['brightness'] }, { area_id: 'garden' }),
+    ent('light.garage_ceiling', 'Garage Light', 'off', {}, { area_id: 'garage' }),
     ent('light.living_room_strip', 'Living Room LED Strip', 'off', {}, { area_id: 'living_room' }),
     ent('climate.living_room', 'Living Room Thermostat', 'heat', { current_temperature: 21.5, temperature: 22, hvac_modes: ['off', 'heat', 'cool', 'auto', 'heat_cool'], preset_modes: ['none', 'eco'], preset_mode: 'none', min_temp: 16, max_temp: 30, target_temp_step: 0.5 }, { area_id: 'living_room' }),
     ent('cover.living_room_blinds', 'Living Room Blinds', 'open', { current_position: 40, device_class: 'blind', supported_features: 15 }, { area_id: 'living_room' }),
     ent('binary_sensor.front_door', 'Front Door', 'off', { device_class: 'door' }, { area_id: 'hallway' }),
     ent('binary_sensor.living_room_window', 'Living Room Window', 'on', { device_class: 'window' }, { area_id: 'living_room' }),
     ent('binary_sensor.kitchen_window', 'Kitchen Window', 'off', { device_class: 'window' }, { area_id: 'kitchen' }),
+    ent('binary_sensor.bedroom_window', 'Bedroom Window', 'off', { device_class: 'window' }, { area_id: 'bedroom' }),
+    ent('binary_sensor.study_window', 'Arbeitszimmer Window', 'on', { device_class: 'window' }, { area_id: 'arbeitszimmer' }),
+    ent('binary_sensor.anziehraum_window', 'Anziehraum Window', 'off', { device_class: 'window' }, { area_id: 'anziehraum' }),
+    ent('binary_sensor.back_door', 'Back Door', 'off', { device_class: 'door' }, { area_id: 'hallway' }),
+    ent('binary_sensor.garage_side_door', 'Garage Side Door', 'off', { device_class: 'door' }, { area_id: 'garage' }),
+    ent('binary_sensor.living_room_motion', 'Living Room Motion', 'on', { device_class: 'motion' }, { area_id: 'living_room' }),
+    ent('binary_sensor.kitchen_motion', 'Kitchen Motion', 'off', { device_class: 'motion' }, { area_id: 'kitchen' }),
+    ent('binary_sensor.kitchen_leak', 'Kitchen Sink Leak Sensor', 'off', { device_class: 'moisture' }, { area_id: 'kitchen' }),
+    ent('binary_sensor.garage_leak', 'Water Heater Leak Sensor', 'off', { device_class: 'moisture' }, { area_id: 'garage' }),
+    ent('sensor.living_room_temp', 'Living Room Temperature', '21.8', { device_class: 'temperature', unit_of_measurement: '°C' }, { area_id: 'living_room' }),
+    ent('sensor.living_room_hum', 'Living Room Humidity', '48', { device_class: 'humidity', unit_of_measurement: '%' }, { area_id: 'living_room' }),
+    ent('sensor.bedroom_temp', 'Bedroom Temperature', '20.4', { device_class: 'temperature', unit_of_measurement: '°C' }, { area_id: 'bedroom' }),
+    ent('sensor.kitchen_temp', 'Kitchen Temperature', '22.6', { device_class: 'temperature', unit_of_measurement: '°C' }, { area_id: 'kitchen' }),
+    ent('sensor.garden_temp', 'Garden Temperature', '14.2', { device_class: 'temperature', unit_of_measurement: '°C' }, { area_id: 'garden' }),
+    ent('sensor.living_room_co2', 'Living Room CO2', '612', { device_class: 'carbon_dioxide', unit_of_measurement: 'ppm' }, { area_id: 'living_room' }),
+    ent('sensor.living_room_lux', 'Living Room Light Level', '184', { device_class: 'illuminance', unit_of_measurement: 'lx' }, { area_id: 'living_room' }),
+    ent('lock.front_door_lock', 'Front Door Lock', 'locked', {}, { area_id: 'hallway' }),
+    ent('lock.back_door_lock', 'Back Door Lock', 'locked', {}, { area_id: 'hallway' }),
+    ent('cover.bedroom_blinds', 'Bedroom Blinds', 'open', { current_position: 70, device_class: 'blind', supported_features: 15 }, { area_id: 'bedroom' }),
+    ent('cover.kitchen_blinds', 'Kitchen Blinds', 'closed', { current_position: 0, device_class: 'blind', supported_features: 15 }, { area_id: 'kitchen' }),
     ent('binary_sensor.garden_door', 'Garden Door', 'off', { device_class: 'door' }, { area_id: 'garden' }),
     ent('media_player.living_room_tv', 'Living Room TV', 'playing', { media_title: 'Planet Earth', volume_level: 0.4, device_class: 'tv', source_list: ['TV', 'HDMI', 'Netflix', 'Disney Plus', 'Apple TV', 'Max'], supported_features: 152461 }, { area_id: 'living_room' }),
     ent('remote.living_room_tv', 'Living Room TV', 'on', {}, {}),
@@ -189,10 +246,11 @@
         return Promise.resolve(function () {});
       } },
       callService: function (domain, service, data) {
-        if (domain === 'media_player' && /^(media_seek|volume_set|shuffle_set|repeat_set|select_source|media_next_track|media_previous_track|media_pause|media_play|play_media)$/.test(service) && /spotify/.test(String(data.entity_id))) {
+        if (domain === 'todo' && service === 'add_item') { (data.entity_id === 'todo.tasks' ? mockTodos() : mockShopping()).push({ uid: 't' + Date.now(), summary: data.item, status: 'needs_action' }); return Promise.resolve({}); }
+        if (domain === 'media_player' && /^(media_seek|volume_set|shuffle_set|repeat_set|select_source|media_next_track|media_previous_track|media_pause|media_play|media_play_pause|play_media)$/.test(service) && /spotify/.test(String(data.entity_id))) {
           (g.__musicCalls = g.__musicCalls || []).push([service, JSON.parse(JSON.stringify(data))]);
           var cur0 = hass.states[data.entity_id], a0 = Object.assign({}, cur0.attributes), st0 = cur0.state;
-          if (service === 'media_pause') st0 = 'paused'; else if (service === 'media_play') st0 = 'playing';
+          if (service === 'media_pause') st0 = 'paused'; else if (service === 'media_play') st0 = 'playing'; else if (service === 'media_play_pause') st0 = st0 === 'playing' ? 'paused' : 'playing';
           else if (service === 'play_media') { var pm = mockSpotifyTitle(data.media_content_id); st0 = 'playing'; a0.media_title = pm.title; a0.media_artist = pm.artist; a0.media_position = 0; a0.media_position_updated_at = new Date().toISOString(); }
           else if (service === 'media_seek') { a0.media_position = data.seek_position; a0.media_position_updated_at = new Date().toISOString(); }
           else if (service === 'volume_set') a0.volume_level = data.volume_level; else if (service === 'shuffle_set') a0.shuffle = !!data.shuffle; else if (service === 'repeat_set') a0.repeat = data.repeat; else if (service === 'select_source') a0.source = data.source;
@@ -326,14 +384,8 @@
         if (msg.type === 'frontend/set_user_data') { (g.__userData = g.__userData || {})[msg.key] = msg.value; return Promise.resolve(); }
         var d = function (o) { return new Date(Date.now() + o * 86400e3).toISOString().slice(0, 10); };
         if (msg.type === 'todo/item/list') {
-          if (msg.entity_id === 'todo.tasks') return Promise.resolve({ items: g.__todos || (g.__todos = [
-            { uid: 't1', summary: 'Test', status: 'needs_action', due: d(-126) },
-            { uid: 't2', summary: 'Pay rent', status: 'needs_action', due: d(2) },
-            { uid: 't3', summary: 'Take out trash', status: 'needs_action', due: d(-3) },
-            { uid: 't4', summary: 'Take out trash', status: 'needs_action', due: d(-2) },
-            { uid: 't5', summary: 'Water plants', status: 'needs_action' },
-          ]) });
-          return Promise.resolve({ items: [{ uid: 's1', summary: 'Milk', status: 'needs_action' }, { uid: 's2', summary: 'Bread', status: 'completed' }] });
+          if (msg.entity_id === 'todo.tasks') return Promise.resolve({ items: mockTodos() });
+          return Promise.resolve({ items: mockShopping() });
         }
         if (msg.type === 'call_service' && msg.service === 'get_forecasts') {
           var key = msg.target.entity_id, f = [], hourly = msg.service_data.type === 'hourly';
@@ -377,7 +429,7 @@
         if (msg.type === 'conversation/process') return new Promise(function (r) { setTimeout(function () {
           var tx = String(msg.text || ''), light = /light|licht/i.test(tx), lock = /lock|schloss|abgeschlossen|haust/i.test(tx);
           var data = light ? { success: [{ name: 'Living Room Lamp', type: 'entity', id: 'light.living_room_lamp' }, { name: 'Kitchen Ceiling', type: 'entity', id: 'light.kitchen_ceiling' }], failed: [] } : (lock ? { success: [{ name: 'Front Door Lock', type: 'entity', id: 'lock.front_door' }], failed: [] } : {});
-          r({ conversation_id: 'c1', response: { response_type: light ? 'action_done' : 'query_answer', data: data, speech: { plain: { speech: light ? 'Done, I switched the lights.' : (lock ? 'The front door is locked.' : 'You asked: ' + tx) } } } });
+          r({ conversation_id: 'c1', response: { response_type: light ? 'action_done' : 'query_answer', data: data, speech: { plain: { speech: light ? 'Done, I switched the lights.' : (lock ? 'The front door is locked.' : demoAnswer(tx)) } } } });
         }, 350); });
         if (msg.type === 'media_source/browse_media') { var imgs = ['bedroom-demo', 'kitchen-demo', 'livingroom-demo', 'home-demo']; return Promise.resolve({ children: imgs.map(function (n) { return { title: n, media_class: 'image', can_expand: false, media_content_id: 'media-source://media_source/local/' + n + '.jpg', thumbnail: '/Hemma/custom_components/hemma/assets/rooms/' + n + '.jpg' }; }) }); }
         if (msg.type === 'media_source/resolve_media') return Promise.resolve({ url: '/Hemma/custom_components/hemma/assets/rooms/' + msg.media_content_id.split('/').pop() });

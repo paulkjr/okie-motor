@@ -469,6 +469,7 @@
     pullPill: pullPill, pullProgress: pullProgress, pullOpens: pullOpens,
     tick: tick, h: h, icon: icon, iconEl: iconEl, ICONS: ICONS, domainIcon: domainIcon, BASE_CSS: BASE_CSS,
     attachScrollbar: attachScrollbar, onTapOrHold: onTapOrHold, debounce: debounce, rafBatch: rafBatch, guard: guard,
+    snapHero: function (pc) { var S = [30, 36, 42, 52, 62], b = S[0]; S.forEach(function (v) { if (Math.abs(v - pc) < Math.abs(b - pc)) b = v; }); return b === 42 ? 0 : b; },      // the picture of a screen snaps to five widths; 0 is the normal one
     screenRect: screenRect, reportsUnzoomed: reportsUnzoomed,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

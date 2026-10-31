@@ -3,7 +3,7 @@
 // Usage: node tools/gen-swift-icons.js
 'use strict';
 const fs = require('fs'), path = require('path');
-const src = fs.readFileSync(path.join(__dirname, '../../src/okie-ui.js'), 'utf8');
+const src = fs.readFileSync(path.join(__dirname, '../../okie-motor/src/okie-ui.js'), 'utf8');
 const a = src.indexOf('var ICONS = {'), b = src.indexOf('\n  };', a);
 const S = x => x;
 const icons = eval('(' + src.slice(a + 'var ICONS = '.length, b + 4) + ')');
@@ -26,7 +26,7 @@ for (const name of Object.keys(icons).sort()) {
 }
 out += '    ]\n';
 // the card's weather pictures (okie-weather.js ICON_INNER: cloud, sun, moon, rain)
-const wsrc = fs.readFileSync(path.join(__dirname, '../../src/okie-weather.js'), 'utf8');
+const wsrc = fs.readFileSync(path.join(__dirname, '../../okie-motor/src/okie-weather.js'), 'utf8');
 const wa = wsrc.indexOf('var ICON_INNER = {'), wb = wsrc.indexOf('\n  };', wa);
 const wicons = eval('(' + wsrc.slice(wa + 'var ICON_INNER = '.length, wb + 4) + ')');
 out += '    static let weatherIcons: [String: [Prim]] = [\n';

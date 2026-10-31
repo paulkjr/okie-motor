@@ -368,7 +368,7 @@
       else if (off) parts.push(t('rm.off')); else parts.push(modeName(st.state));
       if (a.current_humidity != null && !gone) parts.push(t('rm.humidity') + ' ' + Math.round(a.current_humidity) + '%');
       sub.textContent = parts.join(' · ');
-      var modes = (a.hvac_modes || []).filter(function (m) { return m !== 'off'; }).slice(0, 4), key = modes.join(',');
+      var modes = (a.hvac_modes || []).filter(function (m, i, all) { return m !== 'off' && !(m === 'auto' && all.indexOf('heat_cool') >= 0); }).slice(0, 4), key = modes.join(',');
       if (key !== modeKey) { modeKey = key; modesBox.innerHTML = ''; modes.forEach(function (m) { modesBox.appendChild(h('i', { dataset: { mode: m }, title: modeName(m), html: UI.icon(MODE_ICON[m] || 'thermostat', 22) })); }); }
       Array.prototype.forEach.call(modesBox.children, function (i) { i.classList.toggle('on', !off && !gone && i.dataset.mode === st.state); });
     }
@@ -542,7 +542,7 @@
     opts = opts || {};
     var t = function (k) { return core.t(k, ctx.lang()); };
     var c = cardFor(ctx, item), el = c ? c.el : makeRow(item);
-    if (c) rich.push(c);
+    if (c) { rich.push(c); c.update(); }      // paint it at once: until the next state change it would stay empty (no number, no modes)
     var sw = styleSwitch(ctx, item, onChange);
     if (!sw && !opts.onRemove && !opts.order && !opts.side && !opts.grip) return el;
     var mv = opts.order ? orderButtons(ctx, opts.order, item.id, false) : {};
@@ -597,6 +597,7 @@
       if (GD) ids = ids.filter(function (id) { return !GD.owns(id); }).concat(ctx.engine.all().filter(function (i) { return i.domain === 'gadget'; }).map(function (i) { return i.id; }));      // the Kindle and the AWTRIX: one entry each, not their entities
       ids.forEach(function (id) {
         var dom = id.split('.')[0], sensor = dom === 'sensor' || dom === 'binary_sensor';
+        if (cfg.only && !cfg.only(id)) return;      // a list of its own kind (the Lights screen: only lights)
         if (scope === 'devices' && !isDeviceDomain(dom) && dom !== 'gadget') return;
         if (scope === 'sensors' && !sensor) return;
         var it = itemOf(ctx, id); if (!it) return;
@@ -604,7 +605,8 @@
         if (words.some(function (w) { return hay.indexOf(w) < 0; })) return;
         out.push({ it: it, on: !!inList[id] });
       });
-      out.sort(function (a, b) { return (b.on - a.on) || String(a.it.area || '~').localeCompare(String(b.it.area || '~')) || a.it.name.localeCompare(b.it.name); });
+      var hs2 = ctx.hass(), gone = function (x) { var st = hs2 && hs2.states && hs2.states[x.it.id]; return st && (st.state === 'unavailable' || st.state === 'unknown') ? 1 : 0; };
+      out.sort(function (a, b) { return (b.on - a.on) || (gone(a) - gone(b)) || String(a.it.area || '~').localeCompare(String(b.it.area || '~')) || a.it.name.localeCompare(b.it.name); });
       return out;
     }
     function draw() {
@@ -622,7 +624,7 @@
     }
     var timer = 0;
     input.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(function () { query = input.value; draw(); }, 120); });
-    ctx.sheet({ title: cfg.title, onClose: cfg.onClose, content: function () { var box = h('div', null, input, chips.el, counter, list); draw(); return box; } });
+    ctx.sheet({ title: cfg.title, onClose: cfg.onClose, content: function () { var box = h('div', null, input, cfg.only ? null : chips.el, counter, list); draw(); return box; } });
   }
   /** The picker of a room. */
   function openRoomPicker(ctx, roomId, onClose) {
@@ -912,7 +914,7 @@
   // ------------------------------------------------ across devices ----
   // What you arrange here (rooms, their devices and order, the card types) is kept in Home Assistant's own storage for your user, so the phone, the iPad and the
   // wall tablet show the same thing. Newest change wins; a device pulls on start, when it comes back to the foreground and every five minutes.
-  var SYNC_KEY = 'okie_motor_rooms', SYNC_FIELDS = ['rooms', 'roomEdits', 'roomOrder', 'roomsOrder', 'cardStyle', 'roomsExtra', 'roomsHidden', 'roomNames'];
+  var SYNC_KEY = 'okie_motor_rooms', SYNC_FIELDS = ['rooms', 'roomEdits', 'roomOrder', 'roomsOrder', 'cardStyle', 'roomsExtra', 'roomsHidden', 'roomNames', 'lightsFav', 'lightsOrder'];
   function snapshot(ctx) { var s = ctx.settings.get(), o = {}; SYNC_FIELDS.forEach(function (k) { o[k] = s[k]; }); return o; }
   function hasData(snap) { return SYNC_FIELDS.some(function (k) { var v = snap[k]; return Array.isArray(v) ? v.length > 0 : (v && typeof v === 'object' ? Object.keys(v).length > 0 : !!v); }); }
   var applying = false;
@@ -948,8 +950,8 @@
     return { dispose: function () { off(); offSync(); clearTimeout(pushTimer); clearInterval(pullTimer); document.removeEventListener('visibilitychange', visible); clearInterval(timer); Object.keys(registered).forEach(function (id) { registered[id].off(); }); registered = {}; } };
   };
   api.gripButton = gripButton; api.sideButton = sideButton;
-  api.styleOf = styleOf; api.listCard = listCard; api.richCard = richCard; api.addButton = addButton;
+  api.styleOf = styleOf; api.listCard = listCard; api.richCard = richCard; api.addButton = addButton; api.openRoomPicker = openRoomPicker; api.openPicker = openPicker; api.openNewRoom = openNewRoom;
   api.createSorter = createSorter; api.endDrag = function () { if (activeSort) activeSort(true); }; api.tileOrder = tileOrder; api.rooms = roomsNow; api.renderCards = renderCards; api.signature = signature; api.roomItems = roomItems; api.renderRoom = renderRoom;
-  g.OkieMotor.defaults = Object.assign(g.OkieMotor.defaults || {}, { rooms: [], roomOrder: {}, roomsOrder: [], roomEdits: {}, cardStyle: {}, roomsExtra: [], roomsHidden: [], roomNames: {} });
+  g.OkieMotor.defaults = Object.assign(g.OkieMotor.defaults || {}, { rooms: [], roomOrder: {}, roomsOrder: [], roomEdits: {}, cardStyle: {}, roomsExtra: [], roomsHidden: [], roomNames: {}, lightsFav: null, lightsOrder: {} });
   g.OkieMotor.rooms = api;
 })(typeof globalThis !== 'undefined' ? globalThis : window);

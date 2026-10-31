@@ -13,7 +13,7 @@ test('light schedules: a spec is made safe', () => {
   const sun = LS.cleanSpec({ kind: 'sun', event: 'sunrise', offset: 900, dark: true });
   assert.deepEqual(sun, { kind: 'sun', days: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'], dark: false, event: 'sunrise', offset: 360 }, 'offset is capped, dark makes no sense at sunrise');
   assert.equal(LS.cleanSpec({ kind: 'sun', event: 'banana' }).event, 'sunset');
-  assert.equal(LS.cleanSpec({ kind: 'event', when: { entity: 'person.alex', to: 'home', forMin: 7 } }).when.forMin, 0, 'only the offered waits');
+  assert.equal(LS.cleanSpec({ kind: 'event', when: { entity: 'person.paul', to: 'home', forMin: 7 } }).when.forMin, 0, 'only the offered waits');
   assert.equal(LS.cleanSpec({ kind: 'event', when: { entity: 'not an entity', to: 'on' } }), null);
   assert.equal(LS.cleanSpec({ kind: 'event', when: { entity: 'light.a' } }), null, 'a state to wait for is needed');
   assert.equal(LS.cleanSpec(null), null);
@@ -29,8 +29,8 @@ test('light schedules: the automation Home Assistant runs', () => {
   const t = LS.buildAuto({ kind: 'time', time: '22:00', dark: true }, sleep, 'x');
   assert.deepEqual(t.trigger, [{ platform: 'time', at: '22:00:00' }]);
   assert.deepEqual(t.condition, [{ condition: 'state', entity_id: 'sun.sun', state: 'below_horizon' }], 'every day: no weekday condition');
-  const e = LS.buildAuto({ kind: 'event', when: { entity: 'person.alex', to: 'home', forMin: 0 } }, cozy, 'y', { 'person.alex': { attributes: { friendly_name: 'Alex' } } });
-  assert.deepEqual(e.trigger, [{ platform: 'state', entity_id: 'person.alex', to: 'home' }]); assert.match(e.alias, /when Alex is home/);
+  const e = LS.buildAuto({ kind: 'event', when: { entity: 'person.paul', to: 'home', forMin: 0 } }, cozy, 'y', { 'person.paul': { attributes: { friendly_name: 'Paul' } } });
+  assert.deepEqual(e.trigger, [{ platform: 'state', entity_id: 'person.paul', to: 'home' }]); assert.match(e.alias, /when Paul is home/);
   const f = LS.buildAuto({ kind: 'event', when: { entity: 'binary_sensor.hall', to: 'off', forMin: 90 } }, cozy, 'z');
   // forMin 90 is not one of the offered waits: it is cleaned to 0
   assert.deepEqual(f.trigger[0].for, undefined);
@@ -62,19 +62,19 @@ test('light schedules: our automation is read back, others are left alone', () =
 
 test('light schedules: what an entity can become, and which entities are offered', () => {
   const st = {
-    'person.alex': {}, 'binary_sensor.hall_motion': { attributes: { device_class: 'motion' } }, 'binary_sensor.kitchen_window': { attributes: { device_class: 'window' } },
+    'person.paul': {}, 'binary_sensor.hall_motion': { attributes: { device_class: 'motion' } }, 'binary_sensor.kitchen_window': { attributes: { device_class: 'window' } },
     'binary_sensor.smoke': { attributes: { device_class: 'smoke' } }, 'binary_sensor.diag': { attributes: { entity_category: 'diagnostic' } }, 'binary_sensor.washer_done': {},
     'light.lamp': { attributes: { friendly_name: 'Lamp' } }, 'switch.fan': {}, 'media_player.tv': {}, 'lock.front': {}, 'sensor.temp': {},
   };
   const keys = e => LS.stateChoices(e, st).map(c => c.id + ':' + c.key).join();
-  assert.equal(keys('person.alex'), 'home:arrive,not_home:leave');
+  assert.equal(keys('person.paul'), 'home:arrive,not_home:leave');
   assert.equal(keys('binary_sensor.hall_motion'), 'on:motion_on,off:motion_off');
   assert.equal(keys('binary_sensor.kitchen_window'), 'on:opens,off:closes');
   assert.equal(keys('lock.front'), 'locked:locked,unlocked:unlocked');
   assert.equal(keys('media_player.tv'), 'playing:playing,paused:paused,idle:idle,off:off,on:on');
   assert.equal(keys('light.lamp'), 'on:on,off:off');
   const groups = LS.eventGroups(st).map(x => x.key + '=' + x.ids.join('|'));
-  assert.deepEqual(groups, ['people=person.alex', 'motion=binary_sensor.hall_motion', 'doors=binary_sensor.kitchen_window|lock.front', 'devices=light.lamp|switch.fan', 'media=media_player.tv', 'other=binary_sensor.washer_done']);
+  assert.deepEqual(groups, ['people=person.paul', 'motion=binary_sensor.hall_motion', 'doors=binary_sensor.kitchen_window|lock.front', 'devices=light.lamp|switch.fan', 'media=media_player.tv', 'other=binary_sensor.washer_done']);
 });
 
 test('light schedules: the history merges every source into one list of runs', () => {

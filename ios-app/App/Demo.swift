@@ -33,9 +33,9 @@ enum Demo {
             let next = cal.date(byAdding: .day, value: 1, to: day) ?? day
             if calendar == "calendar.family" {
                 switch wd {
-                case 2: out.append(CalendarEvent(calendar: calendar, summary: "Dentist – Alex", start: at(day, 8, 30), end: at(day, 9, 30), allDay: false, location: nil))
+                case 2: out.append(CalendarEvent(calendar: calendar, summary: "Dentist – Paul", start: at(day, 8, 30), end: at(day, 9, 30), allDay: false, location: nil))
                 case 3: out.append(CalendarEvent(calendar: calendar, summary: "Dinner with the Millers", start: at(day, 18), end: at(day, 19, 30), allDay: false, location: nil))
-                case 4: out.append(CalendarEvent(calendar: calendar, summary: "Lunch with Sam", start: at(day, 12), end: at(day, 13), allDay: false, location: nil))
+                case 4: out.append(CalendarEvent(calendar: calendar, summary: "Lunch with Jess", start: at(day, 12), end: at(day, 13), allDay: false, location: nil))
                 case 5: out.append(CalendarEvent(calendar: calendar, summary: "Trash day", start: day, end: next, allDay: true, location: nil))
                 case 6: out.append(CalendarEvent(calendar: calendar, summary: "Movie night", start: at(day, 19), end: at(day, 22), allDay: false, location: nil))
                 case 7: out.append(CalendarEvent(calendar: calendar, summary: "Farmers market", start: at(day, 10), end: at(day, 11, 30), allDay: false, location: nil))

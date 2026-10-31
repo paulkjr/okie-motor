@@ -93,7 +93,7 @@
       tabs: def.tabs.map(function (tb) { return { id: tb.id, icon: tb.icon, label: tb.label }; }), startTab: ctx.store.get('gadget.' + def.id + '.tab', def.tabs[0].id),
       onTab: function (id, body) { painters = []; if (onMsg) { g.removeEventListener('message', onMsg); onMsg = null; } if (offZoom) { offZoom(); offZoom = null; } if (id) ctx.store.set('gadget.' + def.id + '.tab', id); drawTab(def.tabs.filter(function (x) { return x.id === id; })[0] || def.tabs[0], body); },
     });
-    heart = shell.el.querySelector('.dt-acts .dt-circ'); if (heart) { var fav = ctx.favorites.has('gadget.' + def.id); heart.classList.toggle('on', fav); heart.setAttribute('aria-pressed', fav ? 'true' : 'false'); }
+    heart = shell.el.querySelector('.dt-acts .dt-circ.act'); if (heart) { var fav = ctx.favorites.has('gadget.' + def.id); heart.classList.toggle('on', fav); heart.setAttribute('aria-pressed', fav ? 'true' : 'false'); }
     function st(id) { return ctx.hass().states[id]; }
     function call(domain, service, data) { return Promise.resolve(ctx.call(domain, service, data)).catch(function () { ctx.toast('error', 'That did not work'); }); }
     function rowFor(spec) {

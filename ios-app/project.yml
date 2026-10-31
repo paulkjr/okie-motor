@@ -61,6 +61,8 @@ targets:
     dependencies:
       - target: OkieWidgets
         embed: true
+      - target: OkieWatch
+        embed: true
   OkieWidgets:
     type: app-extension
     platform: iOS
@@ -90,6 +92,42 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.okiedokie.home.widgets
         TARGETED_DEVICE_FAMILY: "1,2"
         CODE_SIGN_STYLE: Automatic
+        SKIP_INSTALL: YES
+  OkieWatch:
+    type: application
+    platform: watchOS
+    deploymentTarget: "10.0"
+    sources:
+      - Watch
+      - path: Shared/HAAuth.swift
+      - path: Shared/HAClient.swift
+      - path: Shared/HAEntity.swift
+      - path: Shared/HASession.swift
+      - path: Shared/JSONValue.swift
+      - path: Shared/Keychain.swift
+      - path: Shared/Thermostat.swift
+      - path: Shared/DialLook.swift
+      - path: Shared/WidgetSpec.swift
+      - path: Shared/Theme.swift
+      - path: Shared/OkieIcons.swift
+      - path: Shared/OkieSVGIcons.swift
+      - path: Shared/SVGPath.swift
+      - path: Resources/Fonts
+    info:
+      path: Config/Watch-Info.plist
+      properties:
+        CFBundleDisplayName: Okie Home
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        WKApplication: true
+        WKCompanionAppBundleIdentifier: com.okiedokie.home
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.okiedokie.home.watchkitapp
+        CODE_SIGN_STYLE: Automatic
+        TARGETED_DEVICE_FAMILY: "4"
         SKIP_INSTALL: YES
 schemes:
   OkieHome:

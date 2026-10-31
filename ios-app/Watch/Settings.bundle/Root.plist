@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PreferenceSpecifiers</key>
+	<array>
+		<dict>
+			<key>FooterText</key>
+			<string>The thermostat is always the first page. Only one page can be the hidden one on the left; if both ask for it, the robot gets it.</string>
+			<key>Title</key>
+			<string>Pages</string>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+		</dict>
+		<dict>
+			<key>DefaultValue</key>
+			<true/>
+			<key>Key</key>
+			<string>pref_lights</string>
+			<key>Title</key>
+			<string>Light pages</string>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+		</dict>
+		<dict>
+			<key>DefaultValue</key>
+			<string>first</string>
+			<key>Key</key>
+			<string>pref_lightsOrder</string>
+			<key>Title</key>
+			<string>Lights come</string>
+			<key>Titles</key>
+			<array>
+				<string>Before the other pages</string>
+				<string>After the other pages</string>
+			</array>
+			<key>Type</key>
+			<string>PSMultiValueSpecifier</string>
+			<key>Values</key>
+			<array>
+				<string>first</string>
+				<string>last</string>
+			</array>
+		</dict>
+		<dict>
+			<key>DefaultValue</key>
+			<string>left</string>
+			<key>Key</key>
+			<string>pref_roomba</string>
+			<key>Title</key>
+			<string>Robot vacuum</string>
+			<key>Titles</key>
+			<array>
+				<string>Hidden, swipe right</string>
+				<string>After the lights</string>
+				<string>Off</string>
+			</array>
+			<key>Type</key>
+			<string>PSMultiValueSpecifier</string>
+			<key>Values</key>
+			<array>
+				<string>left</string>
+				<string>end</string>
+				<string>off</string>
+			</array>
+		</dict>
+		<dict>
+			<key>DefaultValue</key>
+			<string>end</string>
+			<key>Key</key>
+			<string>pref_modes</string>
+			<key>Title</key>
+			<string>Light modes</string>
+			<key>Titles</key>
+			<array>
+				<string>Hidden, swipe right</string>
+				<string>After the lights</string>
+				<string>Off</string>
+			</array>
+			<key>Type</key>
+			<string>PSMultiValueSpecifier</string>
+			<key>Values</key>
+			<array>
+				<string>left</string>
+				<string>end</string>
+				<string>off</string>
+			</array>
+		</dict>
+		<dict>
+			<key>FooterText</key>
+			<string>Move a slider to change the dial on this watch. It stays until you move it again. The card on your phone sets the colours.</string>
+			<key>Title</key>
+			<string>Thermostat dial</string>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+		</dict>
+		<dict>
+			<key>Title</key>
+			<string>Glow softness</string>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+		</dict>
+		<dict>
+			<key>DefaultValue</key>
+			<integer>80</integer>
+			<key>Key</key>
+			<string>pref_glowBlur</string>
+			<key>MaximumValue</key>
+			<integer>160</integer>
+			<key>MinimumValue</key>
+			<integer>0</integer>
+			<key>Type</key>
+			<string>PSSliderSpecifier</string>
+		</dict>
+		<dict>
+			<key>Title</key>
+			<string>Glow brightness</string>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+		</dict>
+		<dict>
+			<key>DefaultValue</key>
+			<integer>65</integer>
+			<key>Key</key>
+			<string>pref_glowOpacity</string>
+			<key>MaximumValue</key>
+			<integer>100</integer>
+			<key>MinimumValue</key>
+			<integer>0</integer>
+			<key>Type</key>
+			<string>PSSliderSpecifier</string>
+		</dict>
+		<dict>
+			<key>Title</key>
+			<string>Number of marks</string>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+		</dict>
+		<dict>
+			<key>DefaultValue</key>
+			<integer>100</integer>
+			<key>Key</key>
+			<string>pref_ticks</string>
+			<key>MaximumValue</key>
+			<integer>160</integer>
+			<key>MinimumValue</key>
+			<integer>40</integer>
+			<key>Type</key>
+			<string>PSSliderSpecifier</string>
+		</dict>
+	</array>
+	<key>StringsTable</key>
+	<string>Root</string>
+</dict>
+</plist>

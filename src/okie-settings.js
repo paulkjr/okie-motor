@@ -168,7 +168,7 @@
     { id: 'toastclose', tab: 'general', page: 'toasts', group: yes('Toasts', 'Toasts'), type: 'toggle', path: 'toasts.closable', label: yes('Close button on toasts', 'Schließen-Knopf an Toasts'), desc: yes('Otherwise they dismiss after three seconds', 'Sonst verschwinden sie nach drei Sekunden') },
 
     { id: 'lightmodes_layout', tab: 'general', group: LIGHTS, type: 'segment', path: 'lightModesLayout', label: yes('Light modes layout', 'Anordnung der Lichtmodi'), desc: yes('Side by side is one row as tall as the thermostat card. Stacked puts the modes under each other, separated by lines. Icons only is a thin strip with just the pictures and the arrow.', 'Nebeneinander ist eine Reihe so hoch wie die Thermostat-Karte. Untereinander stapelt die Modi, getrennt durch Linien. Nur Symbole ist ein schmaler Streifen mit den Bildern und dem Pfeil.'),
-      options: [{ id: 'horizontal', label: yes('Side by side', 'Nebeneinander') }, { id: 'vertical', label: yes('Stacked', 'Untereinander') }, { id: 'compact', label: yes('Icons only', 'Nur Symbole') }] },
+      options: [{ id: 'card', label: yes('Card', 'Karte') }, { id: 'horizontal', label: yes('Side by side', 'Nebeneinander') }, { id: 'vertical', label: yes('Stacked', 'Untereinander') }, { id: 'compact', label: yes('Icons only', 'Nur Symbole') }] },
     { id: 'lightmodes', tab: 'general', group: LIGHTS, type: 'lightmodes', label: yes('Light modes', 'Lichtmodi'), desc: yes('Shortcuts for your lights: cards on the Favorites tab and in the rooms you choose. Edit them, add more, put them on a schedule.', 'Kurzbefehle für deine Lichter: Karten bei den Favoriten und in den Räumen, die du wählst. Bearbeiten, ergänzen, planen.') },
 
     // ---- Appearance ----

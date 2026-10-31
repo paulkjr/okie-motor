@@ -168,7 +168,7 @@
       var r = registry && registry[id]; if (dev && r && r.device_id === dev) { found = a.entry_id; return true; } return false;
     });
     if (found) return found;
-    Object.keys(states || {}).some(function (id) { var a = states[id] && states[id].attributes; if (a && a.entry_id && id.indexOf('event.') === 0 && /roomba|mission|stuck/.test(id)) { found = a.entry_id; return true; } return false; });
+    Object.keys(states || {}).some(function (id) { var a = states[id] && states[id].attributes; if (a && a.entry_id && id.indexOf('event.') === 0 && /roomba|jessn|mission|stuck/.test(id)) { found = a.entry_id; return true; } return false; });
     return found;
   }
 

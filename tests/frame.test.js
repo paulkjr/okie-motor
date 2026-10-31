@@ -13,7 +13,7 @@ test('zen: the part of the day follows the hour and the greeting is stable withi
   assert.equal(Z.daypart(6), 'morning'); assert.equal(Z.daypart(12), 'afternoon'); assert.equal(Z.daypart(18), 'evening'); assert.equal(Z.daypart(23), 'evening');
   assert.equal(Z.greeting('en', 9, 5), Z.greeting('en', 9, 5), 'same hour, same words');
   assert.notEqual(Z.greeting('en', 9, 5), Z.greeting('en', 9, 6), 'next hour, other words');
-  assert.match(Z.greeting('de', 9, 0, 'Alex'), /, Alex$/);
+  assert.match(Z.greeting('de', 9, 0, 'Paul'), /, Paul$/);
   assert.ok(Z.GREETINGS.en.morning.length >= 6 && Z.GREETINGS.de.evening.length >= 6);
 });
 

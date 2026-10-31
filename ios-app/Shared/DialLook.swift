@@ -5,6 +5,23 @@ import Foundation
 struct DialLook {
     var c0 = WidgetSpec.Thermostat.Scale.c0, c1 = WidgetSpec.Thermostat.Scale.c1, c2 = WidgetSpec.Thermostat.Scale.c2, c3 = WidgetSpec.Thermostat.Scale.c3
     var cool = Double(WidgetSpec.Thermostat.Scale.cool), warm = Double(WidgetSpec.Thermostat.Scale.warm)
+    /// The light around the dial and its marks (Settings > Dials of the card): softness in px (0 to 160), spread (0 to 60), brightness in % (0 to 100) and the number of marks in % (40 to 160). The defaults are the card's.
+    var glowBlur = 80.0, glowSpread = 15.0, glowOpacity = 65.0, ticks = 100.0
+
+    /// How the wheel is drawn for this look, as factors of the default drawing (1 = the design).
+    var haze: Double { max(0.05, glowBlur / 80) }
+    var brightness: Double { glowOpacity / 65 }
+    var tickCount: Int { max(40, Int((197 * ticks / 100).rounded())) }
+
+    /// Changes made on the watch itself (its own settings page); they stay over what the phone sends. Only the watch app writes them.
+    static let overrideKey = "dialLookOverride"
+    static var overrides: [String: Double] { (UserDefaults.standard.dictionary(forKey: overrideKey) ?? [:]).compactMapValues { ($0 as? NSNumber)?.doubleValue } }
+    static func setOverride(_ key: String, _ value: Double?) {
+        var o = overrides
+        o[key] = value
+        UserDefaults.standard.set(o, forKey: overrideKey)
+        lock.lock(); cached = nil; lock.unlock()
+    }
 
     private static let account = "dialLook"
     private static let lock = NSLock()
@@ -17,7 +34,8 @@ struct DialLook {
     static var current: DialLook {
         lock.lock(); defer { lock.unlock() }
         if let c = cached, Date().timeIntervalSince(c.at) < 2 { return c.value }
-        let v = parse(savedJSON)
+        var v = parse(savedJSON)
+        v.apply(overrides)
         cached = (Date(), v)
         return v
     }
@@ -33,8 +51,18 @@ struct DialLook {
         if let v = hex("c1") { l.c1 = v }
         if let v = hex("c2") { l.c2 = v }
         if let v = hex("c3") { l.c3 = v }
+        var nums: [String: Double] = [:]
+        for k in ["glowBlur", "glowSpread", "glowOpacity", "ticks"] { if let n = (o[k] as? NSNumber)?.doubleValue { nums[k] = n } }
+        l.apply(nums)
         if let c = (o["cool"] as? NSNumber)?.doubleValue, let w = (o["warm"] as? NSNumber)?.doubleValue, c >= 40, c <= 98, w > c, w <= 99 { l.cool = c; l.warm = w }
         return l
+    }
+
+    mutating func apply(_ o: [String: Double]) {
+        if let v = o["glowBlur"] { glowBlur = min(160, max(0, v)) }
+        if let v = o["glowSpread"] { glowSpread = min(60, max(0, v)) }
+        if let v = o["glowOpacity"] { glowOpacity = min(100, max(0, v)) }
+        if let v = o["ticks"] { ticks = min(160, max(40, v)) }
     }
 
     private static var lastCard: String?

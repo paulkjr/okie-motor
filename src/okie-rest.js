@@ -128,7 +128,13 @@
   g.OkieMotor.extraCss = (g.OkieMotor.extraCss || []).concat([CSS]);
 
   api.mount = function (ctx) {
-    var cfg = function () { var c = effectiveRest(ctx.settings.get().rest); return ctx.host && ctx.host._mobile ? Object.assign({}, c, { enabled: false }) : c; };      // a phone is not a wall display: no return to the clock page there
+    var cfg = function () {
+      var r = ctx.settings.get().rest || {}, c = effectiveRest(r), desk = false;
+      try { desk = !!(g.matchMedia && g.matchMedia('(hover: hover) and (pointer: fine)').matches); } catch (e) { /* no media query: treat as a wall display */ }
+      if (ctx.host && ctx.host._mobile) return Object.assign({}, c, { enabled: false });
+      if (desk && LOCK_CHOICES.indexOf(String(r.lockAfter)) < 0) return Object.assign({}, c, { enabled: false });      // a computer with a mouse never goes dark on its own, unless you picked a time in the settings
+      return c;
+    };      // a phone is not a wall display: no return to the clock page there
     var machine = createMachine(cfg());
     var layer = h('div.rest', { role: 'dialog', 'aria-label': 'Screensaver', tabindex: '-1' });
     var photoA = h('div.photo'), photoB = h('div.photo'), shade = h('div.shade');

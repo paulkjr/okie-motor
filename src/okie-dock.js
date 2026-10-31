@@ -9,9 +9,9 @@
   var isNode = typeof module !== 'undefined' && module.exports;
 
   // Home, Energy, Forecast, Calendar, Music, News, Tips, Schedules, Server, Tasks, Settings, Changelog (what you use most first, the housekeeping last)
-  var DEFAULT_ORDER = ['home', 'energy', 'weather', 'calendar', 'music', 'sensors', 'news', 'tips', 'schedules', 'server', 'tasks', 'settings', 'changelog', 'assistant'];
+  var DEFAULT_ORDER = ['home', 'lights', 'energy', 'weather', 'calendar', 'music', 'sensors', 'news', 'tips', 'schedules', 'server', 'tasks', 'settings', 'changelog', 'assistant'];
   var DEFAULT_OFF = { assistant: 1 };
-  var ICON = { home: 'home', changelog: 'code', energy: 'bolt', weather: 'cloud', tips: 'tips', news: 'newsbook', tasks: 'checklist', schedules: 'calclock', server: 'server', settings: 'gear', calendar: 'calendar', music: 'music', sensors: 'door', assistant: 'spark' };
+  var ICON = { home: 'home', changelog: 'code', energy: 'bolt', weather: 'cloud', tips: 'tips', news: 'newsbook', tasks: 'checklist', schedules: 'calclock', server: 'server', settings: 'gear', calendar: 'calendar', music: 'music', lights: 'bulb', sensors: 'door', assistant: 'spark' };
 
   /**
    * dockItems({ available: [ids that exist], saved: [ids]|null }) -> ordered ids to show.

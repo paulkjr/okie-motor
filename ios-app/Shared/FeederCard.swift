@@ -2,7 +2,7 @@ import AppIntents
 import SwiftUI
 
 /// The look of the feeder card. Chosen in the widget's settings (long-press the widget > Edit Widget > Design). The colours of each are in widgets/widgets.json (feeder.designs); the pictures
-/// (the peeking cat, the leaves, the neon bowl, the bowl and the two cats) are in Shared/FeederArt.xcassets, cut from the five design mock-ups.
+/// (the peeking cat, the leaves, the neon bowl, the bowl and the two cats) are in Shared/FeederArt.xcassets, cut from Paul's five mock-ups.
 enum FeederDesign: String, AppEnum, CaseIterable {
     case classic, peek, leaves, neon, bowl
 
@@ -23,7 +23,7 @@ struct FeederBackdrop: View {
     var medium = true          // (kept for the callers; every size uses the same wash)
     var body: some View {
         if design == .classic { GlassBackground() }
-        else if design == .bowl {        // the design picture: bowl, floor and cats; the card's text is drawn over it
+        else if design == .bowl {        // Paul's picture: bowl, floor and cats; the card's text is drawn over it
             GeometryReader { geo in
                 Group {
                     if medium { Image("feeder_bowl_scene").resizable().frame(width: geo.size.width, height: geo.size.height) }        // a little taller than the picture: stretched
@@ -159,7 +159,7 @@ struct FeederCardView: View {
         }
     }
 
-    // 5. a bowl of food, two cats waiting: the picture is the card's background (FeederBackdrop); here only the text, where it is in the design mock-up
+    // 5. a bowl of food, two cats waiting: the picture is the card's background (FeederBackdrop); here only the text, where it is in Paul's mock-up
     private func bowl(W: CGFloat, k: CGFloat) -> some View {
         ZStack(alignment: .topLeading) {
             if medium {

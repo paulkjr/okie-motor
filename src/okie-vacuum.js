@@ -190,24 +190,24 @@
   core.registerStrings('en', {
     'vc.start': 'Start', 'vc.pause': 'Pause', 'vc.stop': 'Stop', 'vc.dock': 'Dock', 'vc.locate': 'Locate',
     'vc.battery': 'Battery', 'vc.charging': 'Charging', 'vc.tank': 'Water tank', 'vc.no_tank': 'No tank', 'vc.bin': 'Bin', 'vc.bin_ok': 'OK', 'vc.bin_full': 'Full', 'vc.bin_gone': 'Missing', 'vc.pad': 'Pad',
-    'vc.last': 'Last clean', 'vc.missions': 'Missions', 'vc.mission_n': '{n} missions', 'vc.ok': 'Successful', 'vc.canceled': 'Cancelled', 'vc.failed': 'Failed', 'vc.scrubs': 'Scrubs', 'vc.avg': 'Average mission',
+    'vc.pg_ctl': 'Control', 'vc.pg_map': 'Map', 'vc.pg_hist': 'History', 'vc.pg_care': 'Care', 'vc.last': 'Last clean', 'vc.missions': 'Missions', 'vc.mission_n': '{n} missions', 'vc.ok': 'Successful', 'vc.canceled': 'Cancelled', 'vc.failed': 'Failed', 'vc.scrubs': 'Scrubs', 'vc.avg': 'Average mission',
     'vc.clean_time': 'Cleaning time', 'vc.area': 'Cleaned area', 'vc.cycles': 'Battery cycles',
     'vc.al.error': 'The robot needs help', 'vc.al.error_d': 'The robot needs help: {d}', 'vc.al.bin_gone': 'The bin is missing', 'vc.al.bin_full': 'The bin is full: empty it', 'vc.al.tank_low': 'The water tank is almost empty', 'vc.al.lid_open': 'The tank lid is open', 'vc.al.battery_low': 'The battery is low',
     'vc.al.maintenance': 'Maintenance due: {d}', 'vc.fav': 'Favorites', 'vc.mode': 'Cleaning mode', 'vc.m.vacuum': 'Vacuum', 'vc.m.mop': 'Mop', 'vc.m.vacuum_and_mop': 'Vacuum & Mop', 'vc.m.vacuum_then_mop': 'Vacuum, then Mop',
     'vc.rooms': 'Rooms', 'vc.rooms_hint': 'One tap cleans just that room.', 'vc.options': 'Settings', 'vc.maint': 'Maintenance', 'vc.due': 'Due', 'vc.h_left': '{n} h left', 'vc.replaced': 'Replaced', 'vc.confirm': 'Tap again', 'vc.reset_done': 'Counter reset',
     'vc.map': 'Map', 'vc.map_path': 'Cleaning path', 'vc.map_rooms': 'Rooms', 'vc.map_coverage': 'Coverage', 'vc.started': 'Started: {n}', 'vc.mp.docked': 'Maintenance part',
-    'vc.jobs': 'Jobs', 'vc.next': 'Next clean', 'vc.recent': 'Recent cleans', 'vc.today': 'Today', 'vc.tomorrow': 'Tomorrow', 'vc.yesterday': 'Yesterday', 'vc.running': 'Running', 'vc.lt_min': '<1 min',
+    'vc.current': 'Current clean', 'vc.elapsed': '{n} min so far', 'vc.jobs': 'Jobs', 'vc.next': 'Next clean', 'vc.recent': 'Recent cleans', 'vc.today': 'Today', 'vc.tomorrow': 'Tomorrow', 'vc.yesterday': 'Yesterday', 'vc.running': 'Running', 'vc.lt_min': '<1 min',
   });
   core.registerStrings('de', {
     'vc.start': 'Start', 'vc.pause': 'Pause', 'vc.stop': 'Stopp', 'vc.dock': 'Station', 'vc.locate': 'Finden',
     'vc.battery': 'Akku', 'vc.charging': 'Lädt', 'vc.tank': 'Wassertank', 'vc.no_tank': 'Kein Tank', 'vc.bin': 'Behälter', 'vc.bin_ok': 'OK', 'vc.bin_full': 'Voll', 'vc.bin_gone': 'Fehlt', 'vc.pad': 'Pad',
-    'vc.last': 'Letzte Reinigung', 'vc.missions': 'Einsätze', 'vc.mission_n': '{n} Einsätze', 'vc.ok': 'Erfolgreich', 'vc.canceled': 'Abgebrochen', 'vc.failed': 'Fehlgeschlagen', 'vc.scrubs': 'Wischgänge', 'vc.avg': 'Mittlerer Einsatz',
+    'vc.pg_ctl': 'Steuerung', 'vc.pg_map': 'Karte', 'vc.pg_hist': 'Verlauf', 'vc.pg_care': 'Pflege', 'vc.last': 'Letzte Reinigung', 'vc.missions': 'Einsätze', 'vc.mission_n': '{n} Einsätze', 'vc.ok': 'Erfolgreich', 'vc.canceled': 'Abgebrochen', 'vc.failed': 'Fehlgeschlagen', 'vc.scrubs': 'Wischgänge', 'vc.avg': 'Mittlerer Einsatz',
     'vc.clean_time': 'Reinigungszeit', 'vc.area': 'Gereinigte Fläche', 'vc.cycles': 'Ladezyklen',
     'vc.al.error': 'Der Roboter braucht Hilfe', 'vc.al.error_d': 'Der Roboter braucht Hilfe: {d}', 'vc.al.bin_gone': 'Der Behälter fehlt', 'vc.al.bin_full': 'Der Behälter ist voll: bitte leeren', 'vc.al.tank_low': 'Der Wassertank ist fast leer', 'vc.al.lid_open': 'Der Tankdeckel ist offen', 'vc.al.battery_low': 'Der Akku ist schwach',
     'vc.al.maintenance': 'Wartung fällig: {d}', 'vc.fav': 'Favoriten', 'vc.mode': 'Reinigungsmodus', 'vc.m.vacuum': 'Saugen', 'vc.m.mop': 'Wischen', 'vc.m.vacuum_and_mop': 'Saugen & Wischen', 'vc.m.vacuum_then_mop': 'Erst saugen, dann wischen',
     'vc.rooms': 'Räume', 'vc.rooms_hint': 'Ein Tipp reinigt nur diesen Raum.', 'vc.options': 'Einstellungen', 'vc.maint': 'Wartung', 'vc.due': 'Fällig', 'vc.h_left': 'noch {n} h', 'vc.replaced': 'Ersetzt', 'vc.confirm': 'Nochmal tippen', 'vc.reset_done': 'Zähler zurückgesetzt',
     'vc.map': 'Karte', 'vc.map_path': 'Reinigungsweg', 'vc.map_rooms': 'Räume', 'vc.map_coverage': 'Abdeckung', 'vc.started': 'Gestartet: {n}', 'vc.mp.docked': 'Wartungsteil',
-    'vc.jobs': 'Aufträge', 'vc.next': 'Nächste Reinigung', 'vc.recent': 'Letzte Reinigungen', 'vc.today': 'Heute', 'vc.tomorrow': 'Morgen', 'vc.yesterday': 'Gestern', 'vc.running': 'Läuft', 'vc.lt_min': '<1 Min.',
+    'vc.current': 'Aktuelle Reinigung', 'vc.elapsed': 'seit {n} Min.', 'vc.jobs': 'Aufträge', 'vc.next': 'Nächste Reinigung', 'vc.recent': 'Letzte Reinigungen', 'vc.today': 'Heute', 'vc.tomorrow': 'Morgen', 'vc.yesterday': 'Gestern', 'vc.running': 'Läuft', 'vc.lt_min': '<1 Min.',
   });
   function T(ctx) { return function (k, v) { return core.t(k, ctx.lang(), v); }; }
   function svc(ctx, item, service) {
@@ -241,7 +241,9 @@
     var t = T(ctx), alive = true, reg = {}, hs0 = ctx.hass();
     var features = ((ctx.state(item.id) || {}).attributes || {}).supported_features || 0;
     var art = robot(), stateEl = h('div.vc-state'), subEl = h('div.vc-sub'), batEl = h('div.vc-bat');
-    var head = h('div.vc-head', null, stateEl, h('div.vc-line', null, subEl, batEl));
+    var photo = ((ctx.settings.get().vacuum || {}).photo) , hero = h('div.vc-hero', null);      // the picture of the black Roomba on its dock, with the state and the battery over it
+    if (photo) hero.appendChild(h('img.vc-photo', { src: photo, alt: '', decoding: 'async', draggable: 'false', onerror: function () { this.remove(); hero.classList.add('nophoto'); } })); else hero.classList.add('nophoto');
+    hero.appendChild(art); hero.appendChild(h('div.vc-hh', null, stateEl, subEl)); hero.appendChild(batEl);
     function key(id, icon, label, onclick) {
       return h('div.vc-key', null, h('button.vc-btn', { type: 'button', 'aria-label': label, dataset: { act: id }, onclick: function () { ctx.haptic && ctx.haptic(8); onclick(); }, html: icon.indexOf('<svg') === 0 ? icon : UI.icon(icon, 24) }), h('span', null, label));
     }
@@ -251,9 +253,41 @@
     keys.appendChild(key('dock', 'home', t('vc.dock'), function () { svc(ctx, item, 'return_to_base').catch(function () {}); }));
     if (L.has(features, 512)) keys.appendChild(key('locate', 'search', t('vc.locate'), function () { svc(ctx, item, 'locate').catch(function () {}); }));
     var favEl = h('div.vc-jobs.vc-fav'), modeEl = h('div.vc-jobs.vc-mode'), roomsEl = h('div.vc-jobs.vc-rooms'), optEl = h('div.vc-card.vc-opt'), maintEl = h('div.vc-card.vc-maint'), mapEl = h('div.vc-card.vc-map'), robotMap = null, sigs = {}, mapState = { kind: '' }, confirm = { key: '', t: 0 };
+    [favEl, roomsEl].forEach(function (el) { el.classList.add('vc-fold'); el.addEventListener('click', function (e) { var tl = e.target.closest && e.target.closest('.vc-tl'); if (tl && el.contains(tl)) el.classList.toggle('open'); }); });
     var alerts = h('div.vc-alerts'), jobsEl = h('div.vc-jobs'), next = h('div.vc-card.vc-next'), runsEl = h('div.vc-card.vc-runs');
-    var tiles = h('div.vc-tiles'), last = h('div.vc-last'), mis = h('div.vc-mis'), jobsSig = '', prevState = null, runs = { rows: null, at: 0, loading: false };
-    var root = h('div.dctl.vc', { dataset: { state: 'idle' } }, head, alerts, art, keys, favEl, jobsEl, modeEl, roomsEl, tiles, next, last, runsEl, optEl, maintEl, mapEl, mis);
+    var tiles = h('div.vc-tiles'), last = h('div.vc-last'), mis = h('div.vc-mis'), cur = h('div.vc-card.vc-cur'), jobsSig = '', prevState = null, runs = { rows: null, at: 0, loading: false };
+    // swipe pages like the weather card: control, map, history, care; a page with nothing to show drops out together with its dot
+    var PG = [['vc.pg_ctl', [hero, keys, modeEl, roomsEl, tiles, cur, favEl, jobsEl]], ['vc.pg_map', [mapEl, next]], ['vc.pg_hist', [last, runsEl, mis]], ['vc.pg_care', [maintEl, optEl]]];
+    var pgEls = PG.map(function (p) { return h('div.vc-pg', null, p[1]); });
+    var track = h('div.vc-pgs', null, pgEls), dots = h('div.vc-pd'), pgName = h('span.vc-pn');
+    var root = h('div.dctl.vc', { dataset: { state: 'idle' } }, alerts, h('div.vc-pbar', null, dots, pgName), track);
+    function pgShown(el) { return Array.prototype.some.call(el.children, function (c) { return !c.hidden && (c.children.length || c.textContent || c.querySelector('svg,img,canvas')); }); }
+    var pgSig = '', pgRaf = 0;
+    function pgSync() {
+      pgRaf = 0;
+      var vis = pgEls.filter(function (e, i) { var on = i === 0 || pgShown(e); e.hidden = !on; return on; });
+      var sig = vis.map(function (e) { return pgEls.indexOf(e); }).join();
+      if (sig !== pgSig) {
+        pgSig = sig; dots.textContent = '';
+        vis.forEach(function (e, i) { dots.appendChild(h('i', { role: 'button', 'aria-label': t(PG[pgEls.indexOf(e)][0]), onclick: function () { track.scrollTo({ left: e.offsetLeft - track.offsetLeft, behavior: 'smooth' }); } })); });
+        dots.hidden = vis.length < 2;
+      }
+      var n = Math.min(vis.length - 1, Math.round(track.scrollLeft / Math.max(1, track.clientWidth))), cur0 = vis[Math.max(0, n)];
+      Array.prototype.forEach.call(dots.children, function (d, i) { d.classList.toggle('on', i === n); });
+      pgName.textContent = vis.length > 1 ? t(PG[pgEls.indexOf(cur0)][0]) : '';
+      track.style.height = cur0.offsetHeight + 'px';
+    }
+    function pgQueue() { if (!pgRaf) pgRaf = requestAnimationFrame(pgSync); }
+    var pgSettle = 0, pgTouch = false;
+    function pgSnap() { pgSettle = 0; if (pgTouch) return; var w = track.clientWidth, x = track.scrollLeft, n = Math.round(x / Math.max(1, w)); if (w && Math.abs(x - n * w) > 2) track.scrollTo({ left: n * w, behavior: 'smooth' }); }
+    track.addEventListener('touchstart', function () { pgTouch = true; clearTimeout(pgSettle); }, { passive: true });
+    track.addEventListener('touchend', function () { pgTouch = false; clearTimeout(pgSettle); pgSettle = setTimeout(pgSnap, 140); }, { passive: true });
+    track.addEventListener('touchcancel', function () { pgTouch = false; clearTimeout(pgSettle); pgSettle = setTimeout(pgSnap, 140); }, { passive: true });
+    track.addEventListener('scroll', function () { clearTimeout(pgSettle); if (!pgTouch) pgSettle = setTimeout(pgSnap, 140); pgQueue(); }, { passive: true });
+    var pgMo = typeof MutationObserver === 'function' ? new MutationObserver(pgQueue) : null;
+    if (pgMo) pgMo.observe(track, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
+    var pgRo = typeof ResizeObserver === 'function' ? new ResizeObserver(pgQueue) : null;
+    if (pgRo) pgEls.forEach(function (e) { pgRo.observe(e); });
 
     function clock(iso) {
       var d = new Date(iso); if (!isFinite(d)) return '';
@@ -304,7 +338,7 @@
       return h('div.vc-orow', null, h('span', null, label), h('div.src-selw', null, sel, h('span.src-chev', { html: UI.icon('chevdown', 16) })));
     }
     function drawExt(X, states, a) {
-      var VS = g.OkieMotor.vacSchedule, kicon = function (k) { return VS ? VS.kindIcon(k, 16) : ''; };
+      var VS = g.OkieMotor.vacSchedule, kicon = function (k) { return k === 'paw' ? PAW : VS ? VS.kindIcon(k, 16) : ''; }, PAW = '<svg class="oi" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="6.2" cy="10.4" rx="2" ry="2.6"/><ellipse cx="10.3" cy="6.2" rx="2" ry="2.7"/><ellipse cx="15.2" cy="6.2" rx="2" ry="2.7"/><ellipse cx="19.2" cy="10.4" rx="2" ry="2.6"/><path d="M12.7 11c-2.8 0-5.6 3.3-5.6 6 0 1.9 1.4 2.8 3 2.8 1 0 1.6-.4 2.6-.4s1.6.4 2.6.4c1.6 0 3-.9 3-2.8 0-2.7-2.8-6-5.6-6z"/></svg>';
       // your iRobot favorites
       section(favEl, 'f' + X.favorites.map(function (f) { return f.id + f.name; }).join('~'), function () {
         if (!X.favorites.length) return false;
@@ -329,7 +363,7 @@
         var names = X.rooms.concat(X.zones); if (!X.zoneSel || !X.zoneBtn || !names.length) return false;
         roomsEl.appendChild(h('div.vc-tl', null, t('vc.rooms'))); var row = h('div.vc-jobrow');
         names.forEach(function (n) {
-          row.appendChild(chip('run', kicon('room'), n.trim(), function () {
+          row.appendChild(chip('run', kicon(/cat|litter|katze|klo|pet|paw/i.test(n) ? 'paw' : 'room'), n.trim(), function () {
             act('select', 'select_option', { entity_id: X.zoneSel, option: n }).then(function () { return act('button', 'press', { entity_id: X.zoneBtn }, t('vc.started', { n: n.trim() })); }).then(function () { ctx.engine.recordUse(item.id); }).catch(function () {});
           }, { dataset: { room: n } }));
         });
@@ -383,8 +417,16 @@
       });
       var img = mapEl.querySelector('.vc-mapimg'); if (img && url && img.getAttribute('src') !== url) img.setAttribute('src', url);
     }
-    function tile(cls, label, value, sub, bar, tone) {
-      return h('div.vc-tile' + (cls ? '.' + cls : ''), null, h('div.vc-tl', null, label), h('div.vc-tv', null, value), sub ? h('div.vc-ts', null, sub) : null,
+    var TI = {
+      battery: '<path d="M4 8.5h13a1.5 1.5 0 0 1 1.5 1.5v4a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 14v-4A1.5 1.5 0 0 1 4 8.5z"/><path d="M21 10.5v3"/>',
+      area: '<path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z"/><path d="M9 4v13.5M15 6.5V20"/>',
+      time: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+      drop: '<path d="M12 3.5c3.2 4 5.5 6.7 5.5 9.6a5.5 5.5 0 0 1-11 0c0-2.9 2.3-5.6 5.5-9.6z"/>',
+      bin: '<path d="M5 7h14l-1 12.5H6zM3.5 7h17M9.5 7V4.5h5V7"/>',
+      pad: '<rect x="4" y="8" width="16" height="8" rx="2.5"/><path d="M8 16v2M12 16v2M16 16v2"/>',
+    };
+    function tile(cls, label, value, sub, bar, tone, icon) {
+      return h('div.vc-tile' + (cls ? '.' + cls : ''), null, h('div.vc-tl', null, icon && TI[icon] ? h('span.vc-ti', { html: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + TI[icon] + '</svg>' }) : null, h('span', null, label)), h('div.vc-tv', null, value), sub ? h('div.vc-ts', null, sub) : null,
         bar != null ? h('div.vc-bar', null, h('i.' + (tone || 'neutral'), { style: { width: Math.max(2, Math.min(100, bar)) + '%' } })) : null);
     }
     function draw(st) {
@@ -396,7 +438,7 @@
       subEl.textContent = ago;
       var bat = batteryOf(states, st, r), chg = isCharging(states, st, r);
       batEl.innerHTML = ''; batEl.hidden = bat == null;
-      if (bat != null) { batEl.appendChild(h('span.vc-bt.' + batteryTone(bat), null, bat + '%')); if (chg) batEl.appendChild(h('span.vc-bolt', { html: UI.icon('bolt', 16), 'aria-label': t('vc.charging') })); }
+      if (bat != null) { batEl.appendChild(h('span.vc-cell.' + batteryTone(bat), { style: { '--lv': bat + '%' } }, h('i'))); batEl.appendChild(h('span.vc-bt.' + batteryTone(bat), null, bat + '%')); if (chg) batEl.appendChild(h('span.vc-bolt', { html: UI.icon('bolt', 16), 'aria-label': t('vc.charging') })); }
       // the keys follow what the vacuum can do now
       var cl = st.state === 'cleaning';
       var sb = startBtn.querySelector('button'); sb.innerHTML = UI.icon(cl ? 'pause' : 'play', 24); startBtn.lastChild.textContent = cl ? t('vc.pause') : t('vc.start');
@@ -419,6 +461,15 @@
         jobsEl.hidden = !js.length;
       }
       drawExt(X, states, a);
+      // the clean going on now: how long it has run (the history of the vacuum has the start), no invented progress
+      cur.innerHTML = ''; var live = st.state === 'cleaning' || st.state === 'paused' || st.state === 'returning';
+      if (live) {
+        var open = runs.rows && runs.rows[0] && runs.rows[0].open ? runs.rows[0].start : (st.last_changed ? Date.parse(st.last_changed) : NaN), mins = isFinite(open) ? Math.max(0, Math.round((Date.now() - open) / 60000)) : null;
+        cur.appendChild(h('div.vc-tl', null, t('vc.current')));
+        cur.appendChild(h('div.vc-cr', null, h('b', null, L.stateLabel(st.state, ctx.lang())), mins != null ? h('span', null, t('vc.elapsed', { n: mins })) : null));
+        cur.appendChild(h('div.vc-bar.vc-live', null, h('i')));
+      }
+      cur.hidden = !live;
       var nx = nextSchedule(states, item.id), rn = X.nextClean; if (rn && (!nx || rn < nx.ts)) nx = { ts: rn, name: '' }; next.innerHTML = '';
       if (nx) { next.appendChild(h('div.vc-tl', null, t('vc.next'))); next.appendChild(h('div.vc-lv', null, dayLabel(nx.ts) + ' · ' + clock(new Date(nx.ts).toISOString()) + (nx.name ? ' · ' + nx.name : ''))); }
       next.hidden = !nx;
@@ -426,14 +477,15 @@
       prevState = st.state;
       // tiles
       tiles.innerHTML = '';
-      if (bat != null) tiles.appendChild(tile('', t('vc.battery'), bat + '%', chg ? t('vc.charging') : '', bat, batteryTone(bat)));
+      if (bat != null) tiles.appendChild(tile('', t('vc.battery'), bat + '%', chg ? t('vc.charging') : '', bat, batteryTone(bat), 'battery'));
       var tank = a.tank_level != null ? parseFloat(a.tank_level) : numberOf(states, r.tank);
       if (a.tank_present === false) tiles.appendChild(tile('', t('vc.tank'), t('vc.no_tank'), '', null));
-      else if (tank != null && isFinite(tank)) tiles.appendChild(tile('', t('vc.tank'), Math.round(tank) + '%', '', tank, 'water'));
+      else if (tank != null && isFinite(tank)) tiles.appendChild(tile('', t('vc.tank'), Math.round(tank) + '%', '', tank, 'water', 'drop'));
       var full = a.bin_full != null ? !!a.bin_full : (r.binFull && states[r.binFull] ? states[r.binFull].state === 'on' : null);
-      if (a.bin_present === false) tiles.appendChild(tile('warn', t('vc.bin'), t('vc.bin_gone'), '', null));
-      else if (full != null) tiles.appendChild(tile(full ? 'warn' : '', t('vc.bin'), full ? t('vc.bin_full') : t('vc.bin_ok'), '', null));
-      var pad = padLabel(a.detected_pad); if (pad) tiles.appendChild(tile('', t('vc.pad'), pad, '', null));
+      if (a.bin_present === false) tiles.appendChild(tile('warn', t('vc.bin'), t('vc.bin_gone'), '', null, null, 'bin'));
+      else if (full != null) tiles.appendChild(tile(full ? 'warn' : '', t('vc.bin'), full ? t('vc.bin_full') : t('vc.bin_ok'), '', null, null, 'bin'));
+      var pad = padLabel(a.detected_pad); if (pad) tiles.appendChild(tile('', t('vc.pad'), pad, '', null, null, 'pad'));
+      [['area', 'vc.area', 'area'], ['cleanTime', 'vc.clean_time', 'time']].forEach(function (p) { var v = numberOf(states, r[p[0]]); if (v == null) return; var unit = (states[r[p[0]]].attributes || {}).unit_of_measurement || ''; tiles.appendChild(tile('', t(p[1]), fmtStat(v, unit), '', null, null, p[2])); });
       tiles.hidden = !tiles.children.length;
       // last clean
       last.innerHTML = '';
@@ -444,7 +496,7 @@
       // missions
       mis.innerHTML = '';
       var total = numberOf(states, r.total), ok = numberOf(states, r.ok), cn = numberOf(states, r.canceled), fl = numberOf(states, r.failed);
-      var rows = [['scrubs', 'vc.scrubs'], ['avg', 'vc.avg'], ['cleanTime', 'vc.clean_time'], ['area', 'vc.area'], ['cycles', 'vc.cycles']].map(function (p) {
+      var rows = [['scrubs', 'vc.scrubs'], ['avg', 'vc.avg'], ['cycles', 'vc.cycles']].map(function (p) {
         var v = numberOf(states, r[p[0]]); if (v == null) return null;
         var unit = (states[r[p[0]]].attributes || {}).unit_of_measurement || ''; if (/^(Scrubs|Missions)$/.test(unit)) unit = '';
         return h('div.vc-row', null, h('span', null, t(p[1])), h('b', null, fmtStat(v, unit)));
@@ -462,9 +514,10 @@
     // the sensors next to the vacuum: found through the registry once it has answered, drawn at once by name before that
     registry(ctx).then(function (m) { if (!alive) return; reg = m; draw(ctx.state(item.id) || {}); });
     loadRuns();
-    return { el: root, dispose: function () { alive = false; if (robotMap) robotMap.dispose(); }, update: function (st) { draw(st); } };
+    return { el: root, dispose: function () { alive = false; clearTimeout(pgSettle); if (pgMo) pgMo.disconnect(); if (pgRo) pgRo.disconnect(); if (robotMap) robotMap.dispose(); }, update: function (st) { draw(st); } };
   }
 
+  var GL = 'background:linear-gradient(145deg,rgba(255,255,255,.14),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.13);-webkit-backdrop-filter:blur(22px) saturate(1.35);backdrop-filter:blur(22px) saturate(1.35);box-shadow:0 8px 24px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.16);';      // the frosted glass of the panels, like the other screens
   var CSS = [
     '.vc{gap:18px;align-items:stretch;width:100%;}',
     '.vc-head{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;}.vc-state{font-size:40px;font-weight:300;letter-spacing:-.02em;line-height:1.05;}',
@@ -503,6 +556,46 @@
     '.vc-jobrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}.vc-job{display:inline-flex;align-items:center;gap:8px;padding:11px 14px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-size:14px;font-weight:600;touch-action:manipulation;}.vc-job:active{background:rgba(255,255,255,.28);}',
     '.vc-ji{display:inline-flex;}.vc-jp{display:inline-flex;opacity:.7;}',
     '.vc-run{display:flex;align-items:baseline;gap:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,.08);font-size:14px;}.vc-rd{flex:none;width:76px;color:var(--okie-text-dim);}.vc-rt{flex:1;min-width:0;font-variant-numeric:tabular-nums;}.vc-run b{font-weight:600;}.vc-run.bad b{color:#ff9d92;}',
+
+    // ---- the design: frosted glass panels around the picture of the black Roomba, two columns when there is room
+    '.vc{container-type:inline-size;gap:14px;}.vc-pbar{display:flex;align-items:center;justify-content:center;gap:12px;min-height:12px;}.vc-pbar:has(.vc-pd[hidden]){display:none;}.vc-pd{display:flex;gap:9px;align-items:center;}.vc-pd i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4);transition:background .2s,transform .2s;cursor:pointer;}.vc-pd i.on{background:#fff;transform:scale(1.2);}.vc-pn{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.6);}'+'.vc-pgs{display:flex;align-items:flex-start;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;touch-action:pan-x pan-y;transition:height .25s;}.vc-pgs::-webkit-scrollbar{display:none;}.vc-pg{flex:0 0 100%;min-width:0;scroll-snap-align:start;display:flex;flex-direction:column;gap:14px;box-sizing:border-box;}.vc-pg[hidden]{display:none;}',
+    '.vc-hero{position:relative;border-radius:26px;overflow:hidden;aspect-ratio:522/454;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.22);box-shadow:0 10px 28px rgba(0,0,0,.22);isolation:isolate;}.vc-hero.nophoto{aspect-ratio:auto;min-height:230px;}',
+    '.vc-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-1;-webkit-user-drag:none;user-select:none;}.vc-hero::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.34),rgba(0,0,0,0) 40%);}',
+    '.vc-hero .vc-art{display:none;}.vc-hero.nophoto .vc-art{display:block;margin:34px auto 12px;width:min(190px,50%);}',
+    '.vc-hh{position:absolute;left:20px;top:16px;z-index:2;display:flex;flex-direction:column;gap:3px;text-align:left;}.vc-hh .vc-state{font-size:clamp(28px,7.6cqw,40px);font-weight:600;letter-spacing:-.015em;line-height:1.05;text-shadow:0 1px 10px rgba(0,0,0,.35);}.vc-hh .vc-sub{font-size:15px;color:rgba(255,255,255,.72);}',
+    '.vc-hero .vc-bat{position:absolute;right:18px;top:20px;z-index:2;display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600;text-shadow:0 1px 8px rgba(0,0,0,.35);}',
+    '.vc-cell{position:relative;width:32px;height:16px;border-radius:4.5px;background:rgba(255,255,255,.2);overflow:hidden;flex:none;}.vc-cell i{position:absolute;left:0;top:0;bottom:0;width:var(--lv,0%);background:#74dc90;}.vc-cell.mid i{background:#ffc266;}.vc-cell.low i{background:#ff7a6e;}',
+    '.vc-keys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;justify-content:stretch;}.vc-key{min-width:0;gap:8px;}',
+    '.vc-btn{width:100%;height:clamp(60px,15cqw,84px);border-radius:20px;' + GL + 'color:#fff;}.vc-btn:active{background:rgba(255,255,255,.26);transform:scale(.97);}',
+    '.vc-jobs .vc-tl{margin:2px 0 0 4px;}',
+    '.vc-jobrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;margin-top:8px;}',
+    '.vc-job{justify-content:flex-start;gap:10px;min-height:54px;padding:10px 14px;border-radius:18px;' + GL + 'box-shadow:0 4px 14px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.14);text-align:left;}.vc-job>span:not(.vc-ji){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}',
+    '.vc-job.on{background:linear-gradient(145deg,#fff,#efe9e1);color:#1d1b19;border-color:rgba(255,255,255,.7);}.vc-jp{display:none;}.vc-job.run::after{content:"";flex:none;width:8px;height:8px;border-right:2px solid currentColor;border-top:2px solid currentColor;transform:rotate(45deg);margin-left:auto;opacity:.6;}',
+    '.vc-tiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}@container (max-width:430px){.vc-tiles{grid-template-columns:repeat(2,minmax(0,1fr));}}',
+    '.vc-tile,.vc-card,.vc-last,.vc-mis{border-radius:24px;' + GL + '}.vc-tile{padding:14px 16px;gap:6px;}.vc-tile.warn{background:linear-gradient(145deg,rgba(255,130,100,.3),rgba(255,130,100,.12));}',
+    '.vc-tile .vc-tl,.vc-card .vc-tl,.vc-last .vc-tl,.vc-mis .vc-tl{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:500;letter-spacing:0;text-transform:none;color:rgba(255,255,255,.74);}.vc-ti{display:inline-grid;color:rgba(255,255,255,.7);}',
+    '.vc-tile .vc-tv{font-size:28px;font-weight:400;letter-spacing:-.01em;}.vc-card,.vc-last,.vc-mis{padding:16px 18px;}',
+    '.vc-bar{height:7px;}.vc-bar i.good{background:#74dc90;}',
+    '.vc-cr{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:19px;margin-top:2px;}.vc-cr b{font-weight:600;}.vc-cr span{font-size:14px;color:rgba(255,255,255,.7);}',
+    '.vc-live{margin-top:10px;}.vc-live i{width:38%;background:#74dc90;animation:vc-live 1.9s ease-in-out infinite alternate;}@keyframes vc-live{from{transform:translateX(0)}to{transform:translateX(163%)}}@media (prefers-reduced-motion:reduce){.vc-live i{animation:none !important;}}',
+    // calmer, smaller: the pages bleed to the screen edge (no hard cut line while swiping), everything a size down
+    ".vc-pgs{margin:0 -8px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8px,#000 calc(100% - 8px),transparent);mask-image:linear-gradient(90deg,transparent,#000 8px,#000 calc(100% - 8px),transparent);}.vc-pg{padding:0 8px;gap:10px;}.vc{gap:10px;}",
+    ".vc-hero.nophoto{min-height:176px;}.vc-hero.nophoto .vc-art{margin:30px auto 8px;width:min(124px,36%);}.vc-hh{left:16px;top:12px;}.vc-hh .vc-state{font-size:clamp(24px,6.4cqw,32px);}.vc-hh .vc-sub{font-size:13px;}.vc-hero .vc-bat{font-size:14px;right:14px;top:16px;}",
+    ".vc-btn{height:clamp(44px,10.5cqw,54px);border-radius:16px;}.vc-keys{gap:8px;}.vc-key{gap:5px;font-size:12px;}",
+    ".vc-jobrow{grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:6px;margin-top:6px;}.vc-job{min-height:40px;padding:6px 10px;border-radius:14px;font-size:13px;gap:7px;}",
+    ".vc-tiles{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:6px;}.vc-tile{padding:9px 11px;gap:3px;border-radius:16px;}.vc-tile .vc-tl{font-size:12px;gap:5px;}.vc-tile .vc-tv{font-size:19px;}.vc-tile .vc-bar{height:4px;margin-top:3px;}.vc-tile .vc-tl+.vc-tv+*{font-size:11px;}",
+    ".vc-card,.vc-last,.vc-mis{padding:12px 14px;border-radius:18px;}.vc-card .vc-lv,.vc-last .vc-lv{font-size:15px;}.vc-card .vc-tl,.vc-last .vc-tl,.vc-mis .vc-tl{font-size:13px;}.vc-mn{font-size:20px;}.vc-run{padding:6px 0;font-size:13px;}.vc-row{padding:6px 0;font-size:13px;}.vc-orow{padding:7px 0;font-size:13.5px;}.vc-mrow{padding:7px 0;}.vc-mt{font-size:13.5px;}.vc-alert{padding:9px 12px;border-radius:14px;font-size:13px;}",
+    // no boxes inside the card: stats, history, maintenance and the map sit straight on the glass, only the buttons stay as buttons
+    ".vc-hero,.vc-tile,.vc-card,.vc-last,.vc-mis,.vc-tile.warn{background:none !important;border:0 !important;box-shadow:none !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important;border-radius:0;}.vc-hero::after{display:none;}.vc-hero.nophoto{min-height:168px;}",
+    ".vc-card,.vc-last,.vc-mis{padding:2px 4px;}.vc-tile{padding:2px 4px;}.vc-tiles{gap:14px 10px;}.vc-tile .vc-tl{font-size:12px;color:rgba(255,255,255,.62);}.vc-tile .vc-tv{font-size:20px;}.vc-tile.warn .vc-tv{color:#ffb4a6;}",
+    ".vc-card .vc-tl,.vc-last .vc-tl,.vc-mis .vc-tl{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.62);}.vc-mapimg{margin-top:4px;}.vc-map .vc-tl{margin-bottom:6px;}",
+    ".vc-pgs{scroll-snap-stop:always;transition:none;}.vc-fold>.vc-tl{display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin:0 !important;padding:6px 4px;}.vc-fold>.vc-tl::after{content:\"\";width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin-right:4px;opacity:.6;transition:transform .2s;}.vc-fold.open>.vc-tl::after{transform:rotate(-135deg);}.vc-fold:not(.open)>.vc-jobrow,.vc-fold:not(.open)>.vc-hint{display:none;}",
+    // the robot is the main element: it takes most of the first screen, the controls are the rest
+    ".vc-hero.nophoto{min-height:clamp(300px,52vh,470px);display:flex;align-items:center;justify-content:center;}.vc-hero.nophoto .vc-art{margin:44px auto 0;width:min(270px,68%);}.vc-hh .vc-state{font-size:clamp(30px,8cqw,42px);}.vc-hh .vc-sub{font-size:14px;}.vc-hero .vc-bat{font-size:15px;}",
+    ".vc-hero.nophoto{min-height:clamp(290px,46vh,420px);align-items:flex-end;}.vc-hero.nophoto .vc-art{margin:56px auto 0;width:min(340px,92%);}",
+    ".vc-tiles{align-items:stretch;}.vc-tile{display:flex;flex-direction:column;min-height:86px;}.vc-tile .vc-bar{margin-top:auto;}.vc-tile .vc-tl+.vc-tv+*{min-height:14px;}",
+    '.vc-run b::after{content:"";display:inline-block;width:7px;height:7px;border-right:2px solid currentColor;border-top:2px solid currentColor;transform:rotate(45deg);margin-left:10px;opacity:.5;}',
+    '.vc-mapimg{border-radius:16px;}',
   ].join('\n');
   g.OkieMotor.extraCss = (g.OkieMotor.extraCss || []).concat([CSS]);
 

@@ -204,12 +204,15 @@ struct BigThermostat: View {
         return Canvas { ctx, _ in
             let u = R / 152.1                                    // the card draws its wheel in a 150 unit circle
             let center = CGPoint(x: cx, y: cy)
-            let reach = 60 * u
+            let look = DialLook.current
+            let reach = 60 * u * look.haze
             // the glow: a radial gradient with the falloff of a soft shadow of the rim, inside and outside
             var stops: [Gradient.Stop] = [.init(color: accent.opacity(0), location: 0)]
             for k in -6...6 {
                 let d = reach * Double(k) / 6
-                let a = 0.6 * exp(-pow(d / (34 * u), 2)) * max(0, 1 - pow(abs(d) / reach, 4))      // fades to nothing at the ends
+                let peak = min(1, 0.6 * look.brightness), width = 34 * u * look.haze
+                let falloff = exp(-pow(d / width, 2)), ends = max(0, 1 - pow(abs(d) / reach, 4))
+                let a = peak * falloff * ends      // fades to nothing at the ends
                 stops.append(.init(color: accent.opacity(a), location: min(1, max(0.0001, (R + d) / (R + reach)))))
             }
             ctx.fill(Path(ellipseIn: CGRect(x: cx - R - reach, y: cy - R - reach, width: 2 * (R + reach), height: 2 * (R + reach))),
@@ -220,7 +223,7 @@ struct BigThermostat: View {
             var t = ctx
             t.translateBy(x: cx, y: cy)
             t.rotate(by: .degrees(rot))
-            let count = 197
+            let count = look.tickCount
             let tickColor = Color(red: 235 / 255, green: 200 / 255, blue: 208 / 255).opacity(0.55)
             for k in 0..<count {
                 let major = k % 5 == 0

@@ -8,12 +8,12 @@ test('which player the Music screen shows: a music player, playing before paused
   const states = {
     'media_player.tv': st('playing', { app_name: 'Netflix', media_title: 'A Show' }),
     'media_player.roku': st('off'),
-    'media_player.spotify_alex': st('paused', { media_title: 'Song', media_artist: 'Band' }),
+    'media_player.spotify_paul': st('paused', { media_title: 'Song', media_artist: 'Band' }),
     'media_player.kitchen': st('playing', { media_content_type: 'music', media_title: 'Radio' }),
   };
   assert.equal(M.pickPlayer(states), 'media_player.kitchen', 'a playing music player beats a paused Spotify');
-  assert.equal(M.pickPlayer(Object.assign({}, states, { 'media_player.kitchen': st('idle', {}) })), 'media_player.spotify_alex');
-  assert.equal(M.pickPlayer(states, 'media_player.spotify_alex'), 'media_player.spotify_alex', 'the one you chose wins');
+  assert.equal(M.pickPlayer(Object.assign({}, states, { 'media_player.kitchen': st('idle', {}) })), 'media_player.spotify_paul');
+  assert.equal(M.pickPlayer(states, 'media_player.spotify_paul'), 'media_player.spotify_paul', 'the one you chose wins');
   assert.equal(M.pickPlayer({ 'media_player.tv': states['media_player.tv'] }), null, 'a TV with an app is not a music player');
   assert.equal(M.pickPlayer({ 'media_player.spotify_x': st('unavailable') }, 'media_player.spotify_x'), null, 'unavailable counts for nothing');
   assert.equal(M.pickPlayer({}), null);

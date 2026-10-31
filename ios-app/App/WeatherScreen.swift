@@ -138,18 +138,19 @@ private struct WeatherPage: View {
         .task { while !Task.isCancelled { await model.refresh(demo: demo); try? await Task.sleep(nanoseconds: 60_000_000_000) } }
     }
 
-    // The first screen of the page: every place is a fraction of the whole screen (read off the design picture of how it should look).
+    // The first screen of the page: every place is a fraction of the whole screen (read off Paul's picture of how it should look).
     private func hero(_ w: WeatherData, W: CGFloat, H: CGFloat) -> some View {
-        ZStack {
+        let U = min(W, H * 0.46)   // wide screens (iPad) size the art by height so it never outgrows the page
+        return ZStack {
             Text(w.dateText).font(.system(size: 22, weight: .light)).position(x: W / 2, y: H * 0.144)
             HStack(spacing: 7) {
                 if isHome { Image(systemName: "location.fill").font(.system(size: 17, weight: .semibold)) }
                 Text(w.place).font(.system(size: 25, weight: .bold)).lineLimit(1)
             }
             .padding(.horizontal, 30).position(x: W / 2, y: H * 0.177)
-            WeatherGlyph(condition: w.cond, night: w.night, size: W * 0.48, line: 0.62).position(x: W / 2, y: H * 0.3745)
+            WeatherGlyph(condition: w.cond, night: w.night, size: U * 0.48, line: 0.62).position(x: W / 2, y: H * 0.3745)
             Text(WxText.condition(w.cond)).font(.system(size: 24, weight: .light)).position(x: W / 2, y: H * 0.508)
-            Text(w.temp.map { "\($0)°" } ?? "–").font(.system(size: W * 0.335, weight: .ultraLight)).monospacedDigit().position(x: W / 2, y: H * 0.600)
+            Text(w.temp.map { "\($0)°" } ?? "–").font(.system(size: U * 0.335, weight: .ultraLight)).monospacedDigit().position(x: W / 2, y: H * 0.600)
             daysRow(w, W: W, H: H)
         }
     }
@@ -192,7 +193,7 @@ private struct WxSky: View {
     var night: Bool
     var cond: String
 
-    /// the day sky, read off the design picture of how it should look (final colours, top to bottom): no extra darkening on top of it
+    /// the day sky, read off Paul's picture of how it should look (final colours, top to bottom): no extra darkening on top of it
     private static let daySkyData: [[Double]] = [
         [0.00, 12, 49, 90], [0.05, 15, 53, 99], [0.10, 17, 58, 109], [0.15, 20, 66, 120], [0.20, 23, 74, 133], [0.25, 27, 82, 146], [0.30, 31, 91, 157], [0.35, 35, 98, 167],
         [0.40, 38, 104, 175], [0.45, 44, 112, 183], [0.50, 47, 118, 190], [0.55, 50, 123, 197], [0.60, 52, 128, 201], [0.65, 56, 134, 206], [0.70, 56, 136, 207], [0.75, 54, 131, 202],

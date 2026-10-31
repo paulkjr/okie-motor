@@ -32,6 +32,8 @@ struct HASession: Codable, Equatable {
 
 enum SessionStore {
     private static let account = "session"
+    /// Told after every save or clear: the phone app uses it to pass the sign-in on to the watch.
+    static var didChange: (() -> Void)?
 
     static func load() -> HASession? {
         guard let d = Keychain.get(account: account) else { return nil }
@@ -39,6 +41,7 @@ enum SessionStore {
     }
     static func save(_ s: HASession) {
         if let d = try? JSONEncoder().encode(s) { Keychain.set(d, account: account) }
+        didChange?()
     }
-    static func clear() { Keychain.delete(account: account) }
+    static func clear() { Keychain.delete(account: account); didChange?() }
 }

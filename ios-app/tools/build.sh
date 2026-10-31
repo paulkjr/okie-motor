@@ -8,12 +8,12 @@
 set -e
 HERE="${0:A:h}/.."
 cd "$HERE"
-[[ -f ../tools-local/scripts/env.sh ]] && . ../tools-local/scripts/env.sh >/dev/null 2>&1      # (the author's own tool folder; not needed when node and xcodegen are on your PATH)
+. ../tools-local/scripts/env.sh >/dev/null 2>&1
 OUT="${BUILD_DIR:-$HERE/.build}"
 [[ "$1" == "clean" ]] && rm -rf "$OUT" && shift
 node tools/build-widgets.js
-[[ -f ../widget/okie-thermostat-widget.js ]] && node tools/build-big-page.js
-[[ -f ../src/okie-ui.js ]] && node tools/gen-swift-icons.js
+[[ -f ../okie-motor/widget/okie-thermostat-widget.js ]] && node tools/build-big-page.js
+[[ -f ../okie-motor/src/okie-ui.js ]] && node tools/gen-swift-icons.js
 xcodegen generate >/dev/null
 xcodebuild -project OkieHome.xcodeproj -scheme OkieHome -destination 'generic/platform=iOS Simulator' -derivedDataPath "$OUT" \
   CODE_SIGN_IDENTITY=- CODE_SIGNING_ALLOWED=YES CODE_SIGNING_REQUIRED=NO DEVELOPMENT_TEAM= build > "$OUT.log" 2>&1 || { grep -E "error:" "$OUT.log" | sort -u | head -20; echo "BUILD FAILED (see $OUT.log)"; exit 1; }

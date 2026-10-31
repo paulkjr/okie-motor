@@ -57,7 +57,8 @@ struct ThermoInfo {
         name = a["friendly_name"]?.string ?? "Thermostat"
         humidity = a["current_humidity"]?.double
         step = a["target_temp_step"]?.double ?? (unit == "°C" ? 0.5 : 1)
-        modes = a["hvac_modes"]?.array?.compactMap { $0.string }.filter { $0 != "off" }
+        let all = a["hvac_modes"]?.array?.compactMap { $0.string }
+        modes = all?.filter { $0 != "off" && !($0 == "auto" && all?.contains("heat_cool") == true) }   // heat, cool, heat/cool: no separate auto
         let names = ["heat": "Heat", "cool": "Cool", "heat_cool": "Heat/Cool", "auto": "Auto", "dry": "Dry", "fan_only": "Fan"]
         let mode = names[st] ?? st.capitalized
         var s = mode

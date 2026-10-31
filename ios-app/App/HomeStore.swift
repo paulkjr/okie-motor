@@ -67,6 +67,10 @@ final class HomeStore {
     func open(_ url: URL) {
         guard url.scheme == "okiehome" else { return }
         NSLog("[okie-timing] link %@ received at +%.2fs", url.absoluteString, AppClock.seconds)
+#if DEBUG
+        if url.host == "report" { NotificationCenter.default.post(name: Notification.Name("okieDebugReport"), object: nil); return }
+        if url.host == "browse" { NotificationCenter.default.post(name: Notification.Name("okieDebugBrowse"), object: nil); return }          // debug builds: save a picture of the screen and the card's measurements (see DashboardView.writeReport)
+#endif
         // a tap on a widget that opens the app buzzes too: iOS plays no haptic while an app is still starting, so it waits until the app is in front
         if UIApplication.shared.applicationState == .active { Haptic.tap() } else { buzzWhenActive = true }
         locked = false
@@ -157,7 +161,7 @@ final class HomeStore {
         return await HAClient.shared.allEvents(calendars: ids, from: from, to: to)
     }
 
-    /// "Dentist – Alex · Tomorrow 8:30 AM": what comes next, for the lock page and the calendar card.
+    /// "Dentist – Paul · Tomorrow 8:30 AM": what comes next, for the lock page and the calendar card.
     func nextEvents(_ n: Int) async -> [CalendarEvent] {
         let now = Date()
         let all = await events(calendars.map(\.entityId), from: now, to: now.addingTimeInterval(7 * 86400))

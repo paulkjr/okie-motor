@@ -2,6 +2,31 @@
 
 The same entries are shown inside the card (dock > What's new). Newest first.
 
+## 0.56.0 (2026-10-28)
+
+**A Lights screen: every light in one place.**
+- A new Lights item in the menu: tabs for Favorites, each room that has lights, and All lights. Show them as square tiles or as long rows with the switch in the corner
+- Every light has a toggle and, when it can dim, a brightness bar in the macOS / iOS style: a soft track that fills with the light's own colour and a big white handle. Drag it, or tap the track
+- Tap the light itself to open its own card (the wheel, colours, schedule). The power button at the top turns the lights of the tab off, or on when they are all off
+
+**The heart on the Lights screen (and Music and the gadgets) hearts.** (2026-10-30)
+- Tapping it lit the pencil instead of the heart, because the pencil sits in front of it. The heart is found by its own place now
+- The heart and the power button on the Lights, Music and gadget screens sat off-centre in their circles (a stray button padding); they are centred now, like the thermostat's
+
+**Search: "lights" finds the Lights screen, and it has its own icon.** (2026-10-30)
+- Typing the whole word "lights" used to show only the single lights and hide the Lights screen, while "ligh" showed it. Both find it now
+- The Lights screen tile shows three bulbs instead of one, so it reads as a group
+
+**Thermostat: no separate Auto, and a remote that stops growing.** (2026-10-30)
+- A thermostat that has Heat/Cool no longer also shows Auto: the widget and the thermostat page list Heat, Cool and Heat/Cool only (also in the iOS app). One that only has Auto still shows it
+- The TV remote scales with its panel up to a comfortable size, then stays centred instead of growing until the dial runs off the card
+
+**Demo: a real song.** (2026-10-30)
+- The demo's music card plays Greensleeves (a public-domain tune, played by a generated music box) with its public-domain words in the lyrics view. The demo's AI answers questions too. Demo only, nothing to install on the server
+
+**TV remote: the volume dial rests while the TV is off.** (2026-10-30)
+- A standby TV refuses volume commands, which showed up as `media_player/volume_set ... Connection refused` toasts. The dial now ignores touches while the TV is off or unavailable and its arc fades; the other keys, including power, work as before
+
 ## 0.55.3 (2026-10-27)
 
 **A card with one page has no pager.**

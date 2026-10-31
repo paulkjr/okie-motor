@@ -150,6 +150,6 @@ test('fmtTime and playPos: the time line of the big cover card', () => {
   assert.equal(R.playPos({ media_position: 100, media_position_updated_at: '2026-10-21T10:00:00Z' }, false, t0 + 14000), 100, 'paused: stays');
   assert.equal(R.playPos({ media_position: 380, media_duration: 388, media_position_updated_at: '2026-10-21T10:00:00Z' }, true, t0 + 60000), 388, 'never past the end');
   assert.equal(R.playPos({}, true, t0), null);
-  assert.equal(R.isTvItem({ id: 'media_player.spotify_alex', name: 'Spotify Alex' }), false);
+  assert.equal(R.isTvItem({ id: 'media_player.spotify_paul', name: 'Spotify Paul' }), false);
   assert.equal(R.isTvItem({ id: 'media_player.living_room_tv', name: 'Living Room TV' }), true);
 });

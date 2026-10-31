@@ -174,7 +174,7 @@
     root.classList.add('thermo');
     function modeId(m) { return m; }
     var TH = g.OkieMotor.thermo;
-    var modes = (a0.hvac_modes || ['off', 'heat']).filter(function (m) { return m !== 'off'; }).map(function (m) { var own = t('th.mode.' + m); return { id: modeId(m), label: own !== 'th.mode.' + m ? own : t('d.mode.' + m) }; });
+    var modes = (a0.hvac_modes || ['off', 'heat']).filter(function (m, i, all) { return m !== 'off' && !(m === 'auto' && all.indexOf('heat_cool') >= 0); }).map(function (m) { var own = t('th.mode.' + m); return { id: modeId(m), label: own !== 'th.mode.' + m ? own : t('d.mode.' + m) }; });
     // heat/cool: HA sends target_temp_low/high and a null target, so the wheel gives way to two steppers
     function bump(key, dir) {
       var a = (ctx.state(item.id) || { attributes: {} }).attributes, lo = fnum(a.target_temp_low, min), hi = fnum(a.target_temp_high, max);
@@ -394,7 +394,7 @@
     var next = h('button.tr', { 'aria-label': 'Next', onclick: function () { svc(ctx, item, 'media_player', 'media_next_track').catch(noop); }, html: UI.icon('next', 22) });
     var power = CT.createPower({ label: t('d.power'), onToggle: function () { var s = (ctx.state(item.id) || {}).state; svc(ctx, item, 'media_player', s === 'off' ? 'turn_on' : 'turn_off').catch(noop); } });
     var vol = L.has(f, 4) ? CT.createSlider({ min: 0, max: 100, step: 1, value: 0, ariaLabel: t('d.volume'), format: pctFmt, color: '#8e5be8', onChange: function (v) { svc(ctx, item, 'media_player', 'volume_set', { volume_level: v / 100 }).catch(noop); } }) : null;
-    var srcRow = null;
+    var srcRow = null, srcLbl = null;
     var root = h('div.dctl' + (o.compact ? '.compact' : ''));
     if (!o.compact) root.appendChild(h('div.mp', null, art, h('div.mp-meta', null, title, sub)));
     else root.appendChild(h('div.mp-meta', null, title, sub));
@@ -408,7 +408,7 @@
       srcRow = a0.source_list.length > SOURCE_CHIPS_MAX
         ? sourceSelect({ options: a0.source_list, placeholder: t('d.source_pick'), label: t('d.source'), onChange: pickSource })
         : CT.createChips({ options: a0.source_list.map(function (s) { return { id: s, label: s }; }), value: null, onChange: pickSource });
-      root.appendChild(h('div.lbl', null, t('d.source'))); root.appendChild(srcRow.el);
+      srcLbl = h('div.lbl', null, t('d.source')); root.appendChild(srcLbl); root.appendChild(srcRow.el);
     }
     var remote = null, gone = false;
     if (!o.compact && a0.device_class !== 'speaker' && a0.device_class !== 'receiver') {
@@ -416,9 +416,16 @@
         if (gone) return;
         if (!info) { actrow.style.display = ''; return; }
         if (hasPower) power.el.classList.add('rm-power');
-        remote = remotePanel(ctx, item, info, hasPower ? power.el : null);
+        var RK = RKEYS[info.brand];
+        var hooks = {
+          keys: RK,
+          send: function (k) { ctx.haptic(8); ctx.call('remote', 'send_command', { entity_id: info.remote, command: [RK[k]] }).then(function () { ctx.engine.recordUse(item.id); }, function () { ctx.toast('error', core.t('d.failed', ctx.lang(), { name: item.name })); }); },
+          svc: function (domain, service, data) { return svc(ctx, item, domain, service, data).catch(noop); },
+        };
+        remote = g.OkieMotor.remote && g.OkieMotor.remote.create ? g.OkieMotor.remote.create(ctx, item, hooks) : remotePanel(ctx, item, info, hasPower ? power.el : null);
         // like a real remote: the transport keys and the power key are in the remote, so the row above is gone; the remote stands beside the picture, the volume and the sources
         actrow.style.display = 'none';
+        if (srcRow && g.OkieMotor.remote && g.OkieMotor.remote.create) { srcRow.el.style.display = 'none'; if (srcLbl) srcLbl.style.display = 'none'; }      // the new remote carries the sources in its favourites
         root.insertBefore(remote.el, root.firstChild); root.classList.add('tv');
         var dt = root.closest && root.closest('.dt'); if (dt) dt.dataset.remote = '1';      // the picture takes the width, the remote is as skinny as a real one
         remote.update();
@@ -612,7 +619,7 @@
     '.rk{height:38px;border-radius:15px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 6px;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:background .12s ease;}',
     '.rk:active{background:rgba(255,255,255,.28);}.rk[disabled]{opacity:.4;pointer-events:none;}',
     '.rdpad{display:grid;grid-template-columns:repeat(3,50px);gap:4px;justify-content:center;justify-items:center;align-items:center;margin:2px 0;}.rdpad .rk{width:50px;height:50px;border-radius:50%;padding:0;}.rk.ok{background:#fff;color:#1d1b19;border-color:#fff;}.rk.ok:active{background:rgba(255,255,255,.8);}',
-    '.dctl.tv .mp{display:none;}',
+    '.dctl.tv .mp{display:none;}.dctl.tv .rmx{flex:1 0 auto;}',
     '@media (max-width:640px){.dctl.tv{min-height:100%;box-sizing:border-box;}.dctl.tv .rmt{flex:1 0 auto;max-width:340px;}.dctl.tv .rmb{flex:1;justify-content:space-between;}.dctl.tv .rk{height:46px;}.dctl.tv .rdpad{grid-template-columns:repeat(3,58px);}.dctl.tv .rdpad .rk{width:58px;height:58px;}}',      // a phone: the remote takes the whole height under the picture
     '.rm-note{font-size:13px;color:#ffd990;background:rgba(255,176,32,.14);border-radius:14px;padding:10px 12px;text-align:center;}.rm-note[hidden]{display:none;}',
     '.stp{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.14);display:grid;place-items:center;}.cval{min-width:60px;text-align:center;font-size:20px;font-weight:600;}',

@@ -202,7 +202,7 @@
   function renderMusic(container, ctx) {
     var t = function (k, v) { return core.t(k, ctx.lang(), v); }, disposed = false, lyricsOn = false, playerId = pickPlayer(ctx.hass().states, ctx.store.get('music.player', null)), lastTrack = '', lyr = null, lyrKey = '', lyrToken = 0, activeLine = -2, tint = null, tintFor = '', dragging = false, bars = [], lf = null, np = null;
     var shell = g.OkieMotor.appshell.create(container, ctx, { id: 'music', title: t('app.music'), subtitle: '', icon: 'music', gradient: ['#0f2a22', '#1db954'], slim: true, tabs: [], heroDomain: 'media_player', onTab: function () {}, actions: [{ icon: 'heart', label: t('dt.fav_add'), onClick: function () { if (!playerId) { ctx.toast('error', t('mu.nothing')); return; } ctx.favorites.toggle(playerId); paintHeart(); } }] });
-    var heart = shell.el.querySelector('.dt-acts .dt-circ');      // the heart pins the player to the favorites, like the heart in every device screen
+    var heart = shell.el.querySelector('.dt-acts .dt-circ.act');      // the heart pins the player to the favorites, like the heart in every device screen
     function paintHeart() { if (!heart) return; var on = !!(playerId && ctx.favorites.has(playerId)); heart.classList.toggle('on', on); heart.setAttribute('aria-pressed', on ? 'true' : 'false'); }
     var body = shell.body, root = h('div.mu'), call = function (svc, data) { return ctx.call('media_player', svc, Object.assign({ entity_id: playerId }, data || {})).catch(function () { ctx.toast('error', t('app.music')); }); };
 

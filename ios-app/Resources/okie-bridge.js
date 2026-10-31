@@ -71,7 +71,7 @@
   };
   (function () { var n = 0, iv = setInterval(function () { if (B.fixCentre() || ++n > 80) clearInterval(iv); }, 250); })();
   // The card's screensaver (Settings > Screensaver & deep rest: after a few minutes without a touch it goes back to the lock page and then to a near-black "deep rest") is for wall tablets that run all
-  // day. In the Okie Home app it looked like a broken screen ("random, 5 minutes later, stays like that"), so the app keeps it off on this device (the setting belongs to this device only).
+  // day. In the Okie Home app it looked like a broken screen (Paul: "random, 5 minutes later, stays like that"), so the app keeps it off on this device (the setting belongs to this device only).
   B.noScreensaver = function () {
     var h = B.host || findHost(document), set = h && h._settings;
     if (!set || typeof set.get !== 'function' || typeof set.set !== 'function') return false;

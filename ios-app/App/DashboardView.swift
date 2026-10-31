@@ -3,7 +3,7 @@ import WebKit
 import WidgetKit
 import UniformTypeIdentifiers
 
-/// The Okie Motor dashboard of your Home Assistant, full screen, signed in with the app's own sign-in (it hands the tokens to the page, so there is no second login).
+/// Paul's real Okie Motor dashboard, full screen, signed in with the app's own sign-in (it hands the tokens to the page, so there is no second login).
 /// The card draws everything itself: lock page, search with the assistant, cards, dock, settings. Nothing of the app is in front of it.
 /// Seconds since the app process started touching this (used for the "[okie-timing]" lines in the log, to see where a cold start spends its time).
 enum AppClock {
@@ -187,7 +187,78 @@ struct DashboardWeb: UIViewRepresentable {
             observers.append(nc.addObserver(forName: .okieCheckWeb, object: nil, queue: .main) { [weak self] _ in self?.check(after: 0.8) })
             observers.append(nc.addObserver(forName: UIResponder.keyboardDidHideNotification, object: nil, queue: .main) { [weak self] _ in self?.web?.scrollView.setContentOffset(.zero, animated: false); self?.check(after: 0.5) })
             observers.append(nc.addObserver(forName: UIDevice.orientationDidChangeNotification, object: nil, queue: .main) { [weak self] _ in self?.check(after: 1.0) })
+#if DEBUG
+            observers.append(nc.addObserver(forName: Notification.Name("okieDebugReport"), object: nil, queue: .main) { [weak self] _ in self?.writeReport() })
+            observers.append(nc.addObserver(forName: Notification.Name("okieDebugBrowse"), object: nil, queue: .main) { [weak self] _ in self?.writeBrowse() })
+#endif
         }
+#if DEBUG
+        /// Debug builds only: `okiehome://report` saves a picture of the web view and what the page and the card measure into Documents (okie-snap.png, okie-report.json),
+        /// so a Mac can look at the screen without anyone taking a photo (`xcrun devicectl device copy from ... --source Documents/okie-snap.png`).
+        func writeReport() {
+            guard let w = web else { return }
+            let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            w.takeSnapshot(with: nil) { image, _ in if let d = image?.pngData() { try? d.write(to: docs.appendingPathComponent("okie-snap.png")) } }
+            let js = "(function(){var o={iw:innerWidth,ih:innerHeight,dpr:devicePixelRatio,url:location.href,sy:scrollY};"
+                + "try{var v=window.visualViewport;o.vv=v?{w:v.width,h:v.height,top:v.offsetTop,scale:v.scale}:null;}catch(e){}"
+                + "try{var d=document.createElement('div');d.style.cssText='position:fixed;visibility:hidden;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)';document.body.appendChild(d);var cs=getComputedStyle(d);o.safe=[cs.paddingTop,cs.paddingRight,cs.paddingBottom,cs.paddingLeft];d.remove();}catch(e){}"
+                + "try{var c=(function f(r){var e=r.querySelector('okie-motor-card');if(e)return e;var a=r.querySelectorAll('*');for(var i=0;i<a.length;i++){if(a[i].shadowRoot){var x=f(a[i].shadowRoot);if(x)return x;}}return null;})(document);if(c){var r=function(e){if(!e)return null;var b=e.getBoundingClientRect();return [Math.round(b.left),Math.round(b.top),Math.round(b.width),Math.round(b.height)];};"
+                + "var sr=c.shadowRoot,st=sr.querySelector('.stage'),mc=sr.querySelector('.main-container');"
+                + "o.card={version:window.OkieMotor&&OkieMotor.version,host:r(c),zoom:c._zoom,homeShown:c._homeShown||null,center:st&&st.style.getPropertyValue('--okie-center'),panelH:st&&getComputedStyle(st).getPropertyValue('--fsc-panel-h'),"
+                + "dataset:st?Object.assign({},st.dataset):null,main:r(mc),mainOffsetH:mc&&mc.offsetHeight,mainZoom:mc&&mc.style.zoom,w1:r(sr.querySelector('.w1')),wright:r(sr.querySelector('.wright')),feeder:r(sr.querySelector('.fdc')),feederDesign:(sr.querySelector('.fdc')||{dataset:{}}).dataset.design,"
+                + "search:r(sr.querySelector('.search-row,.search-wrap,.fsc-search'))};}}catch(e){o.cardError=String(e);}"
+                + "return JSON.stringify(o);})()"
+            w.evaluateJavaScript(js) { result, error in
+                var native: [String: Any] = [
+                    "webFrame": [w.frame.origin.x, w.frame.origin.y, w.frame.size.width, w.frame.size.height],
+                    "webSafe": [w.safeAreaInsets.top, w.safeAreaInsets.left, w.safeAreaInsets.bottom, w.safeAreaInsets.right],
+                    "scrollInset": [w.scrollView.contentInset.top, w.scrollView.contentInset.bottom, w.scrollView.adjustedContentInset.top, w.scrollView.adjustedContentInset.bottom],
+                    "scrollOffset": [w.scrollView.contentOffset.x, w.scrollView.contentOffset.y],
+                    "screen": [UIScreen.main.bounds.width, UIScreen.main.bounds.height], "scale": UIScreen.main.scale,
+                ]
+                if let win = w.window { native["windowSafe"] = [win.safeAreaInsets.top, win.safeAreaInsets.left, win.safeAreaInsets.bottom, win.safeAreaInsets.right]; native["window"] = [win.bounds.width, win.bounds.height] }
+                var out: [String: Any] = ["native": native]
+                if let t = result as? String, let d = t.data(using: .utf8), let j = try? JSONSerialization.jsonObject(with: d) { out["page"] = j } else { out["pageError"] = String(describing: error) }
+                if let d = try? JSONSerialization.data(withJSONObject: out, options: [.prettyPrinted, .sortedKeys]) { try? d.write(to: docs.appendingPathComponent("okie-report.json")) }
+            }
+        }
+
+        /// Debug builds only: `okiehome://browse` makes the page read (only read) what the Spotify player of Home Assistant offers to browse, two levels deep, and saves it in Documents/okie-browse.json.
+        func writeBrowse() {
+            guard let w = web else { return }
+            let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let js = """
+            const find = (r) => { const e = r.querySelector('okie-motor-card'); if (e) return e; for (const n of r.querySelectorAll('*')) { if (n.shadowRoot) { const x = find(n.shadowRoot); if (x) return x; } } return null; };
+            const c = find(document); if (!c || !c._ctx) return JSON.stringify({ error: 'no card' });
+            const ctx = c._ctx, st = ctx.hass().states, id = Object.keys(st).filter(k => /^media_player[.]spotify/.test(k))[0];
+            if (!id) return JSON.stringify({ error: 'no spotify player', players: Object.keys(st).filter(k => k.indexOf('media_player.') === 0) });
+            const a = st[id].attributes;
+            const out = { entity: id, state: st[id].state, features: a.supported_features, sources: a.source_list || null, source: a.source || null, attrKeys: Object.keys(a), levels: [] };
+            const call = async (cid, ctype) => { try { const m = { type: 'media_player/browse_media', entity_id: id }; if (cid != null) { m.media_content_id = cid; m.media_content_type = ctype; } return await ctx.callWS(m); } catch (e) { return { error: String((e && (e.message || e.code)) || JSON.stringify(e)) }; } };
+            const brief = (n, max) => n && !n.error ? Object.assign({}, n, { children: (n.children || []).slice(0, max || 6), childCount: (n.children || []).length }) : n;
+            const root = await call(); out.levels.push({ path: 'root', node: brief(root, 6) });
+            const acct = root && root.children && root.children[0];
+            if (acct) {
+              const lib = await call(acct.media_content_id, acct.media_content_type); out.levels.push({ path: 'account', node: brief(lib, 12) });
+              for (const ch of (lib && lib.children || [])) {
+                if (!/playlist|liked|album|recent|top tracks/i.test(ch.title)) continue;
+                const n = await call(ch.media_content_id, ch.media_content_type); out.levels.push({ path: ch.title, node: brief(n, 3) });
+                const first = n && n.children && n.children[0];
+                if (first && first.can_expand && /playlist|album/i.test(ch.title)) { const d = await call(first.media_content_id, first.media_content_type); out.levels.push({ path: ch.title + ' > first', node: brief(d, 3) }); }
+              }
+            }
+            return JSON.stringify(out);
+            """
+            w.callAsyncJavaScript(js, arguments: [:], in: nil, in: .page) { result in
+                var text = "{\"error\":\"no answer\"}"
+                switch result {
+                case .success(let v): if let t = v as? String { text = t }
+                case .failure(let e): text = "{\"error\":\"\(String(describing: e).replacingOccurrences(of: "\"", with: "'"))\"}"
+                }
+                try? text.data(using: .utf8)?.write(to: docs.appendingPathComponent("okie-browse.json"))
+            }
+        }
+#endif
         func stopWatchdog() { timer?.invalidate(); timer = nil; observers.forEach { NotificationCenter.default.removeObserver($0) }; observers = [] }
 
         func check(after delay: TimeInterval = 0) {

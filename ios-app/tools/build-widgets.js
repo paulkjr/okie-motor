@@ -3,7 +3,7 @@
 // Usage: node tools/build-widgets.js        (tools/build.sh runs it for you)
 'use strict';
 const fs = require('fs'), path = require('path');
-const spec = JSON.parse(fs.readFileSync(path.join(__dirname, '../Widgets/widgets.json'), 'utf8'));
+const spec = JSON.parse(fs.readFileSync(path.join(__dirname, '../widgets/widgets.json'), 'utf8'));
 const isColor = v => typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v);
 const hex = v => '0x' + v.slice(1).toLowerCase();
 const cap = s => s[0].toUpperCase() + s.slice(1);

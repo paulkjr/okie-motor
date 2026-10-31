@@ -65,6 +65,11 @@
       var col = on ? '#f5a30b' : c;
       return '<path d="M24 6a13 13 0 0 0-7.6 23.5c1.3 1 2 2.2 2 3.7V35h11.2v-1.8c0-1.5.7-2.7 2-3.7A13 13 0 0 0 24 6z" fill="' + (on ? 'rgba(245,163,11,.35)' : 'none') + '" stroke="' + col + '" stroke-width="3"/><path d="M19 40h10M21 44h6" stroke="' + col + '" stroke-width="3"/>';
     },
+    lights: function (on, c) {                      // the Lights screen stands for a group, so it shows three bulbs
+      var col = on ? '#f5a30b' : c, fill = on ? 'rgba(245,163,11,.35)' : 'none';
+      var bulb = function (x, y) { return '<g transform="translate(' + x + ' ' + y + ') scale(.55)" stroke="' + col + '" stroke-width="5"><path d="M24 6a13 13 0 0 0-7.6 23.5c1.3 1 2 2.2 2 3.7V35h11.2v-1.8c0-1.5.7-2.7 2-3.7A13 13 0 0 0 24 6z" fill="' + fill + '"/><path d="M19 40h10M21 44h6"/></g>'; };
+      return bulb(-5, 17) + bulb(26, 17) + bulb(10.5, 10);
+    },
     tv: function (on, c) {
       var col = on ? '#2d8cf0' : c;
       return '<rect x="5" y="8" width="38" height="26" rx="4" fill="' + (on ? 'rgba(45,140,240,.18)' : 'none') + '" stroke="' + col + '" stroke-width="3"/><path d="M17 41h14M24 34v7" stroke="' + col + '" stroke-width="3"/>' + (on ? '<path d="M14 26V16M14 21h6M20 16l-6 5 6 5M27 16v10M27 21l7-5M27 21l7 5" stroke="' + col + '" stroke-width="2.6"/>' : '');
@@ -152,7 +157,7 @@
   /** Coloured icon markup for a tile. on = the tile is white. */
   function deviceSvg(item, state, on, size, attrs) {
     var dc = (attrs && attrs.device_class) || item.deviceClass;
-    var k = kind(item.domain, dc, state, attrs);
+    var k = item.id === 'gadget.lights' ? 'lights' : kind(item.domain, dc, state, attrs);
     var col = on ? 'rgba(0,0,0,.72)' : OFF;
     var body = (DRAW[k] || DRAW.dot)(on, col);
     return sv(size || 48, body, 'k-' + k);

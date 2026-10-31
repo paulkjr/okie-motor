@@ -20,7 +20,7 @@
     var engine = ctx.engine;
     registry = registry || new Map();
 
-    function itemState(item) { var hs = ctx.hass(); return hs && hs.states[item.id]; }
+    function itemState(item) { var hs = ctx.hass(); if (item.id === 'gadget.lights') return ctx.state(item.id); return hs && hs.states[item.id]; }
     function liveItem(item) { return Object.assign({}, item, { state: (itemState(item) || {}).state }); }
     function currentAction(item) { return ctx.settings.get().quickEnabled ? L.quickAction(liveItem(item), ctx.settings.get().quickControl) : null; }
 
@@ -90,7 +90,7 @@
 
     function makeRow(item) {
       var ic = makeIconButton(item);
-      var TOG = ['light', 'switch', 'fan', 'input_boolean', 'humidifier', 'automation', 'siren', 'remote'], togg = TOG.indexOf(item.domain) >= 0;
+      var TOG = ['light', 'switch', 'fan', 'input_boolean', 'humidifier', 'automation', 'siren', 'remote'], pin = item.id === 'gadget.lights', togg = pin || TOG.indexOf(item.domain) >= 0;
       var sw = togg ? h('button.sw.row-sw', { type: 'button', role: 'switch', 'aria-checked': 'false', 'aria-label': item.name }, h('i')) : null;
       var more = !togg && ctx.compactAvailable() ? h('button.device-list-actions', { 'aria-label': t('browse.more'), 'aria-expanded': 'false', html: UI.icon('more', 20) }) : null;
       var status = h('div.device-list-status');
@@ -99,7 +99,7 @@
       var row = h('div.device-list-item.tile', { role: 'button', tabindex: '0', 'aria-label': t('browse.open_detail', { name: item.name }) }, h('div.device-list-row', null, iconBox, content, sw || more));
       row._item = item; row._sw = sw;
       if (sw) {
-        sw.addEventListener('click', function (e) { e.stopPropagation(); var on = !sw.classList.contains('on'); sw.classList.toggle('on', on); sw.setAttribute('aria-checked', on ? 'true' : 'false'); if (ctx.haptic) ctx.haptic(10); ctx.call(item.domain, on ? 'turn_on' : 'turn_off', { entity_id: item.id }); });
+        sw.addEventListener('click', function (e) { e.stopPropagation(); var on = !sw.classList.contains('on'); sw.classList.toggle('on', on); sw.setAttribute('aria-checked', on ? 'true' : 'false'); if (ctx.haptic) ctx.haptic(10); if (pin) { g.OkieMotor.lights.toggleFav(ctx); return; } ctx.call(item.domain, on ? 'turn_on' : 'turn_off', { entity_id: item.id }); });
         sw.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
       } row._ic = ic; row._state = status;
       wireOpen(row, item);

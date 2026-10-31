@@ -663,6 +663,7 @@
         editBarEl = AR.editBar(ctx, { onDone: function () { setEditing(false); }, onReset: function () { if (!snap) return; ctx.settings.set({ favorites: snap.favorites, roomsOrder: snap.roomsOrder, bento: { w1height: snap.w1height, wrheight: snap.wrheight, rightOrder: snap.rightOrder, rightCards: snap.rightCards, leftWidgets: snap.leftWidgets } }); } });
         ctx.stage.appendChild(editBarEl); editBarEl.classList.toggle('on', editing);
         if (holder) holder.dispose();
+        if (!w1body._okieEdit) { w1body._okieEdit = true; w1body.addEventListener('okie-edit', function (e) { e.preventDefault(); if (!editing) setEditing(true); }); }      // a long press on the light scenes strip opens the arrangement too
         holder = AR.hold(ctx, w1body, { current: function () { return curOrd; }, layout: function () { return cfg().w1layout === 'list' ? 'list' : 'grid'; }, editing: function () { return editing; }, enter: function () { setEditing(true); } });
       }
       wireGrip(grip, pen);

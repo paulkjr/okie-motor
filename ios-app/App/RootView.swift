@@ -12,7 +12,7 @@ struct RootView: View {
         } else if UserDefaults.standard.bool(forKey: "iconSheet") {
             IconSheet()
         } else if store.isSignedIn {
-            // no tabs and no menus: your Okie Motor dashboard fills the screen (its own lock page first); the sample mode shows the native look-alike
+            // no tabs and no menus: Paul's real Okie Motor dashboard fills the screen (its own lock page first); the sample mode shows the native look-alike
             ZStack {
                 Color(DashboardWeb.background).ignoresSafeArea()
                 if store.demo {

@@ -156,7 +156,7 @@
     'lm.title': 'Light modes', 'lm.ran': '{n} started', 'lm.failed': 'That mode could not run', 'lm.running': 'Running',
     'lm.desc': 'Shortcuts for your lights: cards on the Favorites tab and in the rooms you choose.', 'lm.count': '{n} modes',
     'lm.intro': 'A mode runs a script or a scene, sets some lights or all the lights of a room. Your Govee shortcuts are scripts, so they keep doing what they did.',
-    'lm.add': 'Add a mode', 'lm.edit': 'Edit', 'lm.run': 'Run now', 'lm.delete': 'Delete', 'lm.save': 'Save mode', 'lm.back': 'Modes', 'lm.reset': 'Back to the original three',
+    'lm.add': 'Add a mode', 'lm.add_short': 'Add', 'lm.scenes': 'Light scenes', 'lm.edit': 'Edit', 'lm.run': 'Run now', 'lm.delete': 'Delete', 'lm.save': 'Save mode', 'lm.back': 'Modes', 'lm.reset': 'Back to the original three',
     'lm.new': 'New mode', 'lm.edit_t': 'Edit mode', 'lm.name': 'Name', 'lm.name_ph': 'Name, for example Movie night', 'lm.icon': 'Picture', 'lm.color': 'Color', 'lm.does': 'What it does',
     'lm.add_script': 'Script or scene', 'lm.add_lights': 'Some lights', 'lm.add_room': 'A room\'s lights', 'lm.pick': 'Choose…', 'lm.on': 'On', 'lm.off': 'Off', 'lm.bright': 'Brightness', 'lm.keep_bright': 'Keep brightness',
     'lm.add_item': 'Add', 'lm.remove': 'Remove', 'lm.nothing': 'Add at least one thing for it to do', 'lm.name_empty': 'Give the mode a name', 'lm.saved': 'Mode saved', 'lm.deleted': 'Mode deleted',
@@ -164,13 +164,13 @@
     'lm.sched': 'Schedule', 'lm.sched_add': 'Add a schedule', 'lm.sched_none': 'Not scheduled yet.', 'lm.sched_time': 'Time', 'lm.sched_days': 'Days', 'lm.sched_save': 'Save schedule', 'lm.sched_saved': 'Schedule saved', 'lm.sched_deleted': 'Schedule deleted',
     'lm.sched_failed': 'The schedule could not be saved', 'lm.sched_needs': 'Schedules need the Scheduler component (HACS: nielsfaber/scheduler-component).', 'lm.every': 'Every day', 'lm.weekdays': 'Mon - Fri', 'lm.weekend': 'Weekend', 'lm.sched_hint': 'Runs even when no screen is open.',
     'lm.d_script': 'Runs the script {n}', 'lm.d_scene': 'Activates the scene {n}', 'lm.d_n_lights': '{n} lights', 'lm.d_room': 'the lights in {n}', 'lm.d_off': 'Turns {w} off', 'lm.d_on': 'Turns {w} on', 'lm.d_on_at': 'Turns {w} on at {p}%',
-    'lm.sub': 'Tap to run', 'lm.active': 'Active', 'lm.layout': 'Layout', 'lm.layout_h': 'Side by side', 'lm.layout_v': 'Stacked', 'lm.layout_c': 'Icons only', 'lm.edit_all': 'Edit light modes', 'lm.app_sub': 'Tap a row to run it. Edit, add or schedule them here.',
+    'lm.sub': 'Tap to run', 'lm.active': 'Active', 'lm.layout': 'Layout', 'lm.layout_k': 'Card', 'lm.layout_h': 'Side by side', 'lm.layout_v': 'Stacked', 'lm.layout_c': 'Icons only', 'lm.edit_all': 'Edit light modes', 'lm.app_sub': 'Tap a row to run it. Edit, add or schedule them here.',
   });
   core.registerStrings('de', {
     'lm.title': 'Lichtmodi', 'lm.ran': '{n} gestartet', 'lm.failed': 'Der Modus konnte nicht laufen', 'lm.running': 'Läuft',
     'lm.desc': 'Kurzbefehle für deine Lichter: Karten bei den Favoriten und in den Räumen, die du wählst.', 'lm.count': '{n} Modi',
     'lm.intro': 'Ein Modus startet ein Skript oder eine Szene, stellt einige Lichter oder alle Lichter eines Raums ein. Deine Govee-Kurzbefehle sind Skripte, sie tun also weiter, was sie taten.',
-    'lm.add': 'Modus hinzufügen', 'lm.edit': 'Bearbeiten', 'lm.run': 'Jetzt starten', 'lm.delete': 'Löschen', 'lm.save': 'Modus speichern', 'lm.back': 'Modi', 'lm.reset': 'Zurück zu den ursprünglichen drei',
+    'lm.add': 'Modus hinzufügen', 'lm.add_short': 'Neu', 'lm.scenes': 'Lichtszenen', 'lm.edit': 'Bearbeiten', 'lm.run': 'Jetzt starten', 'lm.delete': 'Löschen', 'lm.save': 'Modus speichern', 'lm.back': 'Modi', 'lm.reset': 'Zurück zu den ursprünglichen drei',
     'lm.new': 'Neuer Modus', 'lm.edit_t': 'Modus bearbeiten', 'lm.name': 'Name', 'lm.name_ph': 'Name, zum Beispiel Filmabend', 'lm.icon': 'Symbol', 'lm.color': 'Farbe', 'lm.does': 'Was er tut',
     'lm.add_script': 'Skript oder Szene', 'lm.add_lights': 'Einige Lichter', 'lm.add_room': 'Lichter eines Raums', 'lm.pick': 'Wählen…', 'lm.on': 'An', 'lm.off': 'Aus', 'lm.bright': 'Helligkeit', 'lm.keep_bright': 'Helligkeit lassen',
     'lm.add_item': 'Hinzufügen', 'lm.remove': 'Entfernen', 'lm.nothing': 'Füge mindestens etwas hinzu, das er tut', 'lm.name_empty': 'Gib dem Modus einen Namen', 'lm.saved': 'Modus gespeichert', 'lm.deleted': 'Modus gelöscht',
@@ -178,14 +178,14 @@
     'lm.sched': 'Zeitplan', 'lm.sched_add': 'Zeitplan hinzufügen', 'lm.sched_none': 'Noch nicht geplant.', 'lm.sched_time': 'Zeit', 'lm.sched_days': 'Tage', 'lm.sched_save': 'Zeitplan speichern', 'lm.sched_saved': 'Zeitplan gespeichert', 'lm.sched_deleted': 'Zeitplan gelöscht',
     'lm.sched_failed': 'Der Zeitplan konnte nicht gespeichert werden', 'lm.sched_needs': 'Zeitpläne brauchen die Scheduler-Komponente (HACS: nielsfaber/scheduler-component).', 'lm.every': 'Jeden Tag', 'lm.weekdays': 'Mo - Fr', 'lm.weekend': 'Wochenende', 'lm.sched_hint': 'Läuft auch, wenn kein Bildschirm offen ist.',
     'lm.d_script': 'Startet das Skript {n}', 'lm.d_scene': 'Aktiviert die Szene {n}', 'lm.d_n_lights': '{n} Lichter', 'lm.d_room': 'die Lichter in {n}', 'lm.d_off': 'Schaltet {w} aus', 'lm.d_on': 'Schaltet {w} ein', 'lm.d_on_at': 'Schaltet {w} auf {p} % ein',
-    'lm.sub': 'Zum Starten tippen', 'lm.active': 'Aktiv', 'lm.layout': 'Anordnung', 'lm.layout_h': 'Nebeneinander', 'lm.layout_v': 'Untereinander', 'lm.layout_c': 'Nur Symbole', 'lm.edit_all': 'Lichtmodi bearbeiten', 'lm.app_sub': 'Zeile antippen zum Starten. Hier bearbeiten, hinzufügen oder planen.',
+    'lm.sub': 'Zum Starten tippen', 'lm.active': 'Aktiv', 'lm.layout': 'Anordnung', 'lm.layout_k': 'Karte', 'lm.layout_h': 'Nebeneinander', 'lm.layout_v': 'Untereinander', 'lm.layout_c': 'Nur Symbole', 'lm.edit_all': 'Lichtmodi bearbeiten', 'lm.app_sub': 'Zeile antippen zum Starten. Hier bearbeiten, hinzufügen oder planen.',
   });
   function T(ctx) { return function (k, v) { return core.t(k, ctx.lang(), v); }; }
   function modesNow(ctx) { return modesOf(ctx.settings.get().lightModes); }
   /** The look switches of the card: which things it shows (all on by default). */
   function lookOf(ctx) { return Object.assign({ active: true, chevron: true, hint: true }, ctx.settings.get().lightModesLook); }
   /** 'horizontal' (side by side), 'vertical' (stacked) or 'compact' (a thin strip of pictures only). */
-  function layoutOf(ctx) { var v = ctx.settings.get().lightModesLayout; return v === 'vertical' || v === 'compact' ? v : 'horizontal'; }
+  function layoutOf(ctx) { var v = ctx.settings.get().lightModesLayout; return v === 'vertical' || v === 'compact' || v === 'horizontal' ? v : 'card'; }
   function areasOf(ctx) { var hs = ctx.hass(); return (hs && hs.areas) || null; }
   function dayName(ctx, d) { return core.t('dt.' + d, ctx.lang()); }
 
@@ -217,11 +217,48 @@
       if (go) go.style.setProperty('--lm-go', col);
       root.firstChild && root.firstChild.style.setProperty('--lm-go', col);
     }
+    function addBar(lay, edit) {
+      // while the start screen is arranged (hold a card) a bar covers the card, like the bar of every other card: the layout, and a pencil that opens the editor; the modes do not run meanwhile
+      var seg = h('span.rm-seg', { role: 'group', 'aria-label': t('lm.layout') });
+      [['card', 'lm.layout_k'], ['horizontal', 'lm.layout_h'], ['vertical', 'lm.layout_v'], ['compact', 'lm.layout_c']].forEach(function (o) {
+        seg.appendChild(h('button' + (lay === o[0] ? '.on' : ''), { type: 'button', 'aria-pressed': lay === o[0] ? 'true' : 'false', onclick: function (e) { e.stopPropagation(); if (lay === o[0]) return; if (ctx.haptic) ctx.haptic(8); ctx.settings.set({ lightModesLayout: o[0] }); } }, t(o[1])));
+      });
+      root.appendChild(h('div.fv-sw.lmbar', null, h('b', null, t('lm.title')), seg, h('button.mv.fv-edit', { type: 'button', 'aria-label': t('lm.edit_all'), title: t('lm.edit_all'), html: UI.icon('pencil', 18), onclick: function (e) { e.stopPropagation(); edit(); } })));
+    }
+    var tgRef = null;
+    function paintToggle() { return; var L = g.OkieMotor.lights, hs = ctx.hass(); if (tgRef && L && L.favOn && hs) { var on = L.favOn(ctx.settings.get(), hs.states); tgRef.classList.toggle('on', on); tgRef.setAttribute('aria-checked', on ? 'true' : 'false'); } }
+    /** The card layout: a title with one switch for the favorite lights, and the modes as round buttons with their name under them (the chosen one filled white), then an Add circle. */
+    function drawCard(list, edit) {
+      var row = h('div.lmk-row');
+      list.forEach(function (m) {
+        var b = h('button.lmk-b', { type: 'button', title: m.name, dataset: { mode: m.id }, 'aria-label': m.name }, h('span.lmk-c', { html: UI.icon(m.icon, 24) }));
+        b.style.setProperty('--lm-a', m.color[0]); b.onclick = function () { run(ctx, m, b); };
+        rowsById[m.id] = { row: b, sub: h('span') }; row.appendChild(b);
+      });
+      row.appendChild(h('button.lmk-b.lmk-add', { type: 'button', title: t('lm.add'), 'aria-label': t('lm.add'), onclick: edit }, h('span.lmk-c', { html: UI.icon('plus', 24) })));
+      var cardEl = h('div.rc.lmk', null, row), timer = 0, sx = 0, sy = 0;      // hold the strip (0.45 s, without moving): the arrangement opens, or, where there is none, the scenes editor
+      function clr() { clearTimeout(timer); timer = 0; }
+      cardEl.addEventListener('pointerdown', function (e) {
+        if ((e.button || 0) !== 0) return; sx = e.clientX; sy = e.clientY; clr();
+        timer = setTimeout(function () {
+          timer = 0; var swallow = function (ev) { ev.stopPropagation(); ev.preventDefault(); }; cardEl.addEventListener('click', swallow, true); setTimeout(function () { cardEl.removeEventListener('click', swallow, true); }, 600);
+          if (ctx.haptic) ctx.haptic('switch');
+          var ev2 = new g.CustomEvent('okie-edit', { bubbles: true, composed: true, cancelable: true }); cardEl.dispatchEvent(ev2); if (!ev2.defaultPrevented) edit();
+        }, 450);
+      });
+      cardEl.addEventListener('pointermove', function (e) { if (timer && Math.hypot(e.clientX - sx, e.clientY - sy) > 8) clr(); });
+      ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (n) { cardEl.addEventListener(n, clr); });
+      cardEl.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+      root.appendChild(cardEl);
+      root.dataset.lay = 'card'; addBar('card', edit); paint();
+    }
     function draw() {
       var hs = ctx.hass(), list = modesNow(ctx).filter(function (m) { return visibleIn(m, where) && available(m, hs && hs.states, areasOf(ctx)); });
-      root.innerHTML = ''; root.hidden = !list.length; shown = list; rowsById = {}; go = null; if (!list.length) return;
+      root.innerHTML = ''; root.hidden = !list.length; shown = list; rowsById = {}; go = null; tgRef = null; if (!list.length) return;
       var edit = function () { if (ctx.haptic) ctx.haptic(8); ctx.openApp('lightmodes', { push: true }); };
-      var lay = layoutOf(ctx), horiz = lay === 'horizontal', compact = lay === 'compact', rowish = horiz || compact, body = h('div.lmc-body');
+      var lay = layoutOf(ctx);
+      if (lay === 'card') { drawCard(list, edit); return; }
+      var horiz = lay === 'horizontal', compact = lay === 'compact', rowish = horiz || compact, body = h('div.lmc-body');
       if (!rowish) body.appendChild(h('button.lmc-head', { type: 'button', 'aria-label': t('lm.edit_all'), onclick: edit }, h('span.lmc-cap', null, t('lm.title')), h('span.lmc-n', null, t('lm.count', { n: list.length }))));
       list.forEach(function (m) {
         var row = h('button.lmc-row', { type: 'button', dataset: { mode: m.id }, 'aria-label': m.name });
@@ -237,12 +274,7 @@
       go = h('button.rc-go.lmc-go', { type: 'button', 'aria-label': t('lm.edit_all'), onclick: edit, html: UI.icon('chevron', 26) });
       var cardEl = h('div.rc.lmc' + (compact ? '.lmc-c' : horiz ? '.lmc-h' : '.lmc-v'), { dataset: { more: '0' } }, body, go);
       root.appendChild(cardEl); root.dataset.lay = lay;
-      // while the start screen is arranged (hold a card) a bar covers the card, like the bar of every other card: the layout, and a pencil that opens the editor; the modes do not run meanwhile
-      var seg = h('span.rm-seg', { role: 'group', 'aria-label': t('lm.layout') });
-      [['horizontal', 'lm.layout_h'], ['vertical', 'lm.layout_v'], ['compact', 'lm.layout_c']].forEach(function (o) {
-        seg.appendChild(h('button' + (lay === o[0] ? '.on' : ''), { type: 'button', 'aria-pressed': lay === o[0] ? 'true' : 'false', onclick: function (e) { e.stopPropagation(); if (lay === o[0]) return; if (ctx.haptic) ctx.haptic(8); ctx.settings.set({ lightModesLayout: o[0] }); } }, t(o[1])));
-      });
-      root.appendChild(h('div.fv-sw.lmbar', null, h('b', null, t('lm.title')), seg, h('button.mv.fv-edit', { type: 'button', 'aria-label': t('lm.edit_all'), title: t('lm.edit_all'), html: UI.icon('pencil', 18), onclick: function (e) { e.stopPropagation(); edit(); } })));
+      addBar(lay, edit);
       // side by side: while there is more to scroll to, the arrow washes in over the edge of the row (its left side fades out); at the end of the row it is just the arrow.
       if (ro) { ro.disconnect(); ro = null; }
       if (rowish) {
@@ -262,7 +294,7 @@
     }
     // follow what runs: a script or scene that fired somewhere else (a schedule, another device) moves the color too
     if (ctx.bus) {
-      offs.push(ctx.bus.on('states', function (ch) { if (!gone() && ch.some(function (c) { return /^(script|scene)\./.test(c.id); })) paint(); }));
+      offs.push(ctx.bus.on('states', function (ch) { if (gone()) return; paintToggle(); if (ch.some(function (c) { return /^(script|scene)\./.test(c.id); })) paint(); }));
       offs.push(ctx.bus.on('lm-ran', function () { if (!gone()) paint(); }));
     }
     offs.push(ctx.settings.on('change', function (p) { if (!gone() && p && (p.lightModes !== undefined || p.lightModesLayout !== undefined || p.lightModesLook !== undefined)) draw(); }));
@@ -411,6 +443,10 @@
   var CSS = [
     '.lm-strip{margin:0 0 12px;}.lm-strip[hidden]{display:none;}',
     '.lm-strip{position:relative;}.w1.editing .lm-strip>.rc{pointer-events:none;}.lm-strip .lmbar{border-radius:26px;}.lm-strip[data-lay="compact"] .lmbar{border-radius:16px;padding:0 6px;}.lm-strip[data-lay="compact"] .lmbar .mv{width:26px;height:26px;}.lm-strip[data-lay="compact"] .lmbar .mv svg{width:14px;height:14px;}.lm-strip[data-lay="compact"] .lmbar .rm-seg button{padding:3px 7px;font-size:11px;}.lm-strip[data-lay="compact"] .lmbar b{display:none;}',
+    '.rc.lmk{position:relative;display:block;padding:10px 6px;border:0;border-radius:0;clip-path:none;-webkit-clip-path:none;box-shadow:none;background:var(--okie-tile,rgba(255,255,255,.1));-webkit-backdrop-filter:var(--okie-card-bf,none);backdrop-filter:var(--okie-card-bf,none);-webkit-mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);}',
+    '.rc.lmk::before,.rc.lmk::after{content:"";position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.28) 18%,rgba(255,255,255,.28) 82%,transparent);pointer-events:none;}.rc.lmk::before{top:0;}.rc.lmk::after{bottom:0;}',
+    '.lmk-row{display:flex;gap:4px;align-items:center;justify-content:space-around;overflow-x:auto;scrollbar-width:none;}.lmk-row::-webkit-scrollbar{display:none;}.lmk-b{flex:none;display:flex;padding:0;border:0;background:none;font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;}',
+    '.lmk-c{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;color:var(--lm-a,#fff);background:transparent;transition:background .25s,color .25s,transform .15s;}.lmk-c svg{width:24px;height:24px;}.lmk-b:active .lmk-c{transform:scale(.92);}.lmk-b[data-active="1"] .lmk-c{background:var(--lm-a,#fff);color:#fff;}.lmk-add .lmk-c{color:var(--okie-text,#fff);opacity:.8;}',
     '.rc.lmc{--lm-go:#8d8a86;background:linear-gradient(90deg,color-mix(in srgb,var(--lm-go) 14%,transparent),transparent 58%),var(--okie-tile,rgba(255,255,255,.1));}',
     '.lmc-body{flex:1;min-width:0;display:flex;flex-direction:column;}',
     '.lmc-head{display:flex;align-items:center;gap:12px;padding:13px 16px 11px;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;}',
@@ -462,7 +498,7 @@
     }
     b.innerHTML = '';
     var cur = layoutOf(ctx), lay = h('div.chiprow.lme-layout');
-    [['horizontal', 'lm.layout_h'], ['vertical', 'lm.layout_v'], ['compact', 'lm.layout_c']].forEach(function (o) {
+    [['card', 'lm.layout_k'], ['horizontal', 'lm.layout_h'], ['vertical', 'lm.layout_v'], ['compact', 'lm.layout_c']].forEach(function (o) {
       lay.appendChild(h('button.cp' + (cur === o[0] ? '.on' : ''), { type: 'button', dataset: { layout: o[0] }, 'aria-pressed': cur === o[0] ? 'true' : 'false', onclick: function () { ctx.settings.set({ lightModesLayout: o[0] }); lookTab(ctx, b); } }, t(o[1])));
     });
     b.appendChild(h('div.lbl', null, lt('ls.set_layout'))); b.appendChild(lay);

@@ -19,6 +19,7 @@
  * one of them is optional, so the card degrades to "search + minimal detail" alone.
  */
 (function (g) {
+  function ctx_lang_is_de(card) { try { return String((card._settings && card._settings.get().language) || (card._hass && card._hass.language) || '').toLowerCase().indexOf('de') === 0; } catch (e) { return false; } }
   'use strict';
 
   var isNode = typeof module !== 'undefined' && module.exports;
@@ -32,7 +33,7 @@
     topCategory: 'devices', chip: 'all', layout: 'grid',
     squircle: 'none',
     quickEnabled: true, quickControl: L.DEFAULT_QUICK,
-    favorites: [], detailHero: 0, deviceNames: {}, rooms: [], roomOrder: {}, roomsOrder: [], roomEdits: {}, cardStyle: {}, roomsExtra: [], roomsHidden: [], roomNames: {}, learning: 'normal',
+    favorites: [], detailHero: 0, heroW: {}, tvApps: {}, deviceNames: {}, rooms: [], roomOrder: {}, roomsOrder: [], roomEdits: {}, cardStyle: {}, roomsExtra: [], roomsHidden: [], roomNames: {}, learning: 'normal',
     visibility: { hidden: false, disabled: false, diagnostic: false },
     excluded: ['switch.schedule_*'],     // the Scheduler component's helper switches belong to the Schedules app, not the device list
     limits: { max: 0, areaOnly: true, hideUnavailable: true },
@@ -52,7 +53,7 @@
     mobile: { autoOpen: false }, haptic: true, sound: false,
     height: 'auto', top_offset: 0,
     lightModesLook: { active: true, chevron: true, hint: true },      // what the light modes card shows: the Active mark, the colored arrow, the "Tap to run" line
-    lightModesLayout: 'horizontal',   // the light modes card: 'horizontal' = the modes side by side in one row as tall as the thermostat card, 'compact' = a thin strip of pictures only, 'vertical' = stacked, separated by lines
+    lightModesLayout: 'card',   // the light modes card: 'horizontal' = the modes side by side in one row as tall as the thermostat card, 'compact' = a thin strip of pictures only, 'vertical' = stacked, separated by lines
     lightModes: null,            // null = the three Govee shortcuts the card ships with (Cozy lights, Let's go to sleep, Turn up the lights); a list = your own modes (Settings > General > Light modes)
     vacuum: { jobs: [] },        // your own vacuum jobs: [{ id, name, kind: both|vacuum|mop|room|other, command, params }], sent through vacuum.send_command
     thermoSched: { profiles: {} },      // the degrees Comfort, Sleep, Eco and Away start with in a thermostat's schedule: { eco: { low, high } }
@@ -228,6 +229,13 @@
       if (typeof ResizeObserver === 'function') { var ro = new ResizeObserver(remeasure); ro.observe(this); this._disposers.push(function () { ro.disconnect(); }); }
       var onKey = (e) => { if (e.key === 'Escape' && !this._locked && (this._nav.mode === 'detail' || this._nav.mode === 'app') && !this._search.isOpen()) { var a = this._root.activeElement; if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return; this._back(); } };
       this.addEventListener('keydown', onKey);
+      var outTap = (e) => {                                                // a tap on the bare wallpaper around the open screen closes it: back to the start page
+        if (this._locked || (this._nav.mode !== 'detail' && this._nav.mode !== 'app') || e.defaultPrevented) return;
+        var t = e.composedPath ? e.composedPath()[0] : e.target;
+        if (t === this._stage || t === this._bg || t === this) { this._ctx.haptic(8); this._show('start'); }
+      };
+      g.document.addEventListener('click', outTap);
+      this._disposers.push(() => g.document.removeEventListener('click', outTap));
       this._disposers.push(() => this.removeEventListener('keydown', onKey));
       requestAnimationFrame(() => this._measure());
       var s = this._settings.get();
@@ -387,7 +395,14 @@
         renderCompact: function (el, id) { return g.OkieMotor.detail.renderCompact(el, self._ctx, id); },
         prefetch: function (id) { if (g.OkieMotor.detail && g.OkieMotor.detail.prefetch) g.OkieMotor.detail.prefetch(self._ctx, id); },
         item: function (id) { return self._engine.getItem(id); },
-        state: function (id) { return self._hass && self._hass.states[id]; },
+        state: function (id) {
+          if (id === 'gadget.lights' && self._hass && g.OkieMotor.lights && g.OkieMotor.lights.favOn) {      // the pinned Lights row: on while any favorite light is on
+            var v = g.OkieMotor.lights.favOn(self._settings.get(), self._hass.states) ? 'on' : 'off';
+            if (!self._pinSt || self._pinSt.state !== v) self._pinSt = { entity_id: id, state: v, attributes: {}, last_changed: '', last_updated: '', context: {} };
+            return self._pinSt;
+          }
+          return self._hass && self._hass.states[id];
+        },
         /** Localised state text: Home Assistant's own formatter when it has one ("Partly cloudy"), else a readable fallback. */
         formatState: function (st) {
           try { if (self._hass.formatEntityState) return self._hass.formatEntityState(st); } catch (e) { /* fall through */ }
@@ -671,6 +686,7 @@
       var items = S.buildCollection(hs, { includeHidden: s.visibility.hidden, includeDisabled: s.visibility.disabled, includeDiagnostic: s.visibility.diagnostic });
       items = items.filter(function (i) { var st = hs.states[i.id]; return !(st && st.attributes && Array.isArray(st.attributes.entries)); });   // news feed sensors belong to the News app
       if (g.OkieMotor.gadgets) items = g.OkieMotor.gadgets.apply(items, hs.states, hs.areas);      // the Kindle and the AWTRIX: one tile each instead of dozens of entities
+      if (g.OkieMotor.lights) items = items.concat([{ id: 'gadget.lights', domain: 'gadget', deviceClass: 'light', name: ctx_lang_is_de(this) ? 'Lichter' : 'Lights', areaId: 'okie_apps', area: '', labels: [], state: '', unit: null, icon: null, category: null }]);      // the Lights screen: a tile you can pin with its heart
       if (s.limits && s.limits.max > 0) items = items.slice(0, s.limits.max);
       var dn = s.deviceNames || {}; items.forEach(function (it) { if (dn[it.id]) it.name = dn[it.id]; });      // the names you gave your devices (the pencil of a device screen)
       this._engine.setCollection(items);
@@ -762,7 +778,7 @@
       var saved = this._settings.get().sidebar.items;
       saved = saved && saved.length ? saved.map(function (x) { return String(x).replace(/^app:/, ''); }) : null;
       // a menu item that did not exist when the list was saved (Server, Music): put it in once, after the one it belongs next to; switching it off afterwards sticks
-      var self2 = this; [['server', 'schedules'], ['music', 'calendar']].forEach(function (nw) {
+      var self2 = this; [['server', 'schedules'], ['music', 'calendar'], ['lights', 'home']].forEach(function (nw) {
         var flag = nw[0] === 'server' ? 'dock.addedServer' : 'dock.added.' + nw[0];
         if (saved && avail.indexOf(nw[0]) >= 0 && saved.indexOf(nw[0]) < 0 && !self2._store.get(flag, false)) {
           self2._store.set(flag, true); var at = saved.indexOf(nw[1]); saved = saved.slice(); saved.splice(at >= 0 ? at + 1 : saved.length, 0, nw[0]);
@@ -897,6 +913,7 @@
     _openDetail(id, origin, restoring) {
       var item = this._engine.getItem(id);
       if (!item) return;
+      if (id === 'gadget.lights') return this._openApp('lights');
       if (item.domain === 'gadget' && g.OkieMotor.apps.get('gadget-' + id.slice(7))) return this._openApp('gadget-' + id.slice(7));
       if (item.domain === 'todo' && g.OkieMotor.apps.get('tasks')) return this._openApp('tasks');
       if (item.domain === 'calendar' && g.OkieMotor.apps.get('calendar')) return this._openApp('calendar');

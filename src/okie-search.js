@@ -535,7 +535,7 @@
           if (!o.includeExcluded && isHidden(it)) continue;
           if (useIntentFilter) {
             if (intent.area && it.areaId !== intent.area.id) continue;
-            if (intent.domain && it.domain !== intent.domain) continue;
+            if (intent.domain && it.domain !== intent.domain && !(it.domain === 'gadget' && it.deviceClass === intent.domain)) continue;      // the Lights app answers "lights" too
             if (intent.deviceClass && it.deviceClass !== intent.deviceClass) continue;
             if (intent.state && !stateMatches(it, intent.state)) continue;
           }
@@ -700,7 +700,12 @@
         return { item: it, score: s };
       });
       scored.sort(function (a, b) { return b.score - a.score || a.item.name.localeCompare(b.item.name); });
-      return scored.slice(0, n || 6).map(function (x) { return x.item; });
+      var want = n || 6;
+      if (!cold) return scored.slice(0, want).map(function (x) { return x.item; });
+      // Nothing learned yet: show a mix (lamp, TV, robot, speaker, lock...) instead of ten lights; one per kind first, then fill up.
+      var per = {}, out = [], rest = [];
+      scored.forEach(function (x) { var d = x.item.domain; per[d] = (per[d] || 0) + 1; (per[d] <= 1 ? out : rest).push(x.item); });
+      return out.concat(rest).slice(0, want);
     }
 
     // --------------------------------------- excluded patterns ----

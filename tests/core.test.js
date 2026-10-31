@@ -86,9 +86,9 @@ test('store: a throwing localStorage never breaks writes', () => {
 test('i18n: language pick, fallback chain, interpolation', () => {
   core.registerStrings('en', { 'a.hello': 'Hello {name}', 'a.only_en': 'only en' });
   core.registerStrings('de', { 'a.hello': 'Hallo {name}', 'a.only_de': 'nur de' });
-  assert.equal(core.t('a.hello', 'de', { name: 'Alex' }), 'Hallo Alex');
-  assert.equal(core.t('a.hello', 'en', { name: 'Alex' }), 'Hello Alex');
-  assert.equal(core.t('a.hello', 'fr', { name: 'Alex' }), 'Hello Alex', 'unknown language falls back to English');
+  assert.equal(core.t('a.hello', 'de', { name: 'Paul' }), 'Hallo Paul');
+  assert.equal(core.t('a.hello', 'en', { name: 'Paul' }), 'Hello Paul');
+  assert.equal(core.t('a.hello', 'fr', { name: 'Paul' }), 'Hello Paul', 'unknown language falls back to English');
   assert.equal(core.t('a.only_de', 'en'), 'nur de', 'missing English falls back to German like FSC');
   assert.equal(core.t('a.nope', 'en'), 'a.nope');
 });

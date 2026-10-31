@@ -21,7 +21,7 @@ enum Haptic {
         }
     }
 
-    /// A short buzz for a widget button (the lights buttons buzz with this on an iPhone): the system's short "peek" tap and a medium impact.
+    /// A short buzz for a widget button (the lights buttons buzz with this on Paul's phone): the system's short "peek" tap and a medium impact.
     static func tap() {
         AudioServicesPlaySystemSound(1519)
         medium.impactOccurred()

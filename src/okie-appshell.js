@@ -32,7 +32,11 @@
     var back = h('button.dt-circ', { 'aria-label': t('card.back'), onclick: function () { ctx.back(); }, html: UI.icon('back', 22) });
     var title = h('div.dt-title', null, o.title), sub = h('div.dt-sub', null, o.subtitle || '');
     var acts = h('div.dt-acts');
-    (o.actions || []).forEach(function (a) { acts.appendChild(h('button.dt-circ', { 'aria-label': a.label, title: a.label, onclick: a.onClick, html: UI.icon(a.icon, 20) })); });
+    // each action's icon sits in a span, as in the device screens, so it is centred in the circle
+    (o.actions || []).forEach(function (a) { acts.appendChild(h('button.dt-circ.act', { 'aria-label': a.label, title: a.label, onclick: a.onClick }, h('span', { html: UI.icon(a.icon, 20) }))); });
+    var canEdit = !o.bare && o.heroEdit !== false;      // every screen gets the pencil of the device screens: drag the picture's width, put it back
+    var pen = canEdit ? h('button.dt-circ', { 'aria-label': t('dt.edit'), title: t('dt.edit'), 'aria-pressed': 'false', html: UI.icon('pencil', 20) }) : null;
+    if (pen) acts.insertBefore(pen, acts.firstChild);
     var hero = h('div.dt-hero', { style: { background: 'linear-gradient(160deg,' + grad[0] + ',' + grad[1] + ')' } },
       h('div.dt-iconbg', { html: UI.icon(o.icon || 'grid', 170) }), vid,
       h('div.dt-top', null, back, h('div.dt-head', null, title, sub), acts.children.length ? acts : h('span', { style: { width: '40px' } })));
@@ -46,6 +50,23 @@
     if (o.slim) root.dataset.slim = '1';
     if (o.bare) root.dataset.bare = '1';      // no picture at the side: a thin bar with the back button, the title and the actions over the full-width screen (the home map)
     container.appendChild(root);
+    if (pen) {
+      var HK = 'app:' + (o.id || ''), heroPct = +((ctx.settings.get().heroW || {})[HK]) || 0, dragHero = false;      // each screen keeps its own width, in five steps
+      var saveHero = function (pc) { var m = {}; m[HK] = pc; ctx.settings.set({ heroW: m }); };
+      var applyHero = function (pc) { root.style.gridTemplateColumns = pc > 0 ? pc + '% 1fr' : ''; };
+      var placeGrip = function () { grip.style.left = Math.max(0, hero.offsetWidth - 16) + 'px'; };
+      var setEdit = function (on) { root.dataset.edit = on ? '1' : ''; pen.classList.toggle('ed', on); pen.setAttribute('aria-pressed', on ? 'true' : 'false'); if (on) placeGrip(); };
+      var grip = h('div.dt-grip', { role: 'separator', 'aria-orientation': 'vertical', 'aria-label': t('dt.hero_hint'), title: t('dt.hero_hint') }, h('span'));
+      var ebar = h('div.dt-ebar', null,
+        h('button.dt-eb', { type: 'button', onclick: function () { heroPct = 0; applyHero(0); saveHero(0); setTimeout(placeGrip, 30); } }, t('dt.hero_reset')),
+        h('button.dt-eb.pri', { type: 'button', onclick: function () { setEdit(false); } }, t('dt.done')));
+      pen.addEventListener('click', function () { setEdit(root.dataset.edit !== '1'); });
+      grip.addEventListener('pointerdown', function (e) { e.preventDefault(); dragHero = true; try { grip.setPointerCapture(e.pointerId); } catch (er) { /* the move still arrives */ } });
+      grip.addEventListener('pointermove', function (e) { if (!dragHero) return; var r = UI.screenRect(root); heroPct = UI.snapHero((e.clientX - r.left) / Math.max(1, r.width) * 100); applyHero(heroPct); placeGrip(); });
+      var endHero = function () { if (!dragHero) return; dragHero = false; saveHero(heroPct); };
+      grip.addEventListener('pointerup', endHero); grip.addEventListener('pointercancel', endHero);
+      root.style.position = 'relative'; root.appendChild(grip); root.appendChild(ebar); applyHero(heroPct);
+    }
     var sb = UI.attachScrollbar(body, host);
     var tabs = o.tabs || [], current = null;
 

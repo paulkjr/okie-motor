@@ -416,7 +416,8 @@
     if (DM.usesDial && DM.usesDial(ctx, item)) root.dataset.dial = 'true';      // the wheel runs edge to edge on the Controls tab
     container.appendChild(root);
     // ---- the pencil: drag the handle to give the picture more or less room, rename the card, put the size back
-    var heroPct = +ctx.settings.get().detailHero || 0, dragHero = false;
+    var heroPct = +((ctx.settings.get().heroW || {})['dev:' + id]) || 0, dragHero = false;      // each device screen keeps its own width, in five steps
+    function saveHero(pc) { var m = {}; m['dev:' + id] = pc; ctx.settings.set({ heroW: m }); }
     function applyHero(pc) { root.style.gridTemplateColumns = pc > 0 ? pc + '% 1fr' : ''; }
     function placeGrip() { grip.style.left = Math.max(0, hero.offsetWidth - 16) + 'px'; }
     function setEdit(on) { root.dataset.edit = on ? '1' : ''; pen.classList.toggle('ed', on); pen.setAttribute('aria-pressed', on ? 'true' : 'false'); if (on) placeGrip(); }
@@ -433,11 +434,11 @@
     }
     var ebar = h('div.dt-ebar', null,
       h('button.dt-eb', { type: 'button', onclick: openRename, html: UI.icon('pencil', 16) + '<span>' + t('dt.rename') + '</span>' }),
-      h('button.dt-eb', { type: 'button', onclick: function () { heroPct = 0; applyHero(0); ctx.settings.set({ detailHero: 0 }); setTimeout(placeGrip, 30); } }, t('dt.hero_reset')),
+      h('button.dt-eb', { type: 'button', onclick: function () { heroPct = 0; applyHero(0); saveHero(0); setTimeout(placeGrip, 30); } }, t('dt.hero_reset')),
       h('button.dt-eb.pri', { type: 'button', onclick: function () { setEdit(false); } }, t('dt.done')));
     grip.addEventListener('pointerdown', function (e) { e.preventDefault(); dragHero = true; try { grip.setPointerCapture(e.pointerId); } catch (er) { /* the move still arrives */ } });
-    grip.addEventListener('pointermove', function (e) { if (!dragHero) return; var r = UI.screenRect(root); heroPct = Math.round(Math.max(24, Math.min(74, (e.clientX - r.left) / Math.max(1, r.width) * 100)) * 10) / 10; applyHero(heroPct); placeGrip(); });
-    var endHero = function () { if (!dragHero) return; dragHero = false; ctx.settings.set({ detailHero: heroPct }); };
+    grip.addEventListener('pointermove', function (e) { if (!dragHero) return; var r = UI.screenRect(root); heroPct = UI.snapHero((e.clientX - r.left) / Math.max(1, r.width) * 100); applyHero(heroPct); placeGrip(); });
+    var endHero = function () { if (!dragHero) return; dragHero = false; saveHero(heroPct); };
     grip.addEventListener('pointerup', endHero); grip.addEventListener('pointercancel', endHero);
     root.appendChild(grip); root.appendChild(ebar); applyHero(heroPct);
     if (wx) { container.appendChild(wx.dots); wx.watch(root); }
@@ -540,7 +541,7 @@
     '.dt-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.35),transparent 30%,transparent 70%,rgba(0,0,0,.25));pointer-events:none;}',
     '.dt-top{position:relative;z-index:2;display:flex;align-items:center;gap:12px;padding:18px;}',
     '.dt-head{flex:1;text-align:center;min-width:0;}.dt-title{font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.dt-sub{font-size:13px;color:rgba(255,255,255,.75);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
-    '.dt-circ{width:40px;height:40px;border-radius:50%;background:rgba(20,18,16,.55);display:grid;place-items:center;flex:none;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}',
+    '.dt-circ{width:40px;height:40px;padding:0;box-sizing:border-box;border-radius:50%;background:rgba(20,18,16,.55);display:grid;place-items:center;flex:none;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}',
     '.dt-circ.on{background:#fff;color:#e0492f;}',
     '.dt-main{display:flex;flex-direction:column;min-width:0;min-height:0;padding:18px 20px 12px;}',
     '.dt-menu{align-self:flex-end;margin-bottom:16px;}.dt-bubble{display:none;}.dt-bar{display:flex;gap:4px;padding:5px;border-radius:9999px;background:rgba(255,255,255,.1);}.dt-main>.dt-bar{align-self:flex-end;margin-bottom:16px;}',      // a bare tab bar (Settings and the other apps) is a normal pill; only a device's detail view wraps it in the bubble menu on phones
