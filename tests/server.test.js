@@ -66,15 +66,15 @@ test('backup and updates', () => {
 });
 
 test('apps: the starting list is the old Server Utility links; a typed one gets https://, a unique id and a safe icon; the search is by name', () => {
-  assert.equal(S.DEFAULT_APPS.length, 9); S.DEFAULT_APPS.forEach(a => { assert.ok(a.id && a.name && a.url && a.icon && a.color); });
-  assert.deepEqual(S.DEFAULT_APPS.filter(a => S.isInternal(a.url)).map(a => a.id), ['files', 'n8n'], 'two open Home Assistant pages, the rest are web addresses');
+  assert.equal(S.DEFAULT_APPS.length, 5); S.DEFAULT_APPS.forEach(a => { assert.ok(a.id && a.name && a.url && a.icon && a.color); });
+  assert.deepEqual(S.DEFAULT_APPS.filter(a => S.isInternal(a.url)).map(a => a.id), S.DEFAULT_APPS.map(a => a.id), 'the starting links all open Home Assistant pages');
   assert.equal(new Set(S.DEFAULT_APPS.map(a => a.id)).size, S.DEFAULT_APPS.length);
-  const a = S.sanitizeApp({ name: ' Grafana ', url: 'grafana.local:3000', icon: 'chart' }, ['adguard']);
+  const a = S.sanitizeApp({ name: ' Grafana ', url: 'grafana.local:3000', icon: 'chart' }, ['addons']);
   assert.equal(a.name, 'Grafana'); assert.equal(a.url, 'https://grafana.local:3000'); assert.equal(a.id, 'grafana'); assert.equal(a.icon, 'chart');
   assert.equal(S.sanitizeApp({ name: 'Grafana', url: '/lovelace/x', icon: 'nonsense' }, ['grafana']).id, 'grafana-2'); assert.equal(S.sanitizeApp({ name: 'x', url: '/p', icon: 'nonsense' }, []).icon, 'server');
   assert.equal(S.sanitizeApp({ name: '', url: 'x' }), null); assert.equal(S.sanitizeApp({ name: 'x', url: '  ' }), null);
   assert.equal(S.sanitizeApp({ name: 'x', url: 'http://a.b' }).url, 'http://a.b', 'a full address is kept as typed');
-  assert.deepEqual(S.appsFilter(S.DEFAULT_APPS, 'jelly').map(x => x.id), ['jellyfin']); assert.equal(S.appsFilter(S.DEFAULT_APPS, '  ').length, 9); assert.equal(S.appsFilter(S.DEFAULT_APPS, 'zzz').length, 0);
+  assert.deepEqual(S.appsFilter(S.DEFAULT_APPS, 'add').map(x => x.id), ['addons']); assert.equal(S.appsFilter(S.DEFAULT_APPS, '  ').length, 5); assert.equal(S.appsFilter(S.DEFAULT_APPS, 'zzz').length, 0);
 });
 
 test('words and numbers: tones, storage state, sizes, rates, uptime, when', () => {
