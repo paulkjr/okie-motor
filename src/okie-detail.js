@@ -565,7 +565,7 @@
     '.wi{height:44px;display:grid;place-items:center;font-size:26px;font-weight:300;scroll-snap-align:center;color:var(--okie-text-dim);}.wi.sel{color:var(--okie-text);font-weight:500;}',
     '.act.primary{background:#fff;color:#1d1b19;}',
     '.attrs{width:100%;}.attrs summary{cursor:pointer;padding:10px 0;color:var(--okie-text-dim);}',
-    '@media (min-width:641px){.dt[data-remote]{grid-template-columns:minmax(260px,1fr) minmax(250px,330px);}}',      // a TV's remote: the picture is wider than the remote, like holding a real one
+    '@media (min-width:641px){.dt[data-remote]{grid-template-columns:minmax(260px,1fr) minmax(250px,460px);}}',      // a TV's remote: the picture is wider than the remote, like holding a real one; the column still gives it room to grow down a tall card, not just across it
     '@media (min-width:641px){.dt[data-dial]{grid-template-columns:minmax(260px,1fr) minmax(300px,451px);}}',      // a thermostat: the glass column is 451 px wide like in the design (the card there is 1101 px: 650 picture + 451 glass), the picture takes the rest
     '@media (max-width:640px){.dt{grid-template-columns:1fr;grid-template-rows:170px 1fr;}.dt-iconbg svg{width:90px;height:90px;}.dt-main{padding:14px 14px 10px;}}',
     // the phone's menu: a round bubble that opens into the row (same as the iPhone widget's big thermostat)

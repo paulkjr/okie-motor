@@ -311,6 +311,7 @@
       this._main = h('div.main-container', null, this._statsHost, this._panelRegion);
       this._stage = h('div.stage', { dataset: { zenRevealed: 'true', detail: 'closed', mobile: 'false', hoehe: 'voll' } }, this._bg, this._main);
       r.appendChild(this._stage);
+      if (g.OkieMotor.pullRefresh) g.OkieMotor.pullRefresh.wire(this._stage);
       this._overlay = OV.createOverlay(this._stage, {
         enabled: () => this._settings.get().toasts.enabled,
         closable: () => this._settings.get().toasts.closable,

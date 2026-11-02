@@ -117,7 +117,7 @@ struct DashboardWeb: UIViewRepresentable {
         ucc.removeAllUserScripts()
         if let d = try? JSONSerialization.data(withJSONObject: tokens), let js = String(data: d, encoding: .utf8) {
             // only the page of your own Home Assistant gets the sign-in: a link to another site opens in this web view too, and must never see the tokens
-            ucc.addUserScript(WKUserScript(source: "try { var t = \(js); if (location.origin === new URL(t.hassUrl).origin) { localStorage.setItem('hassTokens', JSON.stringify(t)); } } catch (e) {}", injectionTime: .atDocumentStart, forMainFrameOnly: true))
+            ucc.addUserScript(WKUserScript(source: "(function () { try { var t = \(js); if (location.origin === new URL(t.hassUrl).origin) { localStorage.setItem('hassTokens', JSON.stringify(t)); } } catch (e) {} })();", injectionTime: .atDocumentStart, forMainFrameOnly: true))
         }
         // the card keeps its Settings in localStorage "okie:settings"; its glass numbers go to the widgets so they wear the same glass
         let own = Self.jsString(host)

@@ -425,6 +425,7 @@
         remote = g.OkieMotor.remote && g.OkieMotor.remote.create ? g.OkieMotor.remote.create(ctx, item, hooks) : remotePanel(ctx, item, info, hasPower ? power.el : null);
         // like a real remote: the transport keys and the power key are in the remote, so the row above is gone; the remote stands beside the picture, the volume and the sources
         actrow.style.display = 'none';
+        if (vol) vol.el.style.display = 'none';      // the dial already carries the volume; left visible (even at 0 height) it still taxes the column's flex gap
         if (srcRow && g.OkieMotor.remote && g.OkieMotor.remote.create) { srcRow.el.style.display = 'none'; if (srcLbl) srcLbl.style.display = 'none'; }      // the new remote carries the sources in its favourites
         root.insertBefore(remote.el, root.firstChild); root.classList.add('tv');
         var dt = root.closest && root.closest('.dt'); if (dt) dt.dataset.remote = '1';      // the picture takes the width, the remote is as skinny as a real one

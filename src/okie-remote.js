@@ -2,9 +2,10 @@
  *
  *   var r = OkieMotor.remote.create(ctx, item, { send(key), svc(domain, service, data), keys }) -> { el, update(), dispose() }
  *
- * Top: power, the name pill with the connection dot and a gear (every other key sits behind it), back / home / microphone.
- * The dial: turn the ring for the volume (the blue arc), tap the four sides of the disc for the arrows, tap the middle for
- * play/pause and hold it for OK. Favourites: the streaming apps as vector tiles, the slider icon edits them.
+ * Top: power, the name pill with the connection dot and a gear (every other key sits behind it), back / home / the * key.
+ * The dial: turn the ring for the volume (the blue arc, fine at the bottom and faster the further round it goes), tap the
+ * four sides of the disc for the arrows, tap the middle for OK. Below it: rewind / play-pause / fast-forward. Favourites:
+ * the streaming apps as vector tiles, the slider icon edits them.
  * Everything is drawn with CSS and SVG against a 560 wide design; one unit scales with the width of the column.
  */
 (function (g) {
@@ -13,12 +14,12 @@
   var UI = g.OkieMotor.ui, core = g.OkieMotor.core, h = UI.h;
 
   core.registerStrings('en', {
-    'rx.favs': 'Favourites', 'rx.inputs': 'Inputs', 'rx.edit_favs': 'Edit favourites', 'rx.more': 'All keys', 'rx.voice': 'Voice', 'rx.vol': 'Volume', 'rx.playpause': 'Play / pause (hold for OK)',
-    'rx.no_app': '{app} is not on this TV', 'rx.up': 'Move up', 'rx.down': 'Move down', 'rx.show': 'Show', 'rx.sources': 'Sources', 'rx.gear': 'Keys and sources', 'rx.power': 'Power',
+    'rx.favs': 'Favourites', 'rx.inputs': 'Inputs', 'rx.edit_favs': 'Edit favourites', 'rx.voice': 'Voice', 'rx.vol': 'Volume', 'rx.ok': 'OK (select)', 'rx.playpause': 'Play / pause',
+    'rx.no_app': '{app} is not on this TV', 'rx.up': 'Move up', 'rx.down': 'Move down', 'rx.show': 'Show', 'rx.power': 'Power',
   });
   core.registerStrings('de', {
-    'rx.favs': 'Favoriten', 'rx.inputs': 'Eingänge', 'rx.edit_favs': 'Favoriten bearbeiten', 'rx.more': 'Alle Tasten', 'rx.voice': 'Sprache', 'rx.vol': 'Lautstärke', 'rx.playpause': 'Wiedergabe / Pause (halten für OK)',
-    'rx.no_app': '{app} ist nicht auf diesem Fernseher', 'rx.up': 'Nach oben', 'rx.down': 'Nach unten', 'rx.show': 'Anzeigen', 'rx.sources': 'Quellen', 'rx.gear': 'Tasten und Quellen', 'rx.power': 'Ein/Aus',
+    'rx.favs': 'Favoriten', 'rx.inputs': 'Eingänge', 'rx.edit_favs': 'Favoriten bearbeiten', 'rx.voice': 'Sprache', 'rx.vol': 'Lautstärke', 'rx.ok': 'OK (auswählen)', 'rx.playpause': 'Wiedergabe / Pause',
+    'rx.no_app': '{app} ist nicht auf diesem Fernseher', 'rx.up': 'Nach oben', 'rx.down': 'Nach unten', 'rx.show': 'Anzeigen', 'rx.power': 'Ein/Aus',
   });
 
   // the apps of the favourites, with the name Roku and Samsung give them in the source list and (Samsung) the app id for a direct start
@@ -37,7 +38,8 @@
 
   var ARC0 = -138, ARC1 = 138;      // the volume scale runs over 276 degrees, the gap sits at the bottom
   var R_OUT = 214, R_BAND = 180, W_BAND = 56, R_DISC = 152, R_DOT = 115;
-  
+  var VOL_K = 2.2;      // the scale is a curve, not a line: fine steps turning it from the bottom, faster per degree the further round it goes
+
   function pt(r, deg) { var a = deg * Math.PI / 180; return [r * Math.sin(a), -r * Math.cos(a)]; }
   function arcPath(r, a0, a1) { var p0 = pt(r, a0), p1 = pt(r, a1); return 'M' + p0[0].toFixed(2) + ' ' + p0[1].toFixed(2) + 'A' + r + ' ' + r + ' 0 ' + (a1 - a0 > 180 ? 1 : 0) + ' 1 ' + p1[0].toFixed(2) + ' ' + p1[1].toFixed(2); }
   var STOPS = [[0, [15, 57, 71]], [.5, [8, 104, 138]], [1, [0, 168, 230]]];      // dark teal at the start of the scale, the clear blue at the end of the arc
@@ -45,14 +47,21 @@
     var i = t < .5 ? 0 : 1, a = STOPS[i], b = STOPS[i + 1], k = (t - a[0]) / (b[0] - a[0]);
     return 'rgb(' + [0, 1, 2].map(function (c) { return Math.round(a[1][c] + (b[1][c] - a[1][c]) * k); }).join(',') + ')';
   }
-  function pctOfAngle(deg) { if (deg > ARC1) return 100; if (deg < ARC0) return 0; return Math.round((deg - ARC0) / (ARC1 - ARC0) * 100); }
+  function clamp01(x) { return x < 0 ? 0 : x > 1 ? 1 : x; }
+  function pctOfAngle(deg) { var af = clamp01((deg - ARC0) / (ARC1 - ARC0)); return Math.round(100 * Math.pow(af, VOL_K)); }
+  function angleFracOfPct(pc) { return Math.pow(clamp01(pc / 100), 1 / VOL_K); }
 
   var ICON = {
     back: '<path d="M20 12H5M11 5.5 4.5 12 11 18.5"/>',
     home: '<path d="M3 11.2 12 3.5l9 7.7M5.2 9.6V20.5h13.6V9.6"/><path d="M9.8 20.5v-5.2h4.4v5.2"/>',
+    options: '<circle cx="5" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="2" fill="currentColor" stroke="none"/>',
     mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/>',
     power: '<path d="M12 3.5v8.2"/><path d="M7.2 6.6a7.4 7.4 0 1 0 9.6 0"/>',
-    gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+    play: '<path d="M8 5l11 7-11 7z" fill="currentColor" stroke="none"/>',
+    pause: '<rect x="7" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="13" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/>',
+    playpause: '<path d="M3 5v14l9-7z" fill="currentColor" stroke="none"/><rect x="14.5" y="5" width="3" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="19" y="5" width="3" height="14" rx="1" fill="currentColor" stroke="none"/>',
+    rew: '<path d="M20 5v14l-9-7z" fill="currentColor" stroke="none"/><path d="M11 5v14l-9-7z" fill="currentColor" stroke="none"/>',
+    ff: '<path d="M4 5v14l9-7z" fill="currentColor" stroke="none"/><path d="M13 5v14l9-7z" fill="currentColor" stroke="none"/>',
     sliders: '<path d="M8 3.5v9.1M8 17.4v3.1M16 3.5v3.1M16 11.4v9.1"/><circle cx="8" cy="15" r="2.4"/><circle cx="16" cy="9" r="2.4"/>',
   };
   function ico(name, size, stroke, w) { return '<svg viewBox="0 0 24 24" width="' + size + '" height="' + size + '" fill="none" stroke="' + stroke + '" stroke-width="' + (w || 1.6) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICON[name] + '</svg>'; }
@@ -66,19 +75,25 @@
     function tvOff() { var st = (ctx.state(item.id) || {}).state; return !st || st === 'off' || st === 'unavailable'; }   // a standby TV refuses volume commands
     function canSet() { return !!((attrs().supported_features || 0) & 4); }
 
-    // ---- top: power, the name pill with the gear
+    // ---- top: power, the name pill with the microphone
     var pw = h('button.rx-b.rx-pw', { type: 'button', 'aria-label': t('rx.power'), html: ico('power', 40, 'currentColor', 1.7), onclick: function () { ctx.haptic(10); var s = (ctx.state(item.id) || {}).state; hooks.svc('media_player', s === 'off' ? 'turn_on' : 'turn_off', {}); } });
     var dot = h('span.rx-dot'), nm = h('span.rx-nm', null, item.name);
-    var gear = h('button.rx-b.rx-gear', { type: 'button', 'aria-label': t('rx.gear'), title: t('rx.gear'), html: ico('gear', 30, 'rgba(255,255,255,.78)', 1.5), onclick: function () { ctx.haptic(8); openKeys(); } });
-    var pill = h('div.rx-pill', null, dot, nm, gear);
+    var mic = h('button.rx-b.rx-gear', { type: 'button', 'aria-label': t('rx.voice'), title: t('rx.voice'), html: ico('mic', 30, 'rgba(255,255,255,.78)', 1.5), onclick: function () { ctx.haptic(8); if (ctx.voice) ctx.voice(); } });
+    var pill = h('div.rx-pill', null, dot, nm, mic);
     var top = h('div.rx-top', null, pw, pill);
 
-    // ---- back / home / microphone
-    function nav(cls, label, icon, size, fn) { return h('button.rx-b.' + cls, { type: 'button', 'aria-label': label, title: label, html: ico(icon, size, 'rgba(255,255,255,.78)', 1.4), onclick: function () { ctx.haptic(8); fn(); } }); }
+    // ---- back / home / Options
+    function nav(cls, label, icon, size, fn) { var b = h('button.rx-b.' + cls, { type: 'button', 'aria-label': label, title: label, html: ico(icon, size, 'rgba(255,255,255,.78)', 1.4), onclick: function () { ctx.haptic(8); fn(); } }); b.setIcon = function (name) { b.innerHTML = ico(name, size, 'rgba(255,255,255,.78)', 1.4); }; return b; }
     var navRow = h('div.rx-nav', null,
       nav('rx-sm', core.t('d.rk.back', ctx.lang()), 'back', 40, function () { hooks.send('back'); }),
       nav('rx-lg', core.t('d.rk.home', ctx.lang()), 'home', 56, function () { hooks.send('home'); }),
-      nav('rx-sm', t('rx.voice'), 'mic', 36, function () { if (ctx.voice) ctx.voice(); }));
+      nav('rx-sm', core.t('d.rk.menu', ctx.lang()), 'options', 32, function () { hooks.send('menu'); }));
+
+    // ---- transport: rewind / play-pause / fast-forward, between the dial and the favourites; a smaller echo of the row above
+    var rewBtn = nav('rx-sm', core.t('d.rk.rew', ctx.lang()), 'rew', 40, function () { hooks.send('rew'); });
+    var playBtn = nav('rx-md', t('rx.playpause'), 'playpause', 46, function () { hooks.send('play'); });
+    var ffBtn = nav('rx-sm', core.t('d.rk.ff', ctx.lang()), 'ff', 40, function () { hooks.send('ff'); });
+    var transRow = h('div.rx-nav.rx-trans', null, rewBtn, playBtn, ffBtn);
 
     // ---- the dial
     var arcG = '', dots = '';
@@ -100,12 +115,12 @@
       dots +
       '<circle r="63" fill="url(#' + uid + 'f)"/>' +
       '<g class="rx-mid"><circle r="50" fill="url(#' + uid + 'e)" filter="url(#' + uid + 'b)"/><circle r="49" fill="none" stroke="#cfc6bf" stroke-opacity=".45" stroke-width="1"/>' +
-      '<path d="M-17 -15 3 0 -17 15z" fill="#2b2b2b"/><path d="M9 -15h6v30H9zM19 -15h6v30h-6z" fill="#2b2b2b" transform="translate(-6 0)"/></g>' +
+      '<circle r="10" fill="#2b2b2b"/></g>' +
       '<g class="rx-sc" fill="rgba(255,255,255,.45)" font-size="23" text-anchor="middle"><circle cx="-160" cy="179" r="3.4"/><circle cx="160" cy="179" r="3.4"/><text x="-168" y="217">0</text><text x="170" y="224">100</text></g></svg>';
     var dial = h('div.rx-dial', { html: dialSvg });
     var svgEl = dial.firstChild, arcEl = svgEl.querySelector('.rx-arc'), endEl = svgEl.querySelector('.rx-end'), midEl = svgEl.querySelector('.rx-mid');
     function drawArc(pc) {
-      var a1 = ARC0 + (ARC1 - ARC0) * pc / 100, n = Math.max(1, Math.ceil(pc * 1.6)), out = '';
+      var a1 = ARC0 + (ARC1 - ARC0) * angleFracOfPct(pc), n = Math.max(1, Math.ceil(pc * 1.6)), out = '';
       for (var i = 0; i < n; i++) {
         var s0 = ARC0 + (a1 - ARC0) * i / n, s1 = ARC0 + (a1 - ARC0) * (i + 1) / n + (i < n - 1 ? 0.8 : 0);
         out += '<path d="' + arcPath(R_BAND, s0, s1) + '" fill="none" stroke="' + mix((i + 1) / n) + '" stroke-width="' + W_BAND + '"/>';
@@ -132,10 +147,10 @@
         rep = setInterval(function () { if (!step()) { clearInterval(rep); rep = 0; } }, 120);
       }
     }
-    var press = null, hold = 0, longDone = false;
+    var press = null;
     function startKey(k) { hooks.send(k); clearTimeout(repTimer); clearInterval(repTimer); repTimer = setTimeout(function () { repTimer = setInterval(function () { hooks.send(k); }, 140); }, 450); }
     function endPress() {
-      clearTimeout(repTimer); clearInterval(repTimer); repTimer = 0; clearTimeout(hold);
+      clearTimeout(repTimer); clearInterval(repTimer); repTimer = 0;
       if (press && press.dot) press.dot.classList.remove('on');
       midEl.classList.remove('on');
       press = null; dragging = false;
@@ -145,7 +160,7 @@
       var p = local(e); e.preventDefault();
       try { svgEl.setPointerCapture(e.pointerId); } catch (er) { /* the move still arrives */ }
       if (p.r > R_DISC + 2 && p.r < R_OUT + 26) { if (tvOff()) { ctx.haptic(6); return; } dragging = true; press = { vol: true }; ctx.haptic(6); setVol(pctOfAngle(p.a), true); volSent = -2; pushVol(); return; }
-      if (p.r <= 62) { press = { mid: true }; longDone = false; midEl.classList.add('on'); hold = setTimeout(function () { longDone = true; ctx.haptic(14); hooks.send('ok'); }, 450); return; }
+      if (p.r <= 62) { press = { mid: true }; midEl.classList.add('on'); ctx.haptic(10); hooks.send('ok'); return; }
       if (p.r <= R_DISC) {
         var k = Math.abs(p.a) < 45 ? 'up' : Math.abs(p.a) > 135 ? 'down' : p.a < 0 ? 'left' : 'right';
         var d = svgEl.querySelector('.rx-dt[data-k="' + k + '"]'); if (d) d.classList.add('on');
@@ -153,7 +168,7 @@
       }
     });
     svgEl.addEventListener('pointermove', function (e) { if (!dragging) return; var p = local(e); setVol(pctOfAngle(p.a), true); heldUntil = Date.now() + 1500; pushVol(); });
-    svgEl.addEventListener('pointerup', function () { if (press && press.mid && !longDone) { ctx.haptic(8); hooks.send('play'); } if (dragging) heldUntil = Date.now() + 1500; endPress(); });
+    svgEl.addEventListener('pointerup', function () { if (dragging) heldUntil = Date.now() + 1500; endPress(); });
     svgEl.addEventListener('pointercancel', endPress);
     svgEl.addEventListener('contextmenu', function (e) { e.preventDefault(); });
     stop.push(function () { endPress(); clearTimeout(volTimer); clearInterval(rep); });
@@ -206,37 +221,38 @@
       ctx.sheet({ title: t('rx.edit_favs'), content: function () { return box; } });
     }
 
-    // ---- every other key and the sources behind the gear
-    var KEYS = [['menu', 'd.rk.menu'], ['replay', 'd.rk.replay'], ['rew', 'd.rk.rew'], ['play', 'd.rk.play'], ['ff', 'd.rk.ff'], ['vdown', 'd.rk.vdown'], ['mute', 'd.mute'], ['vup', 'd.rk.vup'], ['chdown', 'd.rk.chdown'], ['ok', 'd.rk.ok'], ['chup', 'd.rk.chup']];
-    function openKeys() {
-      var box = h('div.rx-edbox');
-      var grid2 = h('div.rx-kg');
-      KEYS.forEach(function (k) {
-        if (hooks.keys && !hooks.keys[k[0]]) return;
-        var b = h('button.rx-kb', { type: 'button', onclick: function () { ctx.haptic(8); hooks.send(k[0]); } }, core.t(k[1], ctx.lang()));
-        grid2.appendChild(b);
-      });
-      box.appendChild(grid2);
-      var list = attrs().source_list || [];
-      if (list.length) {
-        box.appendChild(h('div.rx-sl', null, t('rx.sources')));
-        var src = h('div.rx-sg'); list.forEach(function (s) { src.appendChild(h('button.rx-kb', { type: 'button', onclick: function () { ctx.haptic(8); hooks.svc('media_player', 'select_source', { source: s }); } }, String(s))); });
-        box.appendChild(src);
-      }
-      ctx.sheet({ title: t('rx.more'), content: function () { return box; } });
-    }
-
-    var el = h('div.rmx', null, h('div.rx', null, top, navRow, dial, favCard));
+    var el = h('div.rmx', null, h('div.rx', null, top, navRow, dial, transRow, favCard));
     drawFavs(); setVol(0);
-    function fit() {                                                  // phone: scale the remote down so all of it shows without scrolling
+    function fit() {                                                  // scale the remote to the scroller's real height: down so it never needs to scroll, up so it never leaves the bottom of the card empty
       var sc = el.closest && el.closest('.okie-scroll'); if (!sc || !el.isConnected) return;
-      var phone = !g.matchMedia || g.matchMedia('(max-width:640px)').matches;
-      el.style.width = ''; el.style.margin = ''; sc.scrollTop = 0;
-      if (!phone) return;
-      var W = el.parentElement ? el.parentElement.clientWidth : sc.clientWidth, H = sc.clientHeight - 30;
-      if (!W || H < 200) return;
-      el.style.width = W + 'px'; var hh = el.offsetHeight;
-      if (hh > H) { el.style.width = Math.floor(W * H / hh) + 'px'; el.style.margin = '0 auto'; }
+      el.style.width = ''; el.style.margin = ''; favCard.style.marginTop = ''; sc.scrollTop = 0;
+      var W = el.parentElement ? el.parentElement.clientWidth : sc.clientWidth;
+      if (!W || sc.clientHeight < 160) return;
+      el.style.width = W + 'px';
+      for (var i = 0; i < 5; i++) {                                  // target the scroller's own overflow (not a guessed margin), the width-to-height scaling isn't perfectly linear so a few passes close the gap
+        var over = sc.scrollHeight - sc.clientHeight; if (over <= 0) break;
+        var hh = el.offsetHeight, w = parseFloat(el.style.width) || W;
+        var target = Math.max(120, hh - over - 1);                   // shave off exactly the overflow, plus a point of slack
+        el.style.width = Math.max(120, Math.floor(w * target / hh)) + 'px';
+      }
+      for (var j = 0; j < 6; j++) {                                  // the shrink above is conservative (a point per pass); grow back in small steps to use all of what's actually free (on a tall narrow column this is how it reaches down the card, not just across it)
+        var w2 = parseFloat(el.style.width); if (w2 >= W) break;
+        el.style.width = Math.min(W, w2 + 4) + 'px';
+        if (sc.scrollHeight > sc.clientHeight) { el.style.width = w2 + 'px'; break; }
+      }
+      if (parseFloat(el.style.width) < W) el.style.margin = '0 auto';
+      // push the favourites card down to the bottom of the card: grow its own top margin directly and measure the real overflow after
+      // each step, the same way the width above converges. CSS tricks for this (percentage min-height, flex auto-margins) turned out to
+      // be silently inert in this exact layout on iOS WebKit, so this does the equivalent by hand with numbers the browser just reported.
+      // scrollHeight can never read BELOW clientHeight (it floors there even while under-filling), so a shrink-down-from-overshoot
+      // loop can land short and wrongly read "no overflow" too early. Growing in small steps only ever has to detect real
+      // overflow, which scrollHeight always reports honestly, so it reliably finds the exact edge instead.
+      favCard.style.marginTop = '0px';
+      for (var k = 0; k < 150; k++) {
+        var mtCur = parseFloat(favCard.style.marginTop) || 0;
+        favCard.style.marginTop = (mtCur + 6) + 'px';
+        if (sc.scrollHeight > sc.clientHeight) { favCard.style.marginTop = mtCur + 'px'; break; }
+      }
     }
     var fitTimer = setTimeout(fit, 0), ro = null;
     stop.push(function () { clearTimeout(fitTimer); if (ro) ro.disconnect(); });
@@ -250,6 +266,7 @@
         var s = ctx.state(item.id) || {}, a = s.attributes || {}, on = s.state && s.state !== 'off' && s.state !== 'unavailable', gone = s.state === 'unavailable';
         pw.classList.toggle('on', !!on); dot.classList.toggle('gone', !!gone); dot.classList.toggle('off', !on && !gone);
         nm.textContent = item.name;
+        paintPlay();
         if (srcList().join('|') !== srcSig) drawFavs(); else paintSrc();
         el.classList.toggle('gone', !!gone); dial.classList.toggle('tvoff', !on);
         if (!dragging && Date.now() > heldUntil && a.volume_level != null) { setVol(Math.round(a.volume_level * 100), true); volSent = -1; }
@@ -261,7 +278,7 @@
   function u(n) { return 'calc(' + n + ' * var(--u))'; }
   var CSS = [
     '.rmx{container-type:inline-size;width:100%;box-sizing:border-box;background:none;color:rgba(255,255,255,.7);font-family:Poppins,"Avenir Next","Helvetica Neue",system-ui,sans-serif;}',
-    '.rx{--u:.6px;--u:min(calc(100cqw / 560), 1.1px);max-width:calc(560 * 1.1px);margin:0 auto;padding:' + u(26) + ' 0 ' + u(46) + ';display:flex;flex-direction:column;align-items:stretch;}',
+    '.rx{--u:.6px;--u:min(calc(100cqw / 560), 1.1px);max-width:calc(560 * 1.1px);margin:0 auto;padding:' + u(14) + ' 0 0;display:flex;flex-direction:column;align-items:stretch;}',
     '.rmx.gone{opacity:.55;}',
         '.rx-b{-webkit-appearance:none;appearance:none;border:1px solid rgba(255,255,255,.13);padding:0;margin:0;display:grid;place-items:center;flex:none;border-radius:50%;background:linear-gradient(150deg,rgba(255,255,255,.17),rgba(255,255,255,.05));-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);color:rgba(255,255,255,.78);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;box-shadow:0 ' + u(6) + ' ' + u(16) + ' rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.22);transition:box-shadow .12s ease,transform .12s ease;}',
         '.rx-b:active{transform:scale(.96);box-shadow:0 ' + u(2) + ' ' + u(6) + ' rgba(0,0,0,.3),inset 0 1px 6px rgba(0,0,0,.25);}',
@@ -272,15 +289,18 @@
     '.rx-dot{width:' + u(9) + ';height:' + u(9) + ';border-radius:50%;background:#2fbf63;flex:none;}.rx-dot.off{background:#c9a33f;}.rx-dot.gone{background:#8a3b36;}',
     '.rx-nm{flex:1;min-width:0;font-size:' + u(22) + ';line-height:1.2;letter-spacing:.01em;color:rgba(255,255,255,.82);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
     '.rx-gear{width:' + u(62) + ';height:' + u(62) + ';}.rx-gear svg{width:' + u(30) + ';height:' + u(30) + ';}',
-    '.rx-nav{display:flex;align-items:center;justify-content:center;gap:' + u(63) + ';margin-top:' + u(31) + ';}',
+    '.rx-nav{display:flex;align-items:center;justify-content:center;gap:' + u(63) + ';margin-top:' + u(20) + ';}',
     '.rx-sm{width:' + u(82) + ';height:' + u(82) + ';}.rx-lg{width:' + u(116) + ';height:' + u(116) + ';}.rx-sm svg{width:' + u(40) + ';height:' + u(40) + ';}.rx-lg svg{width:' + u(56) + ';height:' + u(56) + ';}',
-    '.rx-dial{margin-top:' + u(16) + ';touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}.rx-dial.tvoff .rx-arc,.rx-dial.tvoff .rx-end{opacity:.35;}.rx-dialsvg{display:block;overflow:visible;cursor:pointer;}',
+    '.rx-md{width:' + u(96) + ';height:' + u(96) + ';}.rx-md svg{width:' + u(46) + ';height:' + u(46) + ';}',
+    '.rx-tsm{width:' + u(56) + ';height:' + u(56) + ';}.rx-tlg{width:' + u(78) + ';height:' + u(78) + ';}.rx-tsm svg{width:' + u(26) + ';height:' + u(26) + ';}.rx-tlg svg{width:' + u(36) + ';height:' + u(36) + ';}',
+    '.rx-trans{gap:' + u(40) + ';margin-top:' + u(20) + ';}',
+    '.rx-dial{margin-top:' + u(8) + ';touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}.rx-dial.tvoff .rx-arc,.rx-dial.tvoff .rx-end{opacity:.35;}.rx-dialsvg{display:block;overflow:visible;cursor:pointer;}',
     '.rx-dt{fill:rgba(255,255,255,.62);transition:fill .1s ease,r .1s ease;}.rx-dt.on{fill:#fff;}.rx-mid{transition:transform .12s ease;transform-origin:0 0;}.rx-mid.on{transform:scale(.94);}',
-        '.rx-fav{position:relative;margin:' + u(24) + ' ' + u(40) + ' 0;padding:' + u(36) + ' ' + u(44) + ' ' + u(45) + ';border-radius:' + u(34) + ';border:1px solid rgba(255,255,255,.1);background:linear-gradient(160deg,rgba(255,255,255,.1),rgba(255,255,255,.03));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 ' + u(6) + ' ' + u(18) + ' rgba(0,0,0,.2);}',
+        '.rx-fav{position:relative;margin:' + u(20) + ' ' + u(40) + ' 0;padding:' + u(24) + ' ' + u(44) + ' ' + u(28) + ';border-radius:' + u(34) + ';border:1px solid rgba(255,255,255,.1);background:linear-gradient(160deg,rgba(255,255,255,.1),rgba(255,255,255,.03));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 ' + u(6) + ' ' + u(18) + ' rgba(0,0,0,.2);}',
     '.rx-ft{text-align:center;font-size:' + u(22) + ';color:rgba(255,255,255,.5);letter-spacing:.01em;line-height:' + u(30) + ';}',
     '.rx-ed{-webkit-appearance:none;appearance:none;border:0;background:none;position:absolute;right:' + u(30) + ';top:' + u(30) + ';width:' + u(44) + ';height:' + u(44) + ';display:grid;place-items:center;padding:0;cursor:pointer;border-radius:' + u(12) + ';}.rx-ed svg{width:' + u(26) + ';height:' + u(26) + ';}',
-    '.rx-pgs{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;touch-action:pan-x pan-y;margin-top:' + u(34) + ';}.rx-pgs::-webkit-scrollbar{display:none;}',
-    '.rx-pg{flex:0 0 100%;box-sizing:border-box;padding-right:2px;scroll-snap-align:start;display:grid;grid-template-columns:repeat(4,1fr);gap:' + u(29) + ';align-content:start;}',
+    '.rx-pgs{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;touch-action:pan-x pan-y;margin-top:' + u(20) + ';}.rx-pgs::-webkit-scrollbar{display:none;}',
+    '.rx-pg{flex:0 0 100%;box-sizing:border-box;padding-right:2px;scroll-snap-align:start;display:grid;grid-template-columns:repeat(4,1fr);gap:' + u(22) + ';align-content:start;}',
     '.rx-pd{display:flex;justify-content:center;align-items:center;gap:' + u(14) + ';margin-top:' + u(22) + ';height:' + u(10) + ';}.rx-pd[hidden]{display:none;}.rx-pd i{width:' + u(10) + ';height:' + u(10) + ';border-radius:50%;background:rgba(255,255,255,.4);transition:background .2s,transform .2s;cursor:pointer;}.rx-pd i.on{background:#fff;transform:scale(1.15);}',
     '.rx-app{-webkit-appearance:none;appearance:none;border:0;padding:0;aspect-ratio:1;width:100%;border-radius:' + u(15) + ';display:grid;place-items:center;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;border:1px solid rgba(255,255,255,.1);background:linear-gradient(160deg,rgba(255,255,255,.16),rgba(255,255,255,.06));box-shadow:0 ' + u(4) + ' ' + u(10) + ' rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.2);transition:transform .1s ease,filter .1s ease;}',
     '.rx-app:active{transform:scale(.95);filter:brightness(.85);}.rx-app svg{display:block;width:calc(var(--w) * var(--u));height:calc(var(--h) * var(--u));}',
