@@ -2,6 +2,20 @@
 
 The same entries are shown inside the card (dock > What's new). Newest first.
 
+## 0.57.0 (2026-11-02)
+
+**Security: a token-exposure hole in the app, found and closed.**
+- Every release goes through review before it reaches you, and this one turned up a real issue: the script that signs you into Home Assistant inside the app briefly put your access and refresh tokens where any other page loaded in the app's browser view could have read them, for an instant before the script checked that page was actually your own Home Assistant. It never leaked anything in the wild as far as we know, and it is fully closed now: the tokens are private to that one script, period. Your privacy and the security of your home are not an afterthought here, and fixes like this ship the moment they are found
+
+**TV remote: a real transport row, Options instead of the keys sheet, and the remote fills the card.**
+- The centre of the dial is OK/select, and the volume dial responds at the low end too
+- A rewind / play-pause / forward row under the dial; the play button is bigger, with a combined play/pause icon that does not flip with playback state
+- The star became Options (the three-dot icon), using the TV's own menu key; the gear and its "all keys" sheet are gone, and the mic sits where Options used to be, back in the pill
+- The remote now fills the whole height of the card on phone and tablet, with no empty space or scrolling, and the favourites card sits at the very bottom with no gap below it
+
+**Pull down from the top to refresh, in the app.**
+- A pull from the very top of the start screen (not a list or a slider) now does what you would expect: the app clears its copy of the card and loads the fresh one, so a newly installed version shows right away
+
 ## 0.56.0 (2026-10-28)
 
 **A Lights screen: every light in one place.**
