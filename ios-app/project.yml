@@ -113,6 +113,7 @@ targets:
       - path: Shared/OkieSVGIcons.swift
       - path: Shared/SVGPath.swift
       - path: Resources/Fonts
+      - path: Resources/Assets.xcassets
     info:
       path: Config/Watch-Info.plist
       properties:
@@ -127,6 +128,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.okiedokie.home.watchkitapp
         CODE_SIGN_STYLE: Automatic
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         TARGETED_DEVICE_FAMILY: "4"
         SKIP_INSTALL: YES
 schemes:
