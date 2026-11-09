@@ -3,7 +3,7 @@
   // pretend assistant for the demo: canned answers for the questions people actually try
   function demoAnswer(tx) {
     var q = tx.toLowerCase(), place = /\b(?:in|at|for)\s+([a-z][a-z .'-]{2,24}?)\s*(?:\?|$|today|tonight|tomorrow|now|right now)/.exec(q);
-    if (/\bwho(?:'s| is)?\s+(?:home|here|in)\b|\banyone\s+(?:home|in)\b|\bis\s+(?:alex|anyone)\s+(?:home|in)\b/.test(q)) return 'Alex is home. Nobody else is in.';
+    if (/\bwho(?:'s| is)?\s+(?:home|here|in)\b|\banyone\s+(?:home|in)\b|\bis\s+(?:paul|anyone)\s+(?:home|in)\b/.test(q)) return 'Paul is home. Nobody else is in.';
     if (/weather|forecast|rain|snow|sunny|how (?:warm|cold)/.test(q)) {
       if (place && !/^(?:the )?(?:house|home|kitchen|living room|bedroom|garden|patio)$/.test(place[1])) { var pl = place[1].replace(/\b[a-z]/g, function (c) { return c.toUpperCase(); }); return 'In ' + pl + ' it is sunny and about 21° right now, with a light southerly wind. Dry all day.'; }
       if (/tonight|evening|night/.test(q)) return 'Tonight stays dry and clear. It cools from 16° at dusk to about 9° by midnight, with a light breeze from the north-west. A jacket for the patio is a good idea.';
@@ -32,18 +32,18 @@
   function ent(id, name, state, attrs, reg) { return { id: id, st: { entity_id: id, state: state, attributes: Object.assign({ friendly_name: name }, attrs || {}), last_changed: new Date().toISOString(), last_updated: new Date().toISOString() }, reg: reg || {} }; }
   var A = function (id, name) { return { area_id: id, _n: name }; };
   var list = [
-    ent('fan.anziehraum_klima', 'Anziehraum Klima Climate', 'off', {}, { area_id: 'anziehraum' }),
-    ent('light.anziehraum_deckenleuchte', 'Anziehraum Deckenleuchte', 'off', { brightness: 0 }, { area_id: 'anziehraum' }),
-    ent('cover.anziehraum_rollade', 'Anziehraum Rollade', 'open', { current_position: 100 }, { area_id: 'anziehraum' }),
-    ent('binary_sensor.anziehraum_smoke', 'Anziehraum Smoke Sensor 9', 'off', { device_class: 'smoke' }, { area_id: 'anziehraum' }),
-    ent('sensor.anziehraum_temp', 'Anziehraum Temperatur', '21.5', { device_class: 'temperature', unit_of_measurement: '°C' }, { area_id: 'anziehraum' }),
-    ent('sensor.anziehraum_hum', 'Anziehraum Feuchte', '62', { device_class: 'humidity', unit_of_measurement: '%' }, { area_id: 'anziehraum' }),
-    ent('light.study_decke', 'Arbeitszimmer Decke', 'off', {}, { area_id: 'arbeitszimmer' }),
-    ent('fan.study_klima', 'Arbeitszimmer Klima Climate', 'off', {}, { area_id: 'arbeitszimmer' }),
-    ent('cover.study_rollade', 'Arbeitszimmer Rollade', 'open', { current_position: 100 }, { area_id: 'arbeitszimmer' }),
-    ent('binary_sensor.study_smoke', 'Arbeitszimmer Smoke Sensor 10', 'off', { device_class: 'smoke' }, { area_id: 'arbeitszimmer' }),
-    ent('sensor.study_temp', 'Arbeitszimmer Temperatur', '22.0', { device_class: 'temperature', unit_of_measurement: '°C' }, { area_id: 'arbeitszimmer' }),
-    ent('sensor.study_hum', 'Arbeitszimmer Feuchte', '62', { device_class: 'humidity', unit_of_measurement: '%' }, { area_id: 'arbeitszimmer' }),
+    ent('fan.dressing_room_klima', 'Dressing Room AC', 'off', {}, { area_id: 'dressing_room' }),
+    ent('light.dressing_room_deckenleuchte', 'Dressing Room Ceiling Light', 'off', { brightness: 0 }, { area_id: 'dressing_room' }),
+    ent('cover.dressing_room_rollade', 'Dressing Room Shutter', 'open', { current_position: 100 }, { area_id: 'dressing_room' }),
+    ent('binary_sensor.dressing_room_smoke', 'Dressing Room Smoke Sensor 9', 'off', { device_class: 'smoke' }, { area_id: 'dressing_room' }),
+    ent('sensor.dressing_room_temp', 'Dressing Room Temperature', '21.5', { device_class: 'temperature', unit_of_measurement: '°C' }, { area_id: 'dressing_room' }),
+    ent('sensor.dressing_room_hum', 'Dressing Room Humidity', '62', { device_class: 'humidity', unit_of_measurement: '%' }, { area_id: 'dressing_room' }),
+    ent('light.study_decke', 'Study Ceiling', 'off', {}, { area_id: 'study' }),
+    ent('fan.study_klima', 'Study AC', 'off', {}, { area_id: 'study' }),
+    ent('cover.study_rollade', 'Study Shutter', 'open', { current_position: 100 }, { area_id: 'study' }),
+    ent('binary_sensor.study_smoke', 'Study Smoke Sensor 10', 'off', { device_class: 'smoke' }, { area_id: 'study' }),
+    ent('sensor.study_temp', 'Study Temperature', '22.0', { device_class: 'temperature', unit_of_measurement: '°C' }, { area_id: 'study' }),
+    ent('sensor.study_hum', 'Study Humidity', '62', { device_class: 'humidity', unit_of_measurement: '%' }, { area_id: 'study' }),
     ent('light.kitchen_ceiling', 'Kitchen Ceiling', 'on', { brightness: 180, supported_color_modes: ['color_temp', 'xy'], color_temp_kelvin: 2700 }, { area_id: 'kitchen' }),
     ent('light.kitchen_counter', 'Kitchen Counter', 'off', {}, { area_id: 'kitchen' }),
     ent('switch.coffee_machine', 'Kitchen Coffee Machine', 'off', {}, { area_id: 'kitchen' }),
@@ -55,7 +55,7 @@
     ent('light.bedroom_left', 'Bedroom Left Lamp', 'on', { brightness: 80, supported_color_modes: ['color_temp'], color_temp_kelvin: 2200 }, { area_id: 'bedroom' }),
     ent('light.bedroom_right', 'Bedroom Right Lamp', 'on', { brightness: 80, supported_color_modes: ['color_temp'], color_temp_kelvin: 2200 }, { area_id: 'bedroom' }),
     ent('light.hallway_ceiling', 'Hallway Light', 'on', { brightness: 255, supported_color_modes: ['brightness'] }, { area_id: 'hallway' }),
-    ent('light.study_desk', 'Arbeitszimmer Desk Lamp', 'on', { brightness: 255, supported_color_modes: ['color_temp'], color_temp_kelvin: 4000 }, { area_id: 'arbeitszimmer' }),
+    ent('light.study_desk', 'Study Desk Lamp', 'on', { brightness: 255, supported_color_modes: ['color_temp'], color_temp_kelvin: 4000 }, { area_id: 'study' }),
     ent('light.garden_path', 'Garden Path Lights', 'on', { brightness: 120, supported_color_modes: ['brightness'] }, { area_id: 'garden' }),
     ent('light.garage_ceiling', 'Garage Light', 'off', {}, { area_id: 'garage' }),
     ent('light.living_room_strip', 'Living Room LED Strip', 'off', {}, { area_id: 'living_room' }),
@@ -65,8 +65,8 @@
     ent('binary_sensor.living_room_window', 'Living Room Window', 'on', { device_class: 'window' }, { area_id: 'living_room' }),
     ent('binary_sensor.kitchen_window', 'Kitchen Window', 'off', { device_class: 'window' }, { area_id: 'kitchen' }),
     ent('binary_sensor.bedroom_window', 'Bedroom Window', 'off', { device_class: 'window' }, { area_id: 'bedroom' }),
-    ent('binary_sensor.study_window', 'Arbeitszimmer Window', 'on', { device_class: 'window' }, { area_id: 'arbeitszimmer' }),
-    ent('binary_sensor.anziehraum_window', 'Anziehraum Window', 'off', { device_class: 'window' }, { area_id: 'anziehraum' }),
+    ent('binary_sensor.study_window', 'Study Window', 'on', { device_class: 'window' }, { area_id: 'study' }),
+    ent('binary_sensor.dressing_room_window', 'Dressing Room Window', 'off', { device_class: 'window' }, { area_id: 'dressing_room' }),
     ent('binary_sensor.back_door', 'Back Door', 'off', { device_class: 'door' }, { area_id: 'hallway' }),
     ent('binary_sensor.garage_side_door', 'Garage Side Door', 'off', { device_class: 'door' }, { area_id: 'garage' }),
     ent('binary_sensor.living_room_motion', 'Living Room Motion', 'on', { device_class: 'motion' }, { area_id: 'living_room' }),
@@ -121,6 +121,18 @@
     ent('camera.front_door', 'Front Door Camera', 'idle', { entity_picture: 'assets/room.jpg' }, { area_id: 'hallway' }),
     ent('camera.patio_live_view', 'Patio Camera', 'idle', { entity_picture: 'assets/room.jpg' }, { area_id: 'garden' }),
     ent('binary_sensor.patio_motion', 'Patio Motion', 'on', { device_class: 'motion' }, { area_id: 'garden' }),
+    ent('camera.lenslink_preview', 'LensLink Preview', 'idle', { entity_picture: 'assets/room.jpg' }),
+    ent('sensor.lenslink_status', 'LensLink Status', 'Streaming', { status: 'Streaming', tone: 'live', connected: true, standby: false, armed: true, autoStart: true, sync: true }),
+    ent('sensor.lenslink_state', 'LensLink State', 'Main (Wide)', {
+      lens: 'Main (Wide)', lenses: ['Main (Wide)', 'Ultra Wide (0.5x)', 'Telephoto', 'Front'], lensFactors: [1, 0.5, 4, 1],
+      zoom: 1.5, maxZoom: 8, exposureMode: 'auto', focusMode: 'auto', whiteBalanceMode: 'auto',
+      exposureBias: 0.33, iso: 200, minISO: 25, maxISO: 3200, shutterSeconds: 1 / 60, minShutterSeconds: 1 / 8000, maxShutterSeconds: 1,
+      whiteBalanceTemperature: 5200, lensPosition: 0.4, resolution: '4K', resolutions: ['1080p', '4K'], fps: 30, frameRates: [24, 30, 60],
+      codec: 'hevc', codecs: ['h264', 'hevc'], stabilization: 'standard', flashlight: false, hasFlashlight: true, paused: false, naturalBlur: false,
+    }),
+    ent('camera.nursery_owlet', 'Nursery Owlet', 'idle', { entity_picture: 'assets/room.jpg' }, { area_id: 'nursery' }),
+    ent('sensor.nursery_owlet_temperature', 'Nursery Owlet Temperature', '71', { device_class: 'temperature', unit_of_measurement: '°F' }, { area_id: 'nursery' }),
+    ent('sensor.nursery_owlet_humidity', 'Nursery Owlet Humidity', '52', { device_class: 'humidity', unit_of_measurement: '%' }, { area_id: 'nursery' }),
     ent('event.patio_motion', 'Patio Motion Event', new Date(Date.now() - 35 * 60000).toISOString(), { device_class: 'motion', event_type: 'motion' }, { area_id: 'garden' }),
     ent('event.patio_ding', 'Patio Doorbell Event', new Date(Date.now() - 4 * 3600000).toISOString(), { device_class: 'doorbell', event_type: 'ring' }, { area_id: 'garden' }),
     ent('conversation.home_assistant', 'Home Assistant', 'unknown', {}, {}),
@@ -129,27 +141,27 @@
     ent('binary_sensor.hallway_motion', 'Hallway Motion', 'off', { device_class: 'motion' }, { area_id: 'hallway' }),
     ent('binary_sensor.kitchen_window', 'Kitchen Window', 'on', { device_class: 'window' }, { area_id: 'kitchen' }),
     ent('climate.bedroom', 'Bedroom Thermostat', 'off', { current_temperature: 19, temperature: 20, hvac_modes: ['off', 'heat', 'cool', 'auto'], min_temp: 16, max_temp: 30, target_temp_step: 0.5 }, { area_id: 'bedroom' }),
-    ent('climate.office', 'Office AC', 'heat_cool', { current_temperature: 22, temperature: null, target_temp_low: 20, target_temp_high: 24, hvac_modes: ['off', 'heat_cool', 'heat', 'cool'], min_temp: 16, max_temp: 30, target_temp_step: 0.5 }, { area_id: 'arbeitszimmer' }),
+    ent('climate.office', 'Office AC', 'heat_cool', { current_temperature: 22, temperature: null, target_temp_low: 20, target_temp_high: 24, hvac_modes: ['off', 'heat_cool', 'heat', 'cool'], min_temp: 16, max_temp: 30, target_temp_step: 0.5 }, { area_id: 'study' }),
     ent('light.bedroom_main', 'Bedroom Light', 'off', {}, { area_id: 'bedroom' }),
     ent('fan.bedroom_fan', 'Bedroom Fan', 'off', { percentage: 0 }, { area_id: 'bedroom' }),
     ent('garage_dummy.skip', 'skip', 'off', {}, {}),
     ent('cover.garage_door', 'Garage Door', 'closed', { device_class: 'garage' }, { area_id: 'garage' }),
     ent('switch.garden_pump', 'Garden Pump', 'off', {}, { area_id: 'garden' }),
-    ent('sensor.kitchen_temperature', 'Kitchen Temperature', '21.0', { device_class: 'temperature', unit_of_measurement: '°C' }, { area_id: 'kitchen' }),
+    ent('sensor.kitchen_temperature', 'Kitchen Temperaturee', '21.0', { device_class: 'temperature', unit_of_measurement: '°C' }, { area_id: 'kitchen' }),
     ent('scene.movie_night', 'Movie Night', 'scening', {}, {}),
     ent('script.goodnight', 'Goodnight', 'off', {}, {}),
     ent('automation.sunset_lights', 'Sunset Lights', 'on', {}, {}),
     ent('weather.home', 'Home', (new URLSearchParams(location.search).get('night') === '1' ? 'clear-night' : 'partlycloudy'), { temperature: 17, humidity: 71, apparent_temperature: 16, wind_speed: 14, wind_speed_unit: 'km/h', wind_bearing: 300, wind_gust_speed: 26, pressure: 1014, pressure_unit: 'hPa', visibility: 16, visibility_unit: 'km', dew_point: 11, uv_index: 3, cloud_coverage: 58, temperature_unit: '°C', forecast: [] }, {}),
-    ent('weather.berlin', 'Forecast Berlin', 'rainy', { temperature: 11, humidity: 83, wind_speed: 20, wind_speed_unit: 'km/h', wind_bearing: 240, forecast: [] }, {}),
+    ent('weather.berlin', 'Forecast Home', 'rainy', { temperature: 11, humidity: 83, wind_speed: 20, wind_speed_unit: 'km/h', wind_bearing: 240, forecast: [] }, {}),
     ent('sun.sun', 'Sun', (new URLSearchParams(location.search).get('night') === '1' ? 'below_horizon' : 'above_horizon'), { next_rising: new Date(Date.now() + 8 * 3600e3).toISOString(), next_setting: new Date(Date.now() + 5 * 3600e3).toISOString() }, {}),
-    ent('sensor.tagesschau', 'Tagesschau', '4', { channel: { title: 'tagesschau.de' }, entries: [
-      { id: 't1', title: 'Neue Regeln für Balkonkraftwerke beschlossen', link: 'https://example.com/t1', published: new Date(Date.now() - 3600000).toISOString() },
-      { id: 't2', title: 'Wetterdienst warnt vor Sturmböen im Norden', link: 'https://example.com/t2', published: new Date(Date.now() - 2 * 3600000).toISOString() },
-      { id: 't3', title: 'Bahn will Takt im Fernverkehr verdichten', link: 'https://example.com/t3', published: new Date(Date.now() - 5 * 3600000).toISOString() },
-      { id: 't4', title: 'Forscher entdecken neue Tiefseeart', link: 'https://example.com/t4', published: new Date(Date.now() - 9 * 3600000).toISOString() }] }, {}),
-    ent('sensor.heise', 'heise online', '2', { channel: { title: 'heise online' }, entries: [
-      { id: 'h1', title: 'Home Assistant 2026.10 bringt neue Dashboards', link: 'https://example.com/h1', published: new Date(Date.now() - 1800000).toISOString() },
-      { id: 'h2', title: 'Matter 2.0: Das ändert sich für Smart-Home-Geräte', link: 'https://example.com/h2', published: new Date(Date.now() - 4 * 3600000).toISOString() }] }, {}),
+    ent('sensor.tagesschau', 'World News', '4', { channel: { title: 'worldnews.example' }, entries: [
+      { id: 't1', title: 'New rules approved for balcony solar panels', link: 'https://example.com/t1', published: new Date(Date.now() - 3600000).toISOString() },
+      { id: 't2', title: 'Weather service warns of strong gusts in the north', link: 'https://example.com/t2', published: new Date(Date.now() - 2 * 3600000).toISOString() },
+      { id: 't3', title: 'Rail operator plans more frequent long-distance trains', link: 'https://example.com/t3', published: new Date(Date.now() - 5 * 3600000).toISOString() },
+      { id: 't4', title: 'Researchers discover a new deep-sea species', link: 'https://example.com/t4', published: new Date(Date.now() - 9 * 3600000).toISOString() }] }, {}),
+    ent('sensor.heise', 'Tech Daily', '2', { channel: { title: 'Tech Daily' }, entries: [
+      { id: 'h1', title: 'Home Assistant 2026.10 brings new dashboards', link: 'https://example.com/h1', published: new Date(Date.now() - 1800000).toISOString() },
+      { id: 'h2', title: 'Matter 2.0: what changes for smart home devices', link: 'https://example.com/h2', published: new Date(Date.now() - 4 * 3600000).toISOString() }] }, {}),
     ent('sensor.house_power', 'House Power', '412', { unit_of_measurement: 'W', device_class: 'power' }, {}),
     // the Kindle Fire and the AWTRIX display: dozens of entities that the app folds into one tile each
     ent('switch.kindle_fire_screen', 'Kindle Fire Screen', 'on', {}, { area_id: 'hallway' }),
@@ -196,7 +208,7 @@
     ent('sensor.window_battery', 'Window Sensor Battery', '9', { device_class: 'battery', unit_of_measurement: '%' }, { area_id: 'kitchen' }),
     ent('binary_sensor.hall_smoke', 'Hallway Smoke Detector', 'off', { device_class: 'smoke' }, { area_id: 'hallway' }),
     ent('timer.pasta', 'Pasta', 'active', { remaining: '0:08:30', finishes_at: new Date(Date.now() + 510e3).toISOString() }, {}),
-    ent('person.alex', 'Alex', 'home', {}, {}),
+    ent('person.paul', 'Paul', 'home', {}, {}),
     ent('todo.shopping', 'Einkaufsliste', '1', {}, {}),
     ent('todo.tasks', 'To-do', '5', {}, {}),
     ent('event.robo_mission_completed', 'Robo Vacuum Mission completed', new Date(Date.now() - 3 * 3600e3).toISOString(), { event_type: 'mission_completed', entry_id: 'E_ROBO' }, { device_id: 'dev_robo', platform: 'roomba_plus' }),
@@ -224,25 +236,25 @@
     ent('update.hass_n8n_update', 'n8n Update', 'on', { installed_version: '1.2.0', latest_version: '1.3.1' }, {}),
     ent('update.home_assistant_core_update', 'Home Assistant Core Update', 'on', { installed_version: '2026.10.0', latest_version: '2026.10.2' }, {}),
     ent('update.jellyfin_update', 'Jellyfin Update', 'off', { installed_version: '10.9', latest_version: '10.9' }, {}),
-    ent('media_player.spotify_alex', 'Spotify Alex', 'playing', { media_title: 'Chapter Test', media_artist: 'Test Band', media_album_name: 'Waking the Test', media_duration: 337, media_position: 4, media_position_updated_at: new Date().toISOString(), media_content_type: 'music', app_name: 'Spotify', volume_level: 0.5, is_volume_muted: false, shuffle: false, repeat: 'off', source: 'iPhone', source_list: ['iPhone', 'iPad', 'Living Room TV'], supported_features: 1 + 2 + 4 + 16 + 32 + 512 + 2048 + 16384 + 32768 + 131072 + 262144, entity_picture: 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect width="300" height="300" fill="#2a1f3d"/><circle cx="150" cy="150" r="110" fill="#7a4cc9"/><circle cx="150" cy="150" r="40" fill="#f2c14e"/></svg>') }, {}),
+    ent('media_player.spotify_paul', 'Spotify Paul', 'playing', { media_title: 'Chapter Test', media_artist: 'Test Band', media_album_name: 'Waking the Test', media_duration: 337, media_position: 4, media_position_updated_at: new Date().toISOString(), media_content_type: 'music', app_name: 'Spotify', volume_level: 0.5, is_volume_muted: false, shuffle: false, repeat: 'off', source: 'iPhone', source_list: ['iPhone', 'iPad', 'Living Room TV'], supported_features: 1 + 2 + 4 + 16 + 32 + 512 + 2048 + 16384 + 32768 + 131072 + 262144, entity_picture: 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect width="300" height="300" fill="#2a1f3d"/><circle cx="150" cy="150" r="110" fill="#7a4cc9"/><circle cx="150" cy="150" r="40" fill="#f2c14e"/></svg>') }, {}),
     ent('calendar.work', 'Work', 'off', { supported_features: 0 }, {}),
     ent('calendar.birthdays', 'Birthdays', 'off', { supported_features: 0 }, {}),
     ent('calendar.family', 'Familie', 'off', { supported_features: 7, message: 'Dinner', start_time: new Date(Date.now() + 3600e3).toISOString().slice(0, 19).replace('T', ' '), end_time: new Date(Date.now() + 7200e3).toISOString().slice(0, 19).replace('T', ' ') }, {}),
   ].filter(function (e) { return e.id !== 'garage_dummy.skip'; });
   var areas = {};
-  [['anziehraum', 'Anziehraum'], ['arbeitszimmer', 'Arbeitszimmer'], ['kitchen', 'Kitchen'], ['living_room', 'Living Room'], ['hallway', 'Hallway'], ['bedroom', 'Bedroom'], ['garage', 'Garage'], ['garden', 'Garden']].forEach(function (a) { areas[a[0]] = { area_id: a[0], name: a[1] }; });
+  [['dressing_room', 'Dressing Room'], ['study', 'Study'], ['kitchen', 'Kitchen'], ['living_room', 'Living Room'], ['hallway', 'Hallway'], ['bedroom', 'Bedroom'], ['garage', 'Garage'], ['garden', 'Garden']].forEach(function (a) { areas[a[0]] = { area_id: a[0], name: a[1] }; });
 
   function makeHass(onChange) {
     var states = {}, entities = {};
     list.forEach(function (e) { states[e.id] = e.st; entities[e.id] = Object.assign({ entity_id: e.id }, e.reg); });
     var hass = {
       states: states, entities: entities, areas: areas, devices: {},
-      language: 'en', locale: { language: 'en' }, config: { unit_system: { temperature: '°C' }, time_zone: 'Europe/Berlin' },
-      user: { name: 'Alex', is_admin: true },
+      language: 'en', locale: { language: 'en' }, config: { unit_system: { temperature: '°C' }, time_zone: 'America/Chicago' },
+      user: { name: 'Paul', is_admin: true },
       formatEntityState: function (st) { var m = { partlycloudy: g.__lang === 'de' ? 'Teilweise bewölkt' : 'Partly cloudy', sunny: g.__lang === 'de' ? 'Sonnig' : 'Sunny' }; return m[st.state] || st.state; },
       services: { scheduler: { add: {}, remove: {}, edit: {} } },
       connection: { subscribeMessage: function (cb) {
-        setTimeout(function () { cb({ type: 'current', notifications: { n1: { notification_id: 'n1', title: 'Backup failed', message: 'The nightly backup could not finish.', created_at: new Date(Date.now() - 3600e3).toISOString(), status: 'unread' }, n2: { notification_id: 'n2', title: '', message: 'Welcome home, Alex', created_at: new Date(Date.now() - 600e3).toISOString(), status: 'unread' } } }); }, 80);
+        setTimeout(function () { cb({ type: 'current', notifications: { n1: { notification_id: 'n1', title: 'Backup failed', message: 'The nightly backup could not finish.', created_at: new Date(Date.now() - 3600e3).toISOString(), status: 'unread' }, n2: { notification_id: 'n2', title: '', message: 'Welcome home, Paul', created_at: new Date(Date.now() - 600e3).toISOString(), status: 'unread' } } }); }, 80);
         return Promise.resolve(function () {});
       } },
       callService: function (domain, service, data) {
@@ -347,7 +359,7 @@
             var base = day0.getTime() + dd * 86400e3, dow = new Date(base).getDay(), dom = new Date(base).getDate();
             if (which === 'work' && dow >= 1 && dow <= 5 && (dd * 7 + dom) % 3 !== 0) out.push({ summary: ['Stand-up', 'Design review', 'Client call', '1:1 with Sam', 'Sprint planning'][(dom + dow) % 5], start: { dateTime: new Date(base + (9 + (dom % 4)) * 3600e3).toISOString() }, end: { dateTime: new Date(base + (10 + (dom % 4)) * 3600e3).toISOString() }, location: dow === 3 ? 'Room 4B' : '' });
             if (which === 'work' && dow === 2 && dom % 2 === 0) out.push({ summary: 'Team lunch', start: { dateTime: new Date(base + 12.5 * 3600e3).toISOString() }, end: { dateTime: new Date(base + 13.5 * 3600e3).toISOString() }, location: 'Taco Bus, Tampa' });
-            if (which === 'birthdays' && (dom === 5 || dom === 19 || dom === 27)) out.push({ summary: ['Ana birthday', 'Mum birthday', 'Sam birthday'][[5, 19, 27].indexOf(dom)], start: { date: new Date(base).toISOString().slice(0, 10) }, end: { date: new Date(base + 86400e3).toISOString().slice(0, 10) } });
+            if (which === 'birthdays' && (dom === 5 || dom === 19 || dom === 27)) out.push({ summary: ['Jess birthday', 'Mum birthday', 'Sam birthday'][[5, 19, 27].indexOf(dom)], start: { date: new Date(base).toISOString().slice(0, 10) }, end: { date: new Date(base + 86400e3).toISOString().slice(0, 10) } });
           }
           return Promise.resolve(out.filter(function (e) { var s0 = Date.parse(e.start.dateTime || e.start.date), e0 = Date.parse(e.end.dateTime || e.end.date); return s0 < qe && e0 > qs; }));
         }
@@ -438,14 +450,14 @@
       },
     };
     g.__spotifySet = function (fn) {      // dev/test hook: change the pretend Spotify player the way Home Assistant would (fn gets a copy of its attributes and returns them, or { attrs, state })
-      var sid = 'media_player.spotify_alex', cur = hass.states[sid], a = Object.assign({}, cur.attributes), r = fn(a) || a, ns = Object.assign({}, hass.states);
+      var sid = 'media_player.spotify_paul', cur = hass.states[sid], a = Object.assign({}, cur.attributes), r = fn(a) || a, ns = Object.assign({}, hass.states);
       ns[sid] = Object.assign({}, cur, { state: r.state || cur.state, attributes: r.attrs || r, last_updated: new Date().toISOString() });
       hass = Object.assign({}, hass, { states: ns }); onChange(hass);
     };
     return { get hass() { return hass; } };
   }
   // a stand-in for the floor plan card of the Overview dashboard (Home Assistant loads the real one as a dashboard resource)
-  if (g.customElements && !g.customElements.get('floorplan-card')) g.customElements.define('floorplan-card', class extends HTMLElement { constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = '<svg id="plan" viewBox="0 -60 860 2010" style="width:100%;height:100%"><g id="pg"><g transform="scale(1 1)"><g transform="translate(-290 -40)"><polygon points="351,625 1065,625 1065,1882 462,1882 462,1300 351,1300" fill="#d8d2c4"/></g></g></g></svg>'; } setConfig(c) { this._cfg = c; } set hass(v) { this._hass = v; this.textContent = 'floor plan' + (this._cfg && this._cfg.bare ? ' (bare)' : '') + ' ' + JSON.stringify(this._cfg || {}); } });
+  if (g.customElements && !g.customElements.get('floorplan-card') && !/[?&]realplan=1/.test(location.search)) g.customElements.define('floorplan-card', class extends HTMLElement { constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = '<svg id="plan" viewBox="0 -60 860 2010" style="width:100%;height:100%"><g id="pg"><g transform="scale(1 1)"><g transform="translate(-290 -40)"><polygon points="351,625 1065,625 1065,1882 462,1882 462,1300 351,1300" fill="#d8d2c4"/></g></g></g></svg>'; } setConfig(c) { this._cfg = c; } set hass(v) { this._hass = v; this.textContent = 'floor plan' + (this._cfg && this._cfg.bare ? ' (bare)' : '') + ' ' + JSON.stringify(this._cfg || {}); } });
   g.makeMockHass = makeHass;
   g.__mockEntities = list;
 })(window);
@@ -463,7 +475,7 @@ function applyDemoParams(q, card, m) {
   }
   var sp = q.get('spotify');      // ?spotify=open|pick|load: Spotify as Home Assistant shows it before the library is unlocked (nothing running / devices known, none active / a device active, nothing loaded)
   if (sp) {
-    var sid = 'media_player.spotify_alex', was0 = hs.states[sid], A = Object.assign({}, was0.attributes);
+    var sid = 'media_player.spotify_paul', was0 = hs.states[sid], A = Object.assign({}, was0.attributes);
     ['media_title', 'media_artist', 'media_album_name', 'media_duration', 'media_position', 'media_position_updated_at', 'entity_picture', 'volume_level', 'shuffle', 'repeat', 'source', 'source_list'].forEach(function (k) { delete A[k]; });
     A.supported_features = 2048; if (sp === 'pick' || sp === 'load') A.source_list = ['iPad', 'iPhone']; if (sp === 'load') A.source = 'iPad';
     hs.states[sid] = Object.assign({}, was0, { state: 'idle', attributes: A });
