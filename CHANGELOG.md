@@ -2,22 +2,6 @@
 
 The same entries are shown inside the card (dock > What's new). Newest first.
 
-## 0.59.0 (2026-11-09)
-
-**An Owlet camera gets its own view, like LensLink.**
-- Set it up in Settings: pick your Owlet Dream Sight (or other Owlet camera) under Cameras, and the live view becomes a full glass panel instead of the plain grid tile
-- The room's own temperature and humidity sit as a badge over the live picture, and a swipeable "Comfort Temp" card below shows them full size
-- A Dream Sock adds more: Morning Report, Weekly Sleep Trends, Health Patterns and Sleep Positions pages, styled after Owlet's own app. Without a sock they still swipe in to preview what is coming, clearly marked as a demo, never mistaken for a real reading
-
-## 0.58.0 (2026-11-07)
-
-**Music: pick your source, Spotify or My library.**
-- A new switch at the top of the Music screen: Spotify (as before) or My library, your own music on your own server (Navidrome). My library also has its own tile, My Music, in the apps
-- Sign in once with the server address, your user name and your password. The password is turned into a token on this device and thrown away, it is never saved
-- Browse your playlists, liked songs, albums, artists, recently added and a random mix. Play, pause, next, previous, seek, shuffle, repeat and the heart (it likes the song on your server) all work, and the media keys of a computer or browser control it. In the Okie app on a phone the song stops when the screen locks, so for running use a Subsonic app (below)
-- My library plays on the screen that shows the card, not on a speaker: there is no Home Assistant speaker and no Spotify Connect in this source. Leaving it for Spotify pauses the song
-- The server is a separate Docker next to Home Assistant and does not touch it. For offline listening while running, use a Subsonic app on the phone (it can download songs and playlists)
-
 ## 0.57.0 (2026-11-02)
 
 **Security: a token-exposure hole in the app, found and closed.**

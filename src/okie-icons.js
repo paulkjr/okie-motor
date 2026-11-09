@@ -150,8 +150,6 @@
     shield: function (on, c) { var col = on ? '#e0492f' : c; return '<path d="M24 5l17 6v13c0 10-7 16-17 19-10-3-17-9-17-19V11z" stroke="' + col + '" stroke-width="3"/>'; },
     person: function (on, c) { return '<circle cx="24" cy="16" r="8" stroke="' + c + '" stroke-width="3"/><path d="M8 42a16 16 0 0 1 32 0" stroke="' + c + '" stroke-width="3"/>'; },
     dot: function (on, c) { return '<circle cx="24" cy="24" r="14" stroke="' + c + '" stroke-width="3"/><circle cx="24" cy="24" r="4" fill="' + c + '"/>'; },
-    heart: function (on, c) { var col = on ? '#ff453a' : c; return '<path d="M24 41S6 29 6 16a10 10 0 0 1 18-6 10 10 0 0 1 18 6c0 13-18 25-18 25z" fill="' + (on ? 'rgba(255,69,58,.2)' : 'none') + '" stroke="' + col + '" stroke-width="3"/><path d="M8 23h7l3-6 4 10 3-7h8" stroke="' + col + '" stroke-width="2.3" fill="none" stroke-linejoin="round"/>'; },
-    lungs: function (on, c) { var col = on ? '#30d6c4' : c; return '<path d="M24 6v15" stroke="' + col + '" stroke-width="3"/><path d="M24 21c-2-6-7-6-9-4-5 5-6 17-3 20 3 2 8 0 10-5l2-4" fill="' + (on ? 'rgba(48,214,196,.2)' : 'none') + '" stroke="' + col + '" stroke-width="3" stroke-linejoin="round"/><path d="M24 21c2-6 7-6 9-4 5 5 6 17 3 20-3 2-8 0-10-5l-2-4" fill="' + (on ? 'rgba(48,214,196,.2)' : 'none') + '" stroke="' + col + '" stroke-width="3" stroke-linejoin="round"/>'; },
   };
   // the two that move
   var LOOPS = { fan: 1, vacuum: 1 };

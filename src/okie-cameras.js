@@ -156,12 +156,12 @@
   /** how many events are newer than the moment the history was last opened */
   function unseenCount(events, seenAt) { return (events || []).filter(function (e) { return e.ts > (seenAt || 0); }).length; }
 
-  /** The server's recordings page (the Ring clips recorder): cameras.clipsUrl, else https://<this host>:8765/ring; cameras.recordings = false turns it off. */
+  /** The page with your recordings (a clips recorder of your own): cameras.clipsUrl; nothing is guessed, so without it there is no recordings button; cameras.recordings = false turns it off. */
   function recordingsBase(cfg, loc) {
     cfg = cfg || {};
     if (cfg.recordings === false) return '';
     if (cfg.clipsUrl) return safeHttpUrl(cfg.clipsUrl);            // an address from settings (settings can be imported): only a web address or a path, never javascript: or data:
-    return loc && loc.protocol === 'https:' && loc.hostname ? 'https://' + loc.hostname + ':8765/ring' : '';
+    return '';
   }
   /** An address that is a web address (http or https) or a path on this site, else ''. It is parsed the way the browser parses it, so "java\tscript:" and upper case schemes do not get through. */
   function safeHttpUrl(v) {
@@ -406,22 +406,14 @@
 
   // ------------------------------------------------------ the apps ----
   function renderApp(container, ctx) {
-    var t = T(ctx), body = null, cur = null, live = null, llPanel = null, timers = [], disposed = false, feed = feedFor(ctx), offRecs = null;
+    var t = T(ctx), body = null, cur = null, live = null, timers = [], disposed = false, feed = feedFor(ctx), offRecs = null;
     var shell = g.OkieMotor.appshell.create(container, ctx, {
       id: 'cameras', title: t('app.cameras'), subtitle: '', icon: 'camera', gradient: ['#13284a', '#2f5fb0'],
       onTab: function (id, b) { body = b; if (shell) draw(); },       // the shell calls this once while it is still being built
     });
     body = body || shell.body;
 
-    function stopLive() {
-      if (live) { live.dispose(); live = null; }
-      if (llPanel) { llPanel.dispose(); llPanel = null; }
-      if (offRecs) { offRecs(); offRecs = null; }
-      if (shell.el.dataset.llHero) {
-        delete shell.el.dataset.llHero; delete shell.el.dataset.owletHero;
-        var w = shell.hero.querySelector('.ll-hero-wrap,.owlet-hero-wrap'); if (w) w.parentNode.removeChild(w);
-      }
-    }
+    function stopLive() { if (live) { live.dispose(); live = null; } if (offRecs) { offRecs(); offRecs = null; } }
     function clear() { stopLive(); timers.forEach(clearInterval); timers = []; body.innerHTML = ''; body.scrollTop = 0; }
     function stateText(c) { return c.unavailable ? t('cam.unavailable') : (c.alerts.length ? t('cam.motion') : ''); }
 
@@ -463,35 +455,6 @@
       var top = h('div.cam-live-top', null,
         h('button.act.cam-back', { type: 'button', onclick: function () { cur = null; draw(); } }, h('span', { html: UI.icon('back', 16) }), t('cam.all')), title, chip);
       live = liveView(ctx, c.id);
-
-      // LensLink is a real camera entity too (its go2rtc stream), but its detail
-      // view puts the live feed where the hero picture normally goes (replacing
-      // the big camera icon) and the controls in the body, instead of the plain
-      // motion-records layout every other camera gets.
-      var LL = g.OkieMotor.lenslink, llCfg = LL && LL.configFor(ctx, c.id);
-      if (llCfg) {
-        llPanel = LL.panel(ctx, llCfg);
-        shell.hero.insertBefore(h('div.ll-hero-wrap', null, live.el), shell.hero.firstChild);
-        shell.el.dataset.llHero = '1';
-        body.appendChild(h('div.cam-live.cam-live-ll', null, top, llPanel.el));
-        shell.setSubtitle(c.name);
-        return;
-      }
-
-      // the Owlet camera gets the same hero-takeover treatment, with a top-right temp/humidity
-      // badge over the live picture and a swipeable glass panel of its own (okie-owlet.js) below.
-      var OW = g.OkieMotor.owlet, owCfg = OW && OW.configFor(ctx, c.id);
-      if (owCfg) {
-        var owBadge = OW.liveBadge(ctx, owCfg);
-        llPanel = OW.panel(ctx, owCfg);
-        shell.hero.insertBefore(h('div.owlet-hero-wrap', null, live.el, owBadge.el), shell.hero.firstChild);
-        shell.el.dataset.llHero = '1'; shell.el.dataset.owletHero = '1';
-        timers.push(setInterval(function () { owBadge.update(); }, 30000));
-        body.appendChild(h('div.cam-live.cam-live-ll', null, top, llPanel.el));
-        shell.setSubtitle(c.name);
-        return;
-      }
-
       var strip = h('div.cam-strip');
       list.filter(function (x) { return x.id !== c.id && !x.unavailable; }).forEach(function (x) {
         strip.appendChild(h('button.cam-minitile', { type: 'button', 'aria-label': t('cam.open', { name: x.name }), onclick: function () { cur = x.id; draw(); } }, thumb(x, false), h('span.cam-shade'), h('span.cam-name', null, x.name)));
@@ -516,7 +479,6 @@
     return {
       update: function () {
         if (live) live.update();
-        if (llPanel) llPanel.update();
         if (cur) feed.poke();
         // alerts and offline states move the tiles' marks without redrawing the images
         if (!cur) {
