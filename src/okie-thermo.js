@@ -633,7 +633,7 @@
     '.th{height:calc(var(--th-ch,100cqh) - 108px);}.th-gaugewrap,.th-zone{top:-7.5px;height:calc(var(--th-ch,100cqh) - 105.5px);}',
     '.th-title{display:block;position:absolute;left:24px;top:-3px;z-index:3;pointer-events:none;}.th-step{margin-top:6px;}.th-stp{width:44px;height:44px;font-size:24px;}',
     // top gap (a quarter of the height, the design) | readout | free space | schedule, modes: the gap gives way when the card is short, so nothing can run into the block under it
-    '.th-left{left:0;right:0;top:0;bottom:0;width:auto;padding:0 0 0 24px;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,calc((var(--th-ch,100cqh) - 108px) * .25)) auto minmax(14px,1fr) auto;align-content:start;}',
+    '.th-left{left:0;right:0;top:0;bottom:0;width:auto;padding:0 0 0 24px;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,calc((var(--th-ch,100cqh) - 108px) * .25)) auto minmax(14px,64px) auto;align-content:start;}',
     '.th-readout{grid-row:2;margin-top:0;}.th-bottom{grid-row:4;}',
     '.th-readout{gap:13px;}.th-eyebrow{font-size:15px;letter-spacing:1px;}.th-num{font-size:var(--th-num);}.th.dec .th-num{font-size:calc(var(--th-num) * .72);}.th .th-num[data-len="3"]{font-size:calc(var(--th-num) * .76);}',
     '.th-now{font-family:"Okie Manrope",var(--okie-font);font-size:15px;font-weight:600;color:rgba(255,255,255,.62);margin-top:calc(var(--th-num) * -.07 - 13px);}',

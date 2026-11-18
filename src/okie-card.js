@@ -57,7 +57,7 @@
     lightModes: null,            // null = the three Govee shortcuts the card ships with (Cozy lights, Let's go to sleep, Turn up the lights); a list = your own modes (Settings > General > Light modes)
     vacuum: { jobs: [] },        // your own vacuum jobs: [{ id, name, kind: both|vacuum|mop|room|other, command, params }], sent through vacuum.send_command
     thermoSched: { profiles: {} },      // the degrees Comfort, Sleep, Eco and Away start with in a thermostat's schedule: { eco: { low, high } }
-    cameras: { image: '', snapshot: false, lastEntity: '', clipsUrl: '', recordings: true, liveSeconds: 120 },     // image: your own picture for the Cameras card (else the last motion picture, else a built-in one); lastEntity: the image entity of the last motion; clipsUrl: a recordings page for the history
+    cameras: { image: '', snapshot: false, lastEntity: '', clipsUrl: '', recordings: true, liveSeconds: 120, owlet: { entity: '', tempEntity: '', humidityEntity: '', recordingEntity: '', recordOn: false } },     // image: your own picture for the Cameras card (else the last motion picture, else a built-in one); lastEntity: the image entity of the last motion; clipsUrl: a recordings page for the history; owlet: the Owlet camera's entity, its sensors (else auto-matched) and its clip recorder's switch + on/off preference
     centerView: true,            // on a wide screen the column and the lock page sit in the middle of the window, not at the top
     textScale: 100,              // text size in percent (70-140): only the text, the cards and the menu keep their size
     scale: 80,                   // content size in percent: the column (menu, search bar, cards) shrinks or grows, the background stays

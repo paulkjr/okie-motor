@@ -156,12 +156,12 @@
   /** how many events are newer than the moment the history was last opened */
   function unseenCount(events, seenAt) { return (events || []).filter(function (e) { return e.ts > (seenAt || 0); }).length; }
 
-  /** The page with your recordings (a clips recorder of your own): cameras.clipsUrl; nothing is guessed, so without it there is no recordings button; cameras.recordings = false turns it off. */
+  /** The server's recordings page (the Ring clips recorder): cameras.clipsUrl, else https://<this host>:8765/ring; cameras.recordings = false turns it off. */
   function recordingsBase(cfg, loc) {
     cfg = cfg || {};
     if (cfg.recordings === false) return '';
     if (cfg.clipsUrl) return safeHttpUrl(cfg.clipsUrl);            // an address from settings (settings can be imported): only a web address or a path, never javascript: or data:
-    return '';
+    return loc && loc.protocol === 'https:' && loc.hostname ? 'https://' + loc.hostname + ':8765/ring' : '';
   }
   /** An address that is a web address (http or https) or a path on this site, else ''. It is parsed the way the browser parses it, so "java\tscript:" and upper case schemes do not get through. */
   function safeHttpUrl(v) {
@@ -398,6 +398,10 @@
       bell.dataset.alert = live ? 'true' : 'false';
       badge.hidden = !n; badge.textContent = n > 99 ? '99+' : String(n);
       bell.setAttribute('aria-label', n ? (n === 1 ? t('cam.new_1') : t('cam.new_n', { n: n })) : t('cam.history'));
+      // Settings (not the camera's own live view) is where "record the Owlet camera" lives now; keep the real
+      // recorder entity matching that preference on every tick, whether or not anyone has the camera open.
+      var OW = g.OkieMotor.owlet, owCfg = OW && hs && OW.configFor(ctx, (ctx.settings.get().cameras || {}).owlet && ctx.settings.get().cameras.owlet.entity);
+      if (owCfg) OW.reconcileRecording(ctx, owCfg);
     }
     var off = feed.on(draw), tick = setInterval(draw, 60000);
     draw();
@@ -406,14 +410,22 @@
 
   // ------------------------------------------------------ the apps ----
   function renderApp(container, ctx) {
-    var t = T(ctx), body = null, cur = null, live = null, timers = [], disposed = false, feed = feedFor(ctx), offRecs = null;
+    var t = T(ctx), body = null, cur = null, live = null, llPanel = null, timers = [], disposed = false, feed = feedFor(ctx), offRecs = null;
     var shell = g.OkieMotor.appshell.create(container, ctx, {
       id: 'cameras', title: t('app.cameras'), subtitle: '', icon: 'camera', gradient: ['#13284a', '#2f5fb0'],
       onTab: function (id, b) { body = b; if (shell) draw(); },       // the shell calls this once while it is still being built
     });
     body = body || shell.body;
 
-    function stopLive() { if (live) { live.dispose(); live = null; } if (offRecs) { offRecs(); offRecs = null; } }
+    function stopLive() {
+      if (live) { live.dispose(); live = null; }
+      if (llPanel) { llPanel.dispose(); llPanel = null; }
+      if (offRecs) { offRecs(); offRecs = null; }
+      if (shell.el.dataset.owletHero) {
+        delete shell.el.dataset.owletHero;
+        var w = shell.hero.querySelector('.owlet-hero-wrap'); if (w) w.parentNode.removeChild(w);
+      }
+    }
     function clear() { stopLive(); timers.forEach(clearInterval); timers = []; body.innerHTML = ''; body.scrollTop = 0; }
     function stateText(c) { return c.unavailable ? t('cam.unavailable') : (c.alerts.length ? t('cam.motion') : ''); }
 
@@ -455,6 +467,35 @@
       var top = h('div.cam-live-top', null,
         h('button.act.cam-back', { type: 'button', onclick: function () { cur = null; draw(); } }, h('span', { html: UI.icon('back', 16) }), t('cam.all')), title, chip);
       live = liveView(ctx, c.id);
+
+      // The Owlet camera gets the same hero-takeover treatment: a top-right
+      // temp/humidity badge over the live picture and a swipeable glass panel of its own
+      // (okie-owlet.js) in the same side column every other detail view uses (the thermostat
+      // dial) - not a one-off layout.
+      var OW = g.OkieMotor.owlet, owCfg = OW && OW.configFor(ctx, c.id);
+      if (owCfg) {
+        var owBadge = OW.liveBadge(ctx, owCfg);
+        llPanel = OW.panel(ctx, owCfg);
+        shell.hero.insertBefore(h('div.owlet-hero-wrap', null, live.el, owBadge.el), shell.hero.firstChild);
+        shell.el.dataset.owletHero = '1';
+        timers.push(setInterval(function () { owBadge.update(); }, 30000));
+        // the same motion-records list every other camera gets (okie-cameras.js's generic feed):
+        // honest, not Owlet-specific - it will say "no motion" until a real motion/ding sensor exists for it
+        var owRecs = h('div.cam-recs');
+        function drawOwRecs() {
+          var evs = feed.events().filter(function (e) { return e.camera === c.id; }).slice(0, 80);
+          owRecs.innerHTML = '';
+          owRecs.appendChild(h('div.cr-head', null, h('span', null, t('cam.records')), evs.length ? h('span.ch-n', null, evs.length === 1 ? t('cam.events_1') : t('cam.events_n', { n: evs.length })) : null));
+          if (!feed.loaded()) owRecs.appendChild(h('div.ch-note', null, feed.failed() ? t('cam.history_fail') : t('cam.loading')));
+          else if (!evs.length) owRecs.appendChild(h('div.ch-note', null, feed.failed() ? t('cam.history_fail') : t('cam.history_none')));
+          else eventList(ctx, evs, { openedSeen: Infinity, showCamera: false }).forEach(function (n) { owRecs.appendChild(n); });
+        }
+        offRecs = feed.on(drawOwRecs); drawOwRecs();
+        body.appendChild(h('div.cam-live.cam-live-ll', null, top, llPanel.el, owRecs));
+        shell.setSubtitle(c.name);
+        return;
+      }
+
       var strip = h('div.cam-strip');
       list.filter(function (x) { return x.id !== c.id && !x.unavailable; }).forEach(function (x) {
         strip.appendChild(h('button.cam-minitile', { type: 'button', 'aria-label': t('cam.open', { name: x.name }), onclick: function () { cur = x.id; draw(); } }, thumb(x, false), h('span.cam-shade'), h('span.cam-name', null, x.name)));
@@ -479,6 +520,7 @@
     return {
       update: function () {
         if (live) live.update();
+        if (llPanel) llPanel.update();
         if (cur) feed.poke();
         // alerts and offline states move the tiles' marks without redrawing the images
         if (!cur) {

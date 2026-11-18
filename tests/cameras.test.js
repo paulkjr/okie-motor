@@ -138,9 +138,9 @@ test('cameras: what is new is what happened after the history was last opened', 
   assert.equal(C.unseenCount([], 5), 0);
 });
 
-test('cameras: the recordings page is only the clipsUrl you set (nothing is guessed), recordings:false turns it off', () => {
+test('cameras: the recordings page defaults to port 8765 of this https host, clipsUrl overrides it, recordings:false turns it off', () => {
   const https = { protocol: 'https:', hostname: 'home.example.org' };
-  assert.equal(C.recordingsBase({}, https), '');
+  assert.equal(C.recordingsBase({}, https), 'https://home.example.org:8765/ring');
   assert.equal(C.recordingsBase({ clipsUrl: 'https://x.test/clips' }, https), 'https://x.test/clips');
   assert.equal(C.recordingsBase({ recordings: false }, https), '');
   assert.equal(C.recordingsBase({ recordings: false, clipsUrl: 'https://x.test' }, https), '');

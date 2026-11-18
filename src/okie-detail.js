@@ -569,10 +569,10 @@
     '@media (min-width:641px){.dt[data-dial]{grid-template-columns:minmax(260px,1fr) minmax(300px,451px);}}',      // a thermostat: the glass column is 451 px wide like in the design (the card there is 1101 px: 650 picture + 451 glass), the picture takes the rest
     '@media (max-width:640px){.dt{grid-template-columns:1fr;grid-template-rows:170px 1fr;}.dt-iconbg svg{width:90px;height:90px;}.dt-main{padding:14px 14px 10px;}}',
     // the phone's menu: a round bubble that opens into the row (same as the iPhone widget's big thermostat)
-    '@media (max-width:640px){.dt-main>.dt-bar{align-self:center;}.dt-menu{position:relative;align-self:center;width:186px;height:36px;margin-bottom:16px;flex:none;}',
-    '.dt-bubble{position:absolute;left:50%;top:1px;width:34px;height:34px;margin-left:-17px;border-radius:50%;border:0;padding:0;display:grid;place-items:center;background:#fff;color:#1d1b19;box-shadow:0 3px 12px rgba(0,0,0,.35);transition:opacity .16s ease,transform .26s cubic-bezier(.2,.8,.2,1);}.dt-bubble svg{width:17px;height:17px;}',
-    '.dt-menu .dt-bar{position:absolute;left:0;right:0;top:-3px;height:42px;box-sizing:border-box;justify-content:center;align-items:center;gap:2px;padding:4px;background:rgba(255,255,255,.14);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);opacity:0;pointer-events:none;-webkit-clip-path:inset(4px 76px 4px 76px round 17px);clip-path:inset(4px 76px 4px 76px round 17px);transition:opacity .2s ease,clip-path .32s cubic-bezier(.2,.8,.2,1),-webkit-clip-path .32s cubic-bezier(.2,.8,.2,1);}',
-    '.dt-menu.open .dt-bar{opacity:1;pointer-events:auto;-webkit-clip-path:inset(0 0 0 0 round 21px);clip-path:inset(0 0 0 0 round 21px);}.dt-menu.open .dt-bubble{opacity:0;transform:scale(.55);pointer-events:none;}',
+    // the tab bar never collapses into a single tap-to-expand bubble, on any screen size - always the full pill, every icon showing
+    '@media (max-width:640px){.dt-main>.dt-bar{align-self:center;}.dt-menu{position:relative;align-self:center;margin-bottom:16px;}',
+    '.dt-bubble{display:none!important;}',
+    '.dt-menu .dt-bar{position:static;opacity:1;pointer-events:auto;clip-path:none;-webkit-clip-path:none;}',
     '.dt-menu .dt-tab{width:34px;height:34px;flex:none;}.dt-menu .dt-tab svg{width:17px;height:17px;}}',
     '[data-rung="compact"] .dt-top{padding:12px;}[data-rung="rows"] .dt-iconbg svg,[data-rung="stacked"] .dt-iconbg svg{width:110px;height:110px;}',
   ].join('\n');

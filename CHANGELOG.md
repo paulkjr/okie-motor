@@ -2,6 +2,16 @@
 
 The same entries are shown inside the card (dock > What's new). Newest first.
 
+## 0.58.0 (2026-11-17)
+
+**An Owlet camera gets its own view, like LensLink.**
+- Set it up in Settings: pick your Owlet Dream Sight (or other Owlet camera) under Cameras, and the live view becomes a glass panel - comfort temperature and humidity badge over the live picture, a tab bar (the same pill menu the thermostat uses) for Comfort / Overview / Trends, and a motion-records list under it
+- A Dream Sock adds real sleep and health readings to the Overview and Trends tabs. Without one they still show what those pages look like, clearly marked as a demo so nothing is mistaken for a real reading
+- A "Record the Owlet camera" switch in Settings turns its own clip recorder on or off, independent of whether the live view is open
+
+**The tab bar on every detail view (the thermostat, now Owlet) no longer collapses into a tap-to-expand circle on a phone.**
+- It stayed a single pill with every icon showing, on any screen size, the same as on a wide screen
+
 ## 0.57.0 (2026-11-02)
 
 **Security: a token-exposure hole in the app, found and closed.**
