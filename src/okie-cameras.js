@@ -192,6 +192,7 @@
     'cam.new': 'New', 'cam.watch': 'Watch live', 'cam.clips': 'Open recordings', 'cam.play_clip': 'Watch the recording', 'cam.no_clip': 'There is no recording of this event', 'cam.close_clip': 'Close', 'cam.events_n': '{n} events', 'cam.events_1': '1 event',
     'cam.paused': 'Live view paused to spare the camera\'s battery', 'cam.resume': 'Keep watching',
     'cam.full': 'Full screen', 'cam.exit_full': 'Close full screen', 'cam.rotate': 'Rotate',
+    'cam.sound_on': 'Sound on', 'cam.sound_off': 'Sound off', 'cam.record': 'Record a {n} s clip', 'cam.rec': 'REC', 'cam.rec_saved': 'Clip saved to Owlet Clips', 'cam.clips_none': 'Set your Recordings page in Settings first', 'cam.rec_fail': 'The clip could not start', 'cam.zoom_reset': 'double-tap to reset', 'cam.volume': 'Volume',
   });
   core.registerStrings('de', {
     'app.cameras': 'Kameras', 'app.camhistory': 'Bewegungsverlauf', 'cam.view': 'Kameras ansehen', 'cam.n': '{n} Kameras', 'cam.n1': '1 Kamera', 'cam.none': 'Keine Kameras in Home Assistant gefunden', 'cam.all': 'Alle Kameras',
@@ -202,6 +203,7 @@
     'cam.new': 'Neu', 'cam.watch': 'Live ansehen', 'cam.clips': 'Aufnahmen öffnen', 'cam.play_clip': 'Aufnahme ansehen', 'cam.no_clip': 'Zu diesem Ereignis gibt es keine Aufnahme', 'cam.close_clip': 'Schließen', 'cam.events_n': '{n} Ereignisse', 'cam.events_1': '1 Ereignis',
     'cam.paused': 'Live-Ansicht pausiert, um den Akku der Kamera zu schonen', 'cam.resume': 'Weiter ansehen',
     'cam.full': 'Vollbild', 'cam.exit_full': 'Vollbild schließen', 'cam.rotate': 'Drehen',
+    'cam.sound_on': 'Ton an', 'cam.sound_off': 'Ton aus', 'cam.record': '{n}-s-Clip aufnehmen', 'cam.rec': 'REC', 'cam.rec_saved': 'Clip in Owlet Clips gespeichert', 'cam.clips_none': 'Lege zuerst deine Aufnahmen-Seite in den Einstellungen fest', 'cam.rec_fail': 'Der Clip konnte nicht starten', 'cam.zoom_reset': 'Doppeltippen zum Zurücksetzen', 'cam.volume': 'Lautstärke',
   });
 
   function T(ctx) { return function (k, v) { return core.t(k, ctx.lang(), v); }; }
@@ -238,7 +240,8 @@
 
   // Home Assistant's own cards draw a white frame on some browsers: clear every shadow root below the live card (once each)
   var CLEAR_CSS = ':host,*{background:transparent!important;box-shadow:none!important;border:none!important;border-radius:0!important;}'
-    + 'ha-card{transition:none!important;padding:0!important;margin:0!important;}video,img{background:#000!important;object-fit:contain!important;}';
+    + 'ha-card{transition:none!important;padding:0!important;margin:0!important;}video,img{background:#000!important;object-fit:contain!important;}'
+    + 'video{max-height:none!important;}';      // Home Assistant caps its player at 100vh - 97px (for its own pages): sideways on a phone that left the picture ¾ high and stuck to the top
   function clearFrames(root, depth) {
     if (!root || depth > 6 || !root.querySelectorAll) return;
     var all = root.querySelectorAll('*');
@@ -261,6 +264,193 @@
    * awake and blocks its motion events, so the live picture stops by itself after two minutes and waits for a tap.
    */
   var LIVE_MS = 120000;
+  // what the page-level full-screen layer needs besides the camera styles (it is outside the card, so nothing else reaches it)
+  var FULL_BASE = '*{box-sizing:border-box;}button{font:inherit;border:0;margin:0;cursor:pointer;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;}'
+    + ':host{--okie-ok:#34c759;--okie-warn:#ff9f0a;--okie-danger:#ff3b30;}' + String((g.OkieMotor.ui && g.OkieMotor.ui.BASE_CSS) || '').split('\n').filter(function (l) { return /okie-batt/.test(l); }).join('')      // the Motor's one battery
+    + '.cam-full{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;color:#fff;-webkit-text-size-adjust:100%;}button:active{transform:scale(.96);}';
+  /** The full-screen camera's extras (the user's request, 2026-11-19): Sound (the live video unmuted), Record (a manual clip through a
+   *  Home Assistant command named rest_command.<camera>_clip, e.g. the Owlet recorder's clip into the Jellyfin "Owlet Clips" folder),
+   *  and pinch zoom with a drag to look around (double-tap resets). -> { buttons, overlays, attach(frame), onDispose(fn), dispose() } */
+  var CLIP_S = 30;
+  /** rtcPlayer(ctx, id) -> Promise<{ video, close() }>: the camera over WebRTC through Home Assistant's go2rtc (camera/webrtc/offer). It carries
+   *  the camera's own sound (Opus), which Home Assistant's HLS stream drops: the full-screen view uses it so Sound has something to play. */
+  function rtcPlayer(ctx, id) {
+    var hs = ctx.hass(), conn = hs && hs.connection;
+    if (!conn || !conn.subscribeMessage || !g.RTCPeerConnection) return Promise.reject(new Error('no webrtc'));
+    return Promise.resolve(hs.callWS({ type: 'camera/capabilities', entity_id: id })).then(function (c) {
+      if (!c || (c.frontend_stream_types || []).indexOf('web_rtc') < 0) throw new Error('no webrtc');
+      return Promise.resolve(hs.callWS({ type: 'camera/webrtc/get_client_config', entity_id: id })).catch(function () { return {}; });
+    }).then(function (cfg) {
+      var pc = new RTCPeerConnection((cfg && cfg.configuration) || {}), ms = new MediaStream(), sid = null, pend = [], unsub = null, closed = false;
+      pc.addTransceiver('video', { direction: 'recvonly' }); pc.addTransceiver('audio', { direction: 'recvonly' });
+      var video = document.createElement('video'); video.className = 'cam-rtc'; video.autoplay = true; video.muted = true; video.playsInline = true; video.setAttribute('playsinline', ''); video.setAttribute('muted', ''); video.srcObject = ms;
+      var sink = document.createElement('audio'); sink.muted = true; sink.srcObject = ms;      // some engines feed a remote stream to the audio engine only while an element plays it
+      pc.ontrack = function (e) { if (ms.getTracks().indexOf(e.track) < 0) ms.addTrack(e.track); try { var p = video.play(); if (p && p.catch) p.catch(function () {}); var q = sink.play(); if (q && q.catch) q.catch(function () {}); } catch (er) { /* on the next tap */ } };
+      function send(c) { Promise.resolve(hs.callWS({ type: 'camera/webrtc/candidate', entity_id: id, session_id: sid, candidate: c })).catch(function () {}); }
+      pc.onicecandidate = function (e) { if (!e.candidate || !e.candidate.candidate) return; var c = { candidate: e.candidate.candidate, sdpMid: e.candidate.sdpMid, sdpMLineIndex: e.candidate.sdpMLineIndex }; if (sid) send(c); else pend.push(c); };
+      return pc.createOffer().then(function (o) { return pc.setLocalDescription(o).then(function () { return o; }); }).then(function (o) {
+        return new Promise(function (resolve, reject) {
+          var to = setTimeout(function () { reject(new Error('webrtc timeout')); }, 12000);
+          Promise.resolve(conn.subscribeMessage(function (m) {
+            if (closed || !m) return;
+            if (m.type === 'session') { sid = m.session_id; pend.splice(0).forEach(send); }
+            else if (m.type === 'answer') { pc.setRemoteDescription({ type: 'answer', sdp: m.answer }).catch(function () {}); }
+            else if (m.type === 'candidate') {
+              var c = m.candidate; if (typeof c === 'string') c = { candidate: c, sdpMLineIndex: 0 };
+              else if (c) c = { candidate: c.candidate, sdpMid: c.sdpMid != null ? c.sdpMid : c.sdp_mid, sdpMLineIndex: c.sdpMLineIndex != null ? c.sdpMLineIndex : (c.sdp_m_line_index != null ? c.sdp_m_line_index : 0) };
+              if (c && c.candidate) pc.addIceCandidate(c).catch(function () {});
+            } else if (m.type === 'error') { clearTimeout(to); reject(new Error(m.message || 'webrtc error')); }
+          }, { type: 'camera/webrtc/offer', entity_id: id, offer: o.sdp })).then(function (u) { unsub = u; }, function (e) { clearTimeout(to); reject(e); });
+          video.addEventListener('loadeddata', function () { clearTimeout(to); resolve(); }, { once: true });
+        });
+      }).then(function () {
+        return { video: video, close: function () { closed = true; try { if (unsub) unsub(); } catch (e) { /* gone */ } try { pc.close(); } catch (e) { /* closed */ } video.srcObject = null; sink.srcObject = null; video.remove(); } };
+      }, function (e) { closed = true; try { if (unsub) unsub(); } catch (er) { /* gone */ } try { pc.close(); } catch (er) { /* closed */ } throw e; });
+    });
+  }
+  function fullExtras(ctx, id, box, cardOf, opts) {
+    opts = opts || {};
+    var t = T(ctx), hs = ctx.hass() || {}, st = hs.states && hs.states[id], obj = id.split('.')[1] || '', done = [], soundOn = false, soundT = 0;
+    var buttons = h('div.cam-fs-extra'), overlays = [];
+    function videos(root, out, depth) { out = out || []; if (!root || depth > 8) return out; var v = root.querySelectorAll ? root.querySelectorAll('video') : []; for (var i = 0; i < v.length; i++) out.push(v[i]); var all = root.querySelectorAll ? root.querySelectorAll('*') : []; for (var j = 0; j < all.length; j++) if (all[j].shadowRoot) videos(all[j].shadowRoot, out, (depth || 0) + 1); return out; }
+    // Volume: an iPhone ignores a video's own volume, so the sound runs through the phone's audio engine with a gain we can set
+    var vol = Math.max(0, Math.min(1, +ctx.store.get('cam.vol', 1))), AC = null, routes = typeof WeakMap === 'function' ? new WeakMap() : null;
+    var IOS = /iP(hone|ad|od)/.test(navigator.userAgent || '') || (/Macintosh/.test(navigator.userAgent || '') && navigator.maxTouchPoints > 1);
+    function route(v) {
+      try {
+        if (IOS && !v.srcObject) return null;      // an iPhone plays HLS (the stream away from home) silent through the audio engine: unmute it plainly, its buttons set the volume
+        var A = g.AudioContext || g.webkitAudioContext; if (!A || !routes) return null;
+        AC = AC || new A(); if (AC.state === 'suspended' && AC.resume) AC.resume();
+        var key = v.srcObject || v.currentSrc || v.src, r = routes.get(v);
+        if (!r || r.key !== key) {
+          if (r && r.src) { try { r.src.disconnect(); } catch (e) { /* gone */ } }
+          var stream = !!v.srcObject, src = stream ? AC.createMediaStreamSource(v.srcObject) : (r && !r.stream ? r.src : AC.createMediaElementSource(v)), gn = AC.createGain();
+          src.connect(gn); gn.connect(AC.destination); r = { key: key, src: src, gain: gn, stream: stream }; routes.set(v, r);
+        }
+        return r;
+      } catch (e) { return null; }
+    }
+    function applySound() {
+      var c = cardOf();
+      var rtcOn = box.classList.contains('rtc-on');
+      videos(c && (c.shadowRoot || c), [], 0).concat(videos(box, [], 0)).forEach(function (v) {
+        var active = rtcOn ? v.classList.contains('cam-rtc') : !v.classList.contains('cam-rtc');
+        if (!active) { v.muted = true; return; }      // one player speaks: the live WebRTC one when it runs, the backup stays silent
+        if (IOS) { v.muted = !soundOn; if (soundOn) { try { var pi = v.play(); if (pi && pi.catch) pi.catch(function () {}); } catch (e) { /* next tap */ } } return; }      // iPhone / iPad: plain unmute (its audio engine plays a live stream silent), the side buttons set the volume
+        var r = soundOn ? route(v) : (routes && routes.get(v));
+        if (r) { r.gain.gain.value = soundOn ? vol : 0; v.muted = r.stream ? true : !soundOn; }      // a live (WebRTC) stream plays through the gain only
+        else { v.muted = !soundOn; try { v.volume = vol; } catch (e) { /* read-only here */ } }
+        if (soundOn) { try { var p = v.play(); if (p && p.catch) p.catch(function () {}); } catch (e) { /* plays on the next tap */ } }
+      });
+    }
+    // Sound: only cameras that stream (Home Assistant's STREAM feature, bit 2)
+    if (st && ((st.attributes || {}).supported_features & 2)) {
+      var snd = h('button.cam-fs-btn', { type: 'button', 'aria-pressed': 'false', 'aria-label': t('cam.sound_on'), html: UI.icon('volume-off', 22), onclick: function () {
+        // the user's rule (2026-11-19): the slider shows only after a tap on the speaker. Tap = sound on + slider; tap while the slider shows = mute
+        if (ctx.haptic) ctx.haptic(8);
+        var noSlider = IOS;      // iPhone / iPad: the speaker is a plain on / off, the side buttons set the volume
+        if (soundOn && (!volw.hidden || noSlider)) { soundOn = false; volw.hidden = true; clearTimeout(volT); }
+        else { soundOn = true; showVol(); }
+        snd.innerHTML = UI.icon(soundOn ? 'volume' : 'volume-off', 22); snd.setAttribute('aria-pressed', soundOn ? 'true' : 'false'); snd.setAttribute('aria-label', t(soundOn ? 'cam.sound_off' : 'cam.sound_on'));
+        applySound(); clearInterval(soundT); if (soundOn) soundT = setInterval(applySound, 1500);      // the player can rebuild its video: keep it unmuted
+      } });
+      var volT = 0;
+      function showVol() { if (IOS) return;      // no slider where the phone's own buttons are the only volume
+        volw.hidden = false; clearTimeout(volT); volT = setTimeout(function () { volw.hidden = true; }, 3000); }      // hides 3 s after the last touch
+      var slider = h('input.cam-vol', { type: 'range', min: '0', max: '100', step: '1', value: String(Math.round(vol * 100)), 'aria-label': t('cam.volume') });
+      slider.addEventListener('input', function () { vol = (+slider.value || 0) / 100; ctx.store.set('cam.vol', vol); applySound(); });
+      ['input', 'pointerdown', 'touchstart'].forEach(function (ev) { slider.addEventListener(ev, function () { if (!volw.hidden) showVol(); }, { passive: true }); });
+      var volw = h('div.cam-volw', { hidden: true }, slider);
+      buttons.appendChild(volw); buttons.appendChild(snd);
+    }
+    // Record: a manual clip when Home Assistant has a clip command for this camera
+    var svc = hs.services && hs.services.rest_command && hs.services.rest_command[obj + '_clip'] ? obj + '_clip' : null;
+    var pill = h('div.cam-rec', { hidden: true }), recT = 0;
+    if (svc) {
+      var recBtn = h('button.cam-fs-btn.cam-recbtn', { type: 'button', 'aria-label': t('cam.record', { n: CLIP_S }), html: '<i></i>', onclick: function () {
+        if (ctx.haptic) ctx.haptic(12);
+        if (recT) {      // a second tap stops the clip (it is still saved)
+          clearInterval(recT); recT = 0; recBtn.classList.remove('on');
+          Promise.resolve(ctx.call('rest_command', svc, { seconds: 0 })).then(function () { pill.hidden = false; pill.textContent = t('cam.rec_saved'); setTimeout(function () { if (!recT) pill.hidden = true; }, 3500); });
+          return;
+        }
+        var until = Date.now() + CLIP_S * 1000;
+        Promise.resolve(ctx.call('rest_command', svc, { seconds: CLIP_S })).then(function () {
+          recBtn.classList.add('on'); pill.hidden = false;
+          var tick = function () { var left = until - Date.now(), el = CLIP_S - Math.max(0, Math.ceil(left / 1000)), mm = function (s) { return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+            if (left <= 0) { clearInterval(recT); recT = 0; recBtn.classList.remove('on'); pill.innerHTML = ''; pill.appendChild(document.createTextNode(t('cam.rec_saved'))); setTimeout(function () { if (!recT) pill.hidden = true; }, 3500); return; }
+            pill.innerHTML = '<i></i>' + t('cam.rec') + ' ' + mm(el) + ' / ' + mm(CLIP_S); };
+          tick(); recT = setInterval(tick, 500);
+        }, function () { pill.hidden = false; pill.textContent = t('cam.rec_fail'); setTimeout(function () { pill.hidden = true; }, 3500); });
+      } });
+      buttons.appendChild(recBtn); overlays.push(pill);
+    }
+    // The baby's vitals on the Owlet camera: one small glass strip bottom-left, live from the sock (the user's request, 2026-11-19)
+    var OW = g.OkieMotor.owlet, vitEl = null, vitT = 0;
+    if (!opts.owl && OW && OW.vitalsFor && OW.vitalsFor(ctx, id)) {      // the Owlet camera's own screen has its cards
+      vitEl = h('div.cam-vitals'); overlays.push(vitEl);
+      var drawVit = function () {
+        var v = OW.vitalsFor(ctx, id); if (!v) { vitEl.hidden = true; return; } vitEl.hidden = false; vitEl.dataset.level = v.level || '';
+        var f = function (n, d) { return n == null ? '--' : (d ? (Math.round(n * 10) / 10).toFixed(1) : String(Math.round(n))); };
+        var item = function (icon, color, val, unit) { return h('span.cam-vi', null, h('i', { style: { color: color }, html: UI.icon(icon, 17) }), h('b', null, val), h('small', null, unit)); };
+        vitEl.innerHTML = '';
+        vitEl.appendChild(h('span.cam-vdot'));
+        vitEl.appendChild(item('heart', '#ff4d6a', f(v.hr), 'bpm'));
+        vitEl.appendChild(item('lungs', '#4fd6e8', f(v.o2), '%'));
+        vitEl.appendChild(item('thermo', '#5ee08f', f(v.temp, 1), v.tempUnit));
+      };
+      drawVit(); vitT = setInterval(drawVit, 2000); done.push(function () { clearInterval(vitT); });
+    }
+    // Zoom: pinch (two fingers), drag when zoomed, double-tap back; a wheel with Ctrl (or a trackpad pinch) on a computer
+    // messages on the full-screen layer itself (the card's toasts sit behind it), the camera flash and its shutter sound
+    var msg = h('div.cam-msg', { hidden: true }), msgT = 0, flash = h('div.cam-flash');
+    overlays.push(msg); overlays.push(flash);
+    function notify(text) { msg.textContent = text; msg.hidden = false; clearTimeout(msgT); msgT = setTimeout(function () { msg.hidden = true; }, 3200); }
+    function shutter() {
+      flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go');
+      try { var A = g.AudioContext || g.webkitAudioContext; if (!A) return; var ac = new A(), n = Math.floor(ac.sampleRate * 0.09), buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
+        for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3) * (i < n * 0.35 || i > n * 0.5 ? 1 : 0.2);      // two quick clicks, like a camera
+        var src = ac.createBufferSource(), gn = ac.createGain(); gn.gain.value = 0.5; src.buffer = buf; src.connect(gn); gn.connect(ac.destination); src.start(); setTimeout(function () { try { ac.close(); } catch (e) { /* closed */ } }, 400);
+      } catch (e) { /* no sound here */ }
+    }
+    var zs = 1, zbase = 1, zx = 0, zy = 0, chip = h('div.cam-zoom', { hidden: true }), chipT = 0;
+    overlays.push(chip);
+    function clampPan() { var W = box.offsetWidth, H = box.offsetHeight, cw = Math.min(W, H * 16 / 9), ch = cw * 9 / 16, mx = Math.max(0, (cw * zs - W) / 2), my = Math.max(0, (ch * zs - H) / 2); zx = Math.max(-mx, Math.min(mx, zx)); zy = Math.max(-my, Math.min(my, zy)); }      // the picture's own edges (16:9 inside the screen), so a drag never shows black
+    function applyZoom(show) {
+      if (zs <= 1.01) { zs = 1; zx = 0; zy = 0; }
+      clampPan(); box.style.transform = zs === 1 ? '' : 'translate(' + zx + 'px,' + zy + 'px) scale(' + zs + ')';
+      if (show) { chip.hidden = Math.abs(zs - zbase) < 0.02; chip.textContent = zs.toFixed(1) + '×  ·  ' + t('cam.zoom_reset'); clearTimeout(chipT); chipT = setTimeout(function () { chip.hidden = true; }, 1800); }
+    }
+    function attach(frame) {
+      var p0 = null, lastTap = 0;
+      var dist = function (a, b) { return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY); };
+      frame.addEventListener('touchstart', function (e) {
+        if (e.target.closest && e.target.closest('.cam-fs-bar, .cow-lp, .cow button, .cow-card')) { p0 = null; return; }      // the panels and buttons get their own touches (the list scrolls, Stop is pressed), not the picture
+        if (e.touches.length === 2) p0 = { d: dist(e.touches[0], e.touches[1]), s: zs };
+        else if (e.touches.length === 1) {
+          var now = Date.now(); if (now - lastTap < 300) { zs = zbase; zx = 0; zy = 0; applyZoom(true); lastTap = 0; return; } lastTap = now;
+          p0 = { x: e.touches[0].clientX, y: e.touches[0].clientY, zx: zx, zy: zy };
+        }
+      }, { passive: true });
+      frame.addEventListener('touchmove', function (e) {
+        if (!p0) return;
+        if (e.touches.length === 2 && p0.d) { e.preventDefault(); zs = Math.max(1, Math.min(5, p0.s * dist(e.touches[0], e.touches[1]) / Math.max(1, p0.d))); applyZoom(true); }
+        else if (e.touches.length === 1 && p0.x != null && zs > 1) {
+          e.preventDefault(); var dx = e.touches[0].clientX - p0.x, dy = e.touches[0].clientY - p0.y, turned = /rotate/.test(frame.style.transform || '');
+          zx = p0.zx + (turned ? dy : dx); zy = p0.zy + (turned ? -dx : dy); applyZoom(false);      // a turned picture: the finger's sideways is its up
+        }
+      }, { passive: false });
+      frame.addEventListener('touchend', function (e) { if (!e.touches.length) p0 = null; }, { passive: true });
+      frame.addEventListener('wheel', function (e) { if (!e.ctrlKey) return; e.preventDefault(); zs = Math.max(1, Math.min(5, zs * (e.deltaY < 0 ? 1.1 : 0.9))); applyZoom(true); }, { passive: false });
+      frame.addEventListener('dblclick', function () { zs = zbase; zx = 0; zy = 0; applyZoom(true); });
+    }
+    return { buttons: buttons, overlays: overlays, attach: attach, onDispose: function (fn) { done.push(fn); },
+      toggleSound: function () { if (typeof snd !== 'undefined' && snd) snd.click(); return soundOn; },
+      record: function () { if (typeof recBtn !== 'undefined' && recBtn) { recBtn.click(); return true; } return false; },
+      recording: function () { return !!recT; }, notify: notify, shutter: shutter, resetZoom: function () { zs = zbase; zx = 0; zy = 0; applyZoom(false); },
+      setBaseZoom: function (z) { var nz = Math.max(1, z || 1); if (Math.abs(nz - zbase) < 0.01) return; zbase = nz; zs = zbase; zx = 0; zy = 0; applyZoom(false); },      // the upright phone opens zoomed in to fill the screen; only when it changes, so a resize keeps where the finger moved it
+      dispose: function () { clearInterval(soundT); clearInterval(recT); if (typeof volT !== 'undefined') clearTimeout(volT); clearTimeout(chipT); soundOn = false; applySound(); if (AC && AC.close) { try { AC.close(); } catch (e) { /* closed */ } } box.style.transform = ''; done.forEach(function (fn) { try { fn(); } catch (e) { /* gone */ } }); } };
+  }
   function liveView(ctx, id) {
     var t = T(ctx), box = h('div.cam-player'), img = h('img.cam-snap', { alt: '', draggable: false });
     var note = h('div.cam-note', { hidden: true }, t('cam.snap_note'));
@@ -271,33 +461,91 @@
     var full = null;
     function closeFull() {
       if (!full) return; var f = full; full = null;
+      if (f.extras) f.extras.dispose();
       document.removeEventListener('keydown', f.onKey, true); window.removeEventListener('resize', f.layout); document.removeEventListener('fullscreenchange', f.onFs); document.removeEventListener('webkitfullscreenchange', f.onFs);
       try { var fe = document.fullscreenElement || document.webkitFullscreenElement; if (fe) (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) { /* already out */ }
       box.classList.remove('full'); box.style.cssText = '';
       if (f.home.parentNode) f.home.parentNode.replaceChild(box, f.home);
-      f.shell.remove();
+      var lay = f.shell.getRootNode && f.shell.getRootNode().host; f.shell.remove(); if (lay && lay.hasAttribute && lay.hasAttribute('data-okie-cam-full')) lay.remove();
     }
     function openFull() {
       var stage = ctx.stage; if (full || disposed || !stage) return;
-      var home = h('div.cam-player.holder'), rot = null;       // a stand-in keeps the page from jumping while the player is away
+      var home = h('div.cam-player.holder'), rot = false;      // upright unless the turn button says otherwise (turning the phone turns the page itself)       // a stand-in keeps the page from jumping while the player is away
       box.parentNode.replaceChild(home, box);
       var frame = h('div.cam-fs-frame');
       var rotBtn = h('button.cam-fs-btn', { type: 'button', 'aria-label': t('cam.rotate'), html: UI.icon('refresh', 20), onclick: function () { rot = !(rot === null ? isPortrait() : rot); layout(); } });
+      var OWm = g.OkieMotor.owlet, owl = !!(OWm && OWm.camScreen && OWm.vitalsFor && OWm.vitalsFor(ctx, id));      // the baby's camera gets the Owlet screen
+      var extras = fullExtras(ctx, id, box, function () { return card; }, { owl: owl });
+      // the sound lives on WebRTC: swap the picture to it once it plays (the HLS picture stays underneath if it never does)
+      var rtc = null, rtcGone = false;
+      rtcPlayer(ctx, id).then(function (r) { if (rtcGone || !full) { r.close(); return; } rtc = r; box.appendChild(r.video); box.classList.add('rtc-on'); }, function () { /* the HLS picture, without sound */ });
+      extras.onDispose(function () { rtcGone = true; box.classList.remove('rtc-on'); if (rtc) rtc.close(); });
       var closeBtn = h('button.cam-fs-btn', { type: 'button', 'aria-label': t('cam.exit_full'), html: UI.icon('close', 22), onclick: closeFull });
       var shell = h('div.cam-full', { role: 'dialog', 'aria-modal': 'true' }, frame);
-      function isPortrait() { var r = shell.getBoundingClientRect(); return r.height > r.width; }
+      // sizes in the layer's own units: on a phone the card runs at a zoom, and the screen's pixels made the picture ¾ size and stuck to the top
+      // the Kindle's baby monitor is captured on a 1707 px wide page and shrunk to the tablet: lay it out iPad-wide (1180) and scale it up, so it has the iPad's proportions
+      var kz = g.__okieKiosk ? Math.max(1, (g.innerWidth || 1180) / 1180) : 1;
+      function size() { var vv = g.visualViewport; return { W: Math.round((vv ? vv.width : g.innerWidth) / kz), H: Math.round((vv ? vv.height : g.innerHeight) / kz) }; }      // the screen, now that the layer sits on the page
+      function isPortrait() { var z = size(); return z.H > z.W; }
       function layout() {
-        var r = shell.getBoundingClientRect(), W = r.width, H = r.height, turn = rot === null ? H > W : rot;
+        var z = size(), W = z.W, H = z.H, turn = rot === null ? H > W : rot;
         frame.style.width = (turn ? H : W) + 'px'; frame.style.height = (turn ? W : H) + 'px';
         frame.style.transform = turn ? 'translate(' + W + 'px,0) rotate(90deg)' : '';
         frame.style.setProperty('--cam-fh', (turn ? W : H) + 'px');
       }
-      box.classList.add('full'); frame.appendChild(box); frame.appendChild(h('div.cam-fs-bar', null, rotBtn, closeBtn));
-      stage.appendChild(shell); layout();
-      var f = full = { shell: shell, home: home, layout: layout,
+      box.classList.add('full'); frame.appendChild(box);
+      var scr = owl ? OWm.camScreen(ctx, id, {
+        back: function () { closeFull(); }, close: function () { closeFull(); },
+        sound: function () { return extras.toggleSound(); },
+        mic: function () { if (ctx.toast) ctx.toast('info', T(ctx)('owl.cam_mic_off')); },
+        fullscreen: function () { try { var fe = document.fullscreenElement || document.webkitFullscreenElement; if (fe) (document.exitFullscreen || document.webkitExitFullscreen).call(document); else { var rq = shell.requestFullscreen || shell.webkitRequestFullscreen; if (rq) rq.call(shell); } } catch (e) { /* the layer already covers the screen */ } },
+        fit: function () { frame.classList.toggle('cow-fit'); extras.resetZoom(); },
+        record: function (b) { var was = extras.recording(); if (!extras.record()) return; if (was) { b.classList.remove('rec'); return; } b.classList.add('rec'); var w = setInterval(function () { if (!extras.recording()) { b.classList.remove('rec'); clearInterval(w); } }, 600); },
+        notify: function (text) { extras.notify(text); },
+        snapshot: function () {
+          var hs2 = ctx.hass() || {}, sv = (id.split('.')[1] || '') + '_snap', T2 = T(ctx);
+          if (!(hs2.services && hs2.services.rest_command && hs2.services.rest_command[sv])) { extras.notify(T2('owl.cam_snap_fail')); return; }
+          extras.shutter(); if (ctx.haptic) ctx.haptic(15);
+          Promise.resolve(ctx.call('rest_command', sv, {})).then(function () { extras.notify(T2('owl.cam_snap_saved')); }, function () { extras.notify(T2('owl.cam_snap_fail')); });
+        },
+        // the clips (Jellyfin) open inside the camera screen with an X; leaving the app for a new page had no way back
+        clips: function () {
+          // the Recordings page from Settings (cameras.clipsUrl), for example your Jellyfin; nothing is guessed
+          var cu = safeHttpUrl(((ctx.settings.get() || {}).cameras || {}).clipsUrl || ''), u; if (!cu) { extras.notify(T(ctx)('cam.clips_none')); return; }
+          try { u = new URL(cu, location.origin); } catch (e) { return; }
+          if (frame.querySelector('.cam-clips')) return;
+          var box = h('div.cam-clips', null, h('iframe', { src: u.toString(), allow: 'autoplay; fullscreen', referrerpolicy: 'no-referrer' }),
+            h('button.cam-fs-btn.cam-clipsx', { type: 'button', 'aria-label': T(ctx)('cam.close_clip'), html: UI.icon('close', 22), onclick: function (e) { e.stopPropagation(); box.remove(); } }));
+          frame.appendChild(box);
+        },
+      }) : null;
+      if (scr) { frame.classList.add('cow-on'); frame.appendChild(scr.el); extras.onDispose(function () { scr.dispose(); }); }
+      else frame.appendChild(h('div.cam-fs-bar', null, extras.buttons, rotBtn, closeBtn));
+      // upright phone (the user's 9:16 reference): the picture fills the screen, zoomed in, and a finger moves it around
+      var fillUpright = function () { if (!scr) return; var z = size(); extras.setBaseZoom(z.H > z.W && z.W <= 600 ? z.H / (z.W * 9 / 16) : 1); };
+      extras.overlays.forEach(function (o) { frame.appendChild(o); }); extras.attach(frame);
+      // the buttons show on a touch and fade after 3 s, like a streaming app; a tap on the picture while they show hides them
+      var uiT = 0, inBar = function (e) { return e.target && e.target.closest && e.target.closest('.cam-fs-bar, .cow button, .cow-card, .cow-lp'); };
+      var showUI = function () { frame.classList.remove('ui-hide'); clearTimeout(uiT); uiT = setTimeout(function () { frame.classList.add('ui-hide'); }, 3000); };
+      frame.addEventListener('click', function (e) { if (inBar(e) || frame.classList.contains('ui-hide')) showUI(); else { clearTimeout(uiT); frame.classList.add('ui-hide'); } });
+      ['pointerdown', 'input'].forEach(function (ev) { frame.addEventListener(ev, function (e) { if (inBar(e)) showUI(); }, true); });
+      frame.addEventListener('mousemove', function (e) { if (e.movementX || e.movementY) showUI(); });
+      showUI(); extras.onDispose(function () { clearTimeout(uiT); });
+      // the layer goes on the page itself, not inside the dashboard: Home Assistant's page around the card boxed it in (on a phone the picture
+      // was ¾ of the height and stuck to the top), so it has its own little root with the camera styles
+      var layer = document.createElement('div'); layer.setAttribute('data-okie-cam-full', '');
+      layer.style.cssText = 'position:fixed;inset:0;z-index:2147483000;' + (kz !== 1 ? 'zoom:' + kz.toFixed(4) + ';' : '');
+      var lroot = layer.attachShadow ? layer.attachShadow({ mode: 'open' }) : layer;
+      var lcss = document.createElement('style'); lcss.textContent = ':host{all:initial;}' + FULL_BASE + CSS; lroot.appendChild(lcss); lroot.appendChild(shell);
+      (document.body || stage).appendChild(layer); layout(); fillUpright();
+      // turning the phone: the window settles in steps, so lay out again a moment later (the picture was left pushed down)
+      var relayout = function () { var lf = function () { layout(); fillUpright(); }; lf(); requestAnimationFrame(lf); setTimeout(lf, 250); setTimeout(lf, 700); }, turned = function () { rot = false; relayout(); };      // the phone turned: upright again
+      window.addEventListener('orientationchange', turned); if (g.visualViewport) g.visualViewport.addEventListener('resize', relayout);
+      extras.onDispose(function () { window.removeEventListener('orientationchange', turned); if (g.visualViewport) g.visualViewport.removeEventListener('resize', relayout); });
+      var f = full = { shell: shell, home: home, layout: layout, extras: extras,
         onKey: function (e) { if (e.key === 'Escape') { e.stopImmediatePropagation(); e.preventDefault(); closeFull(); } },
         onFs: function () { if (!(document.fullscreenElement || document.webkitFullscreenElement)) closeFull(); } };
-      document.addEventListener('keydown', f.onKey, true); window.addEventListener('resize', layout);
+      document.addEventListener('keydown', f.onKey, true); window.addEventListener('resize', relayout); f.layout = relayout;
       try { var rq = shell.requestFullscreen || shell.webkitRequestFullscreen; if (rq) { var pr = rq.call(shell); if (pr && pr.then) pr.then(function () { document.addEventListener('fullscreenchange', f.onFs); layout(); }, function () { /* the window stays the full screen */ }); else { document.addEventListener('webkitfullscreenchange', f.onFs); layout(); } } } catch (e) { /* no native full screen here: the layer already covers the window */ }
     }
     box.appendChild(h('button.cam-expand', { type: 'button', 'aria-label': t('cam.full'), html: UI.icon('expand', 18), onclick: function (e) { e.stopPropagation(); openFull(); } }));
@@ -323,7 +571,7 @@
         if (disposed) return;
         card = el; card.classList.add('cam-card'); card.hass = ctx.hass(); box.appendChild(card); out.live = true;
         var n = 0; clearInterval(fixT); fixT = setInterval(function () { clearFrames(card && card.shadowRoot, 0); if (++n > 40) clearInterval(fixT); }, 400);
-        var sec = +((ctx.settings.get().cameras || {}).liveSeconds); clearTimeout(stopT); stopT = setTimeout(function () { stop(true); }, (sec > 0 ? sec * 1000 : LIVE_MS));
+        var sec = +((ctx.settings.get().cameras || {}).liveSeconds); clearTimeout(stopT); if (!g.__okieKiosk) stopT = setTimeout(function () { stop(true); }, (sec > 0 ? sec * 1000 : LIVE_MS));      // the Kindle's baby monitor never pauses
       }).catch(fallback);
     }
     start();
@@ -629,7 +877,7 @@
     '.camcard{position:relative;border-radius:24px;-webkit-clip-path:inset(0 round 24px);clip-path:inset(0 round 24px);-webkit-transform:translateZ(0);transform:translateZ(0);overflow:hidden;color:#fff;cursor:pointer;min-height:150px;isolation:isolate;background:#1c1916;display:flex;flex-direction:column;justify-content:flex-end;padding:0 18px 16px;box-sizing:border-box;grid-area:w34;}',
     '.cc-pic{position:absolute;inset:-14px;z-index:-2;background-size:cover;background-position:center;filter:blur(6px) saturate(1.18) brightness(1.02);opacity:0;transition:opacity .7s ease;}.cc-pic.on{opacity:1;}',
     '.cc-shade{position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,rgba(10,8,6,.62),rgba(10,8,6,.05) 62%,rgba(10,8,6,.2));}',
-    '.cc-chip{position:absolute;left:16px;top:14px;padding:4px 11px;border-radius:12px;font-size:12px;font-weight:600;background:rgba(0,0,0,.34);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:rgba(255,255,255,.92);}.cc-chip[hidden]{display:none;}',
+    '.cc-chip{position:absolute;left:16px;top:14px;padding:4px 11px;border-radius:12px;font-size:12px;font-weight:600;background:rgba(0,0,0,.34);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.5),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.5),24px));color:rgba(255,255,255,.92);}.cc-chip[hidden]{display:none;}',
     '.cam-cluster{display:flex;flex-direction:column;align-items:flex-start;gap:10px;}',
     '.camcard .cam-cluster{flex-direction:row;align-items:center;justify-content:space-between;gap:12px;width:100%;}',
     '.cc-bell{position:relative;flex:none;width:54px;height:54px;border-radius:50%;display:grid;place-items:center;color:#fff;background:radial-gradient(circle at 34% 28%,#d4585d,#b23c42 70%);box-shadow:0 10px 26px rgba(120,20,26,.4),inset 0 1px 0 rgba(255,255,255,.3);transition:transform .25s cubic-bezier(.34,1.18,.24,1);}',
@@ -637,7 +885,7 @@
     '.cc-bell[data-alert="true"]{animation:cam-bell 2.4s ease-in-out infinite;}@keyframes cam-bell{0%,100%{transform:none;}8%{transform:rotate(14deg);}16%{transform:rotate(-12deg);}24%{transform:rotate(8deg);}32%{transform:none;}}',
     '.cc-bell[data-alert="true"]::after{content:"";position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 0 rgba(212,88,93,.7);animation:cam-ping 1.8s infinite;}',
     '.cam-badge{position:absolute;top:-5px;right:-5px;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:#fff;color:#b23c42;font-size:12px;font-weight:800;font-style:normal;display:grid;place-items:center;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.3);}.cam-badge[hidden]{display:none;}',
-    '.cam-pill{display:flex;align-items:center;gap:14px;padding:7px 24px 7px 7px;border-radius:999px;background:rgba(74,66,42,.76);-webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);color:#fff;font-size:16px;font-weight:500;letter-spacing:.01em;box-shadow:inset 0 1px 0 rgba(255,255,255,.14);transition:transform .25s cubic-bezier(.34,1.18,.24,1);}',
+    '.cam-pill{display:flex;align-items:center;gap:14px;padding:7px 24px 7px 7px;border-radius:999px;background:rgba(74,66,42,.76);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px)) saturate(140%);backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px)) saturate(140%);color:#fff;font-size:16px;font-weight:500;letter-spacing:.01em;box-shadow:inset 0 1px 0 rgba(255,255,255,.14);transition:transform .25s cubic-bezier(.34,1.18,.24,1);}',
     '.cam-pill:hover{transform:scale(1.03);}.cam-pill:active{transform:scale(.97);}',
     '.cam-pill-ic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.2);flex:none;touch-action:none;cursor:grab;position:relative;z-index:1;will-change:transform;}',
     // pull to open (UI.pullPill): the round button follows the finger and turns, a light fills the track behind it, the word drifts off, spreads and blurs
@@ -658,7 +906,7 @@
     '.cam-info{position:absolute;left:14px;right:14px;bottom:11px;z-index:3;display:flex;flex-direction:column;gap:1px;}',
     '.cam-name{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.cam-st{font-size:12px;color:rgba(255,255,255,.75);min-height:15px;}',
     '.cam-tile.alert .cam-st{color:#ff9a9a;font-weight:600;}.cam-tile.alert::after{content:"";position:absolute;top:12px;right:12px;width:10px;height:10px;border-radius:50%;background:#ff4d4f;z-index:3;box-shadow:0 0 0 0 rgba(255,77,79,.7);animation:cam-ping 1.8s infinite;}',
-    '.cam-tile.off{opacity:.55;}.cam-play{position:absolute;right:12px;bottom:12px;z-index:3;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.22);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);}',
+    '.cam-tile.off{opacity:.55;}.cam-play{position:absolute;right:12px;bottom:12px;z-index:3;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.22);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.4),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.4),24px));}',
     '@keyframes cam-ping{0%{box-shadow:0 0 0 0 rgba(255,77,79,.65);}100%{box-shadow:0 0 0 12px rgba(255,77,79,0);}}',
     '.cam-empty{display:flex;flex-direction:column;align-items:center;gap:14px;padding:70px 20px;color:rgba(255,255,255,.7);text-align:center;}',
     '.cam-live{display:flex;flex-direction:column;gap:14px;padding:2px 2px 24px;}',
@@ -667,13 +915,80 @@
     '.cam-chip{flex:none;padding:4px 11px;border-radius:12px;font-size:12px;font-weight:700;background:rgba(255,255,255,.18);}.cam-chip.alert{background:#e0393e;}',
     '.cam-player{position:relative;width:100%;aspect-ratio:16/9;border-radius:26px;overflow:hidden;background:#000;cursor:zoom-in;-webkit-clip-path:inset(0 round 26px);clip-path:inset(0 round 26px);-webkit-transform:translateZ(0);transform:translateZ(0);}',
     '.cam-player.holder{background:rgba(0,0,0,.28);cursor:default;}',
-    '.cam-expand{position:absolute;right:12px;bottom:12px;z-index:4;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0;color:#fff;background:rgba(20,20,24,.46);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);opacity:.92;}',
+    '.cam-expand{position:absolute;right:12px;bottom:12px;z-index:4;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0;color:#fff;background:rgba(20,20,24,.46);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.6),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.6),24px));opacity:.92;}',
     '.cam-full{position:fixed;inset:0;z-index:10001;background:#000;overflow:hidden;}.cam-fs-frame{position:absolute;left:0;top:0;transform-origin:0 0;display:flex;align-items:center;justify-content:center;}',
     '.cam-player.full{position:relative;aspect-ratio:auto;border-radius:0;cursor:default;-webkit-clip-path:none;clip-path:none;-webkit-transform:none;transform:none;width:100%;height:100%;display:flex;align-items:center;justify-content:center;}',
     '.cam-player.full .cam-card{height:auto;width:100%;max-width:calc(var(--cam-fh,100vh) * 1.7778);}.cam-player.full .cam-expand{display:none;}.cam-player.full .cam-snap{max-height:100%;}',
+    '.cam-fs-extra{display:contents;}.cam-recbtn i{display:block;width:18px;height:18px;border-radius:50%;background:#ff3b30;box-shadow:0 0 0 3px rgba(255,255,255,.9);transition:border-radius .2s ease,transform .2s ease;}.cam-recbtn.on i{border-radius:4px;transform:scale(.8);animation:camrec 1.2s ease-in-out infinite;}@keyframes camrec{50%{opacity:.45;}}',
+    '.cam-rec,.cam-zoom{position:absolute;z-index:6;display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;color:#fff;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;background:rgba(40,40,46,.62);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));pointer-events:none;}',
+    '.cam-rec{top:calc(env(safe-area-inset-top,0px) + 14px);left:16px;}.cam-rec i{width:10px;height:10px;border-radius:50%;background:#ff3b30;}.cam-zoom{bottom:16px;left:50%;transform:translateX(-50%);}.cam-rec[hidden],.cam-zoom[hidden]{display:none;}',
+    '.cam-player.full{transform-origin:center center;will-change:transform;}',
+    '.cam-vitals{position:absolute;z-index:6;left:calc(env(safe-area-inset-left,0px) + 16px);bottom:calc(env(safe-area-inset-bottom,0px) + 16px);display:flex;align-items:center;gap:14px;padding:8px 16px 8px 12px;border-radius:999px;color:#fff;background:rgba(22,22,26,.5);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));pointer-events:none;}.cam-vitals[hidden]{display:none;}',
+    '.cam-vdot{width:8px;height:8px;border-radius:50%;background:#8e8e93;flex:none;}.cam-vitals[data-level=green] .cam-vdot{background:#34c759;box-shadow:0 0 8px #34c759;}.cam-vitals[data-level=yellow] .cam-vdot{background:#ffcc00;}.cam-vitals[data-level=red] .cam-vdot{background:#ff3b30;box-shadow:0 0 8px #ff3b30;}.cam-vitals[data-level=blue] .cam-vdot{background:#0a84ff;}',
+    '.cam-vi{display:flex;align-items:baseline;gap:4px;}.cam-vi i{display:flex;align-self:center;margin-right:2px;}.cam-vi i svg{filter:drop-shadow(0 0 4px currentColor);}.cam-vi b{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums;}.cam-vi small{font-size:12px;opacity:.75;}',
+    // ---- the Owlet camera screen (okie-owlet.js camScreen), the user's reference (2026-11-19)
+    '.cow{position:absolute;inset:0;z-index:5;pointer-events:none;color:#fff;}.cow>*{pointer-events:auto;}.cow>.cow-scrim{pointer-events:none;position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.38),rgba(0,0,0,0) 22%,rgba(0,0,0,0) 72%,rgba(0,0,0,.42));}',
+    '.cow-fade{transition:opacity .3s ease;}.cam-fs-frame.ui-hide .cow-fade{opacity:0;pointer-events:none;}',
+    '.cow-b{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0;color:#fff;background:rgba(28,30,29,.46);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.8),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.8),24px));}.cow-b.on{color:#4fe39a;}',
+    '.cow-tl{position:absolute;top:calc(env(safe-area-inset-top,0px) + 22px);left:calc(env(safe-area-inset-left,0px) + 28px);display:flex;align-items:center;gap:14px;}',
+    '.cow-logo{display:flex;color:#3fe0b0;fill:none;filter:drop-shadow(0 0 6px rgba(63,224,176,.5));}.cow-brand{font-size:25px;font-weight:700;letter-spacing:-.01em;margin-left:-4px;}',
+    '.cow-sep{width:1px;height:26px;background:rgba(255,255,255,.25);display:block;}.cow-live{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:500;}.cow-live i{width:10px;height:10px;border-radius:50%;background:#8e8e93;}.cow-live[data-on="1"] i{background:#34c759;box-shadow:0 0 8px #34c759;}',
+    '.cow-tr{position:absolute;top:calc(env(safe-area-inset-top,0px) + 22px);right:calc(env(safe-area-inset-right,0px) + 28px);display:flex;gap:14px;}',
+    '.cow-rail{position:absolute;left:calc(env(safe-area-inset-left,0px) + 28px);top:43%;transform:translateY(-50%);display:flex;flex-direction:column;gap:16px;}.cow-rail .cow-b{width:56px;height:56px;}.cow-rail .cow-b.on{color:#4fe39a;background:rgba(52,199,120,.2);box-shadow:inset 0 0 0 1.5px rgba(79,227,154,.55);}',
+    '.cow-vit{position:absolute;right:calc(env(safe-area-inset-right,0px) + 28px);top:calc(env(safe-area-inset-top,0px) + 17%);display:flex;flex-direction:column;gap:10px;width:206px;}',
+    '.cow-card{display:flex;align-items:center;gap:14px;height:82px;padding:10px 16px 10px 14px;border-radius:22px;box-sizing:border-box;background:rgba(28,30,29,.5);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);-webkit-backdrop-filter:blur(clamp(6px,var(--glass-blur-amount,20px),28px));backdrop-filter:blur(clamp(6px,var(--glass-blur-amount,20px),28px));cursor:pointer;}',
+    '.cow-ic{display:flex;flex:none;width:40px;justify-content:center;}.cow-ic svg{filter:drop-shadow(0 0 5px currentColor);}.cow-cv{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}',
+    '.cow-num{display:flex;align-items:baseline;gap:5px;white-space:nowrap;}.cow-num b{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;}.cow-num small{font-size:15px;opacity:.9;}.cow-num sub{font-size:.7em;}',
+    '.cow-wave{height:20px;}.cow-wave svg{width:100%;height:100%;display:block;overflow:visible;}.cow-wave svg>path:first-of-type{display:none;}.cow-wave.dash svg path{stroke-dasharray:5 5;}',
+    '.cow-bar{position:relative;height:6px;border-radius:3px;background:rgba(255,255,255,.18);margin-top:7px;}.cow-bar i{position:absolute;left:0;top:0;bottom:0;width:var(--p,0%);border-radius:3px;background:#34c759;}.cow-bar b{position:absolute;top:50%;left:var(--p,0%);width:10px;height:10px;border-radius:50%;background:#4fe39a;transform:translate(-50%,-50%);box-shadow:0 0 6px #4fe39a;}',
+    '.cow-who{position:absolute;left:calc(env(safe-area-inset-left,0px) + 40px);bottom:calc(env(safe-area-inset-bottom,0px) + 30px);text-shadow:0 1px 6px rgba(0,0,0,.4);}.cow-nm{font-size:27px;font-weight:700;letter-spacing:-.01em;}.cow-st{display:flex;align-items:center;gap:8px;font-size:15px;margin-top:4px;}.cow-st i{width:10px;height:10px;border-radius:50%;background:#8e8e93;}.cow-st[data-on="1"] i{background:#34c759;}',
+    '.cow-pill{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);transform:translateX(-50%);display:flex;gap:12px;padding:8px;border-radius:999px;background:rgba(28,30,29,.46);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.8),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.8),24px));}.cow-pill{gap:16px;padding:9px 12px;}.cow-pill .cow-b{width:58px;height:58px;background:rgba(255,255,255,.08);box-shadow:none;}.cow-pill .cow-b.rec{color:#ff3b30;}',
+    '.cow-stat{position:absolute;right:calc(env(safe-area-inset-right,0px) + 28px);bottom:calc(env(safe-area-inset-bottom,0px) + 22px);display:flex;align-items:center;gap:16px;padding:10px 20px 10px 14px;border-radius:22px;background:rgba(28,30,29,.5);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);-webkit-backdrop-filter:blur(clamp(6px,var(--glass-blur-amount,20px),28px));backdrop-filter:blur(clamp(6px,var(--glass-blur-amount,20px),28px));}',
+    '.cow-sock{display:flex;width:38px;height:38px;}.cow-sock svg{width:100%;height:100%;}.cow-sk{display:flex;flex-direction:column;gap:3px;font-size:14px;}.cow-batt{font-size:15px;font-weight:600;}.cow-net{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:500;}.cow-net>span:first-child{display:flex;color:#4fe39a;}.cow-stat:not([data-on="1"]) .cow-net>span:first-child{color:#8e8e93;}',
+    // the picture fills the screen on the Owlet screen (fit toggles back to the whole picture)
+    '.cow-on .cam-player.full .cam-card{width:max(100%,calc(var(--cam-fh,100vh) * 1.7778));max-width:none;flex:none;}.cow-on.cow-fit .cam-player.full .cam-card{width:100%;max-width:calc(var(--cam-fh,100vh) * 1.7778);}',
+    '.cow-on .cam-player .cam-rtc,.cow-on .cam-player.full .cam-snap{object-fit:cover;}.cow-on.cow-fit .cam-player .cam-rtc,.cow-on.cow-fit .cam-player.full .cam-snap{object-fit:contain;}',
+    '.cow-on .cam-rec{left:50%;transform:translateX(-50%);}',
+    '.cam-msg{position:absolute;z-index:9;left:50%;top:calc(env(safe-area-inset-top,0px) + 84px);transform:translateX(-50%);padding:9px 16px;border-radius:999px;color:#fff;font-size:15px;font-weight:600;white-space:nowrap;background:rgba(28,30,29,.78);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);pointer-events:none;}.cam-msg[hidden]{display:none;}',
+    '.cam-flash{position:absolute;inset:0;z-index:8;background:#fff;opacity:0;pointer-events:none;}.cam-flash.go{animation:camflash .45s ease-out;}@keyframes camflash{0%{opacity:.85;}100%{opacity:0;}}',
+    '.cam-clips{position:absolute;inset:0;z-index:10;background:#101010;}.cam-clips iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}.cam-clipsx{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:calc(env(safe-area-inset-right,0px) + 14px);z-index:2;}',
+    '@media (orientation:portrait){.cow-on .cam-player.full .cam-card{width:100%;max-width:calc(var(--cam-fh,100vh) * 1.7778);}.cow-on .cam-player .cam-rtc,.cow-on .cam-player.full .cam-snap{object-fit:contain;}}',      // upright: the whole picture (filling would crop it to a strip)
+    // a phone: the same layout, smaller
+    '@media (max-height:520px),(max-width:600px){.cow{zoom:.66;}}',
+    '.cow-pc,.cow-bar2{display:none;}',
+    // Lullabies panel and hold-to-talk (2026-11-20, the user's approved mockup)
+    '.cow.lp-open .cow-vit{display:none;}.cow-mic.talking{background:#ff3b30;color:#fff;box-shadow:0 0 0 4px rgba(255,59,48,.3);}',
+    '.cow-talk{position:absolute;top:calc(env(safe-area-inset-top,0px) + 90px);left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:10px 18px;border-radius:999px;background:rgba(255,59,48,.88);font-size:15px;font-weight:600;white-space:nowrap;z-index:7;}.cow-talk[hidden]{display:none;}.cow-talk svg{flex:none;}',
+    '.cow-lp{position:absolute;right:calc(env(safe-area-inset-right,0px) + 28px);top:calc(env(safe-area-inset-top,0px) + 92px);bottom:calc(env(safe-area-inset-bottom,0px) + 104px);width:340px;display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:26px;box-sizing:border-box;background:rgba(24,26,25,.62);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);-webkit-backdrop-filter:blur(clamp(6px,var(--glass-blur-amount,20px),28px));backdrop-filter:blur(clamp(6px,var(--glass-blur-amount,20px),28px));z-index:6;}.cow-lp[hidden]{display:none;}',
+    '.cow-lph{display:flex;align-items:center;justify-content:space-between;}.cow-lph b{font-size:21px;font-weight:700;}.cow-lpx{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0;color:#fff;background:rgba(255,255,255,.08);}',
+    '.cow-seg{display:flex;padding:3px;border-radius:999px;background:rgba(255,255,255,.08);}.cow-seg button{flex:1;padding:8px 0;border-radius:999px;color:#fff;background:none;font-size:14px;font-weight:500;}.cow-seg button.on{background:#fff;color:#1d1b19;font-weight:600;}',
+    '.cow-lpnote{font-size:13px;opacity:.75;}.cow-lpnote[hidden]{display:none;}.cow-lpempty{font-size:14px;opacity:.7;padding:10px 4px;}',
+    '.cow-lprows{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:6px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}.cow-lprows::-webkit-scrollbar{display:none;}',
+    '.cow-lpr{display:flex;align-items:center;gap:12px;padding:9px 12px 9px 9px;border-radius:15px;color:#fff;background:rgba(255,255,255,.05);text-align:left;flex:none;}.cow-lpr.on{background:rgba(52,199,120,.18);box-shadow:inset 0 0 0 1px rgba(79,227,154,.5);}',
+    '.cow-lpr i{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.1);color:#4fe39a;flex:none;}.cow-lpr span{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}.cow-lpr b{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.cow-lpr small{font-size:12.5px;opacity:.6;}.cow-lpr em{display:flex;flex:none;}',
+    '.cow-lph{gap:8px;}.cow-lph b{flex:1;}.cow-lpren.on{background:#fff;color:#1d1b19;}.cow-lpr.ren{cursor:default;}.cow-lpin{width:100%;box-sizing:border-box;padding:6px 10px;border-radius:10px;border:0;background:rgba(255,255,255,.12);color:#fff;font:inherit;font-size:15px;}',
+    '.cow-lpadd{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border-radius:15px;color:#fff;background:none;border:1px dashed rgba(255,255,255,.3);font-size:14px;}',
+    '.cow-lpctl{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}.cow-lptim{display:flex;gap:6px;}.cow-chip{display:flex;align-items:center;gap:5px;padding:7px 11px;border-radius:999px;color:#fff;background:rgba(255,255,255,.08);font-size:13px;white-space:nowrap;}.cow-chip.on{background:#fff;color:#1d1b19;font-weight:600;}.cow-chip.stop{margin-left:auto;}',
+    '.cow-lpvol{display:flex;align-items:center;gap:10px;font-size:13px;}.cow-lpvol>span:first-child{display:flex;}.cow-lpvol input{flex:1;accent-color:#4fe39a;}',
+    // upright phone, the user's 9:16 reference (2026-11-19): no rail, the cards top right, one glass bar (name | sock | online), three round buttons under it
+    '@media (orientation:portrait) and (max-width:600px){',
+    '.cow-rail{display:none;}.cow-vit{top:calc(env(safe-area-inset-top,0px) + 12.5%);}',
+    '.cow-bar2{display:block;position:absolute;left:calc(env(safe-area-inset-left,0px) + 18px);right:calc(env(safe-area-inset-right,0px) + 18px);bottom:calc(env(safe-area-inset-bottom,0px) + 150px);height:104px;border-radius:32px;background:rgba(28,30,29,.5);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);-webkit-backdrop-filter:blur(clamp(6px,var(--glass-blur-amount,20px),28px));backdrop-filter:blur(clamp(6px,var(--glass-blur-amount,20px),28px));}',
+    '.cow-who{left:calc(env(safe-area-inset-left,0px) + 52px);bottom:calc(env(safe-area-inset-bottom,0px) + 174px);}',
+    '.cow-stat{right:calc(env(safe-area-inset-right,0px) + 30px);bottom:calc(env(safe-area-inset-bottom,0px) + 150px);height:104px;padding:0 0 0 26px;border-radius:0;background:none;box-shadow:inset 1px 0 0 rgba(255,255,255,.18);-webkit-backdrop-filter:none;backdrop-filter:none;}',
+    '.cow-pill{bottom:calc(env(safe-area-inset-bottom,0px) + 36px);gap:76px;padding:0;background:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;align-items:center;}',
+    '.cow-pill .cow-b{width:70px;height:70px;background:rgba(28,30,29,.5);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);}',
+    '.cow-pill .k-rec{width:80px;height:80px;color:#4fe39a;background:rgba(40,120,80,.25);box-shadow:inset 0 0 0 2px #4fe39a,0 0 18px rgba(79,227,154,.35);}.cow-pill .k-rec svg{width:30px;height:30px;}',
+    '.cow-lo{display:none;}.cow-pc{display:flex;}.cow-pill .k-clips{order:1;}.cow-pill .k-rec{order:2;}.cow-pill .k-snap{order:3;}',
+    '.cow-lp{left:calc(env(safe-area-inset-left,0px) + 18px);right:calc(env(safe-area-inset-right,0px) + 18px);width:auto;top:calc(env(safe-area-inset-top,0px) + 12.5%);bottom:calc(env(safe-area-inset-bottom,0px) + 270px);}',
+    '}',
+    '.cam-fs-bar{transition:opacity .3s ease;}.cam-fs-frame.ui-hide .cam-fs-bar{opacity:0;pointer-events:none;}',
+    '.cam-player .cam-rtc{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;z-index:2;}.cam-player.rtc-on .cam-card{visibility:hidden;}',
+    '.cam-volw{display:flex;align-items:center;height:44px;padding:0 16px;border-radius:22px;background:rgba(40,40,46,.62);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));}.cam-volw[hidden]{display:none;}',
+    '.cam-vol{width:120px;margin:0;accent-color:#fff;height:28px;}',
     '.cam-fs-bar{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:12px;display:flex;gap:10px;z-index:5;}',
-    '.cam-fs-btn{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0;color:#fff;background:rgba(40,40,46,.62);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);}',
-    '.cam-player .cam-card{display:block;width:100%;height:100%;--ha-card-border-radius:0;--ha-card-box-shadow:none;--ha-card-border-width:0;--ha-card-background:transparent;--card-background-color:transparent;}',
+    '.cam-fs-btn{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0;color:#fff;background:rgba(40,40,46,.62);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));}',
+    '.cam-player .cam-card{--video-max-height:none;display:block;width:100%;height:100%;--ha-card-border-radius:0;--ha-card-box-shadow:none;--ha-card-border-width:0;--ha-card-background:transparent;--card-background-color:transparent;}',
     '.cam-player .cam-snap{width:100%;height:100%;object-fit:contain;display:block;}.cam-note{position:absolute;left:12px;right:12px;bottom:10px;padding:6px 10px;border-radius:10px;font-size:11.5px;background:rgba(0,0,0,.55);color:rgba(255,255,255,.85);}',
     '.cam-paused{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;text-align:center;background:rgba(0,0,0,.72);color:#fff;font-size:13.5px;}.cam-paused[hidden]{display:none;}.cam-paused b{margin-top:4px;padding:8px 18px;border-radius:999px;background:#fff;color:#1d1b19;font-size:14px;}',
     '.cam-strip{display:flex;gap:10px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none;}.cam-strip::-webkit-scrollbar{display:none;}',

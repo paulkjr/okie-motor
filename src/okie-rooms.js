@@ -203,7 +203,7 @@
     '.rm-card.on .rm-ic{background:rgba(255,255,255,.9);color:#1d1b19;}',
     '.rm-grid .rm-card{flex-direction:column;align-items:flex-start;gap:10px;padding:16px;}.rm-grid .rm-chev{display:none;}',
     // the taller cards of a room: the thermostat (big number, its colour on the right) and the TV / speaker (picture tile, now playing, controls)
-    '.rc{position:relative;display:flex;box-sizing:border-box;width:100%;border-radius:26px;border:1px solid var(--glass-border-color);-webkit-backdrop-filter:var(--okie-card-bf,none);backdrop-filter:var(--okie-card-bf,none);background:var(--okie-tile,rgba(255,255,255,.1));color:var(--okie-text);overflow:hidden;-webkit-tap-highlight-color:transparent;text-align:left;font:inherit;}',
+    '.rc{position:relative;display:flex;box-sizing:border-box;width:100%;border-radius:var(--okie-rc-radius,26px);border:0;box-shadow:var(--okie-card-edge,none);-webkit-backdrop-filter:var(--okie-card-bf,none);backdrop-filter:var(--okie-card-bf,none);background:var(--okie-tile,rgba(255,255,255,.1));color:var(--okie-text);overflow:hidden;-webkit-tap-highlight-color:transparent;text-align:left;font:inherit;}',
     '.rc.open{cursor:pointer;transition:transform .15s ease;}.rc:focus-visible{outline:2px solid rgba(255,255,255,.7);outline-offset:2px;}.rc.unav{opacity:.55;}',
     '.rc-climate{min-height:124px;background:linear-gradient(90deg,rgba(var(--rc-rgb,255,255,255),var(--rc-tint,0)),transparent 62%),var(--okie-tile,rgba(255,255,255,.1));}',
     '.rc-climate .rc-num{text-shadow:0 0 34px rgba(var(--rc-rgb,255,255,255),.34);}',
@@ -215,14 +215,14 @@
     '.rc-num{display:flex;align-items:flex-start;gap:4px;font-family:"Okie Sora",var(--okie-font);font-weight:800;font-size:54px;line-height:1;letter-spacing:-.03em;}.rc-num sup{font-size:17px;font-weight:700;letter-spacing:0;margin-top:5px;color:var(--okie-text-dim);}',
     '.rc-sub{font-size:13px;color:var(--okie-text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.rc-sub b{color:var(--okie-text);font-weight:700;}',
     '.rc-go{flex:none;width:66px;border:0;display:grid;place-items:center;background:var(--rc-accent,#ff2d55);color:#fff;transition:background .4s ease;}.rc-go svg{width:26px;height:26px;}',
-    '.rc{-webkit-clip-path:inset(0 round 26px);clip-path:inset(0 round 26px);}',
+    '.rc{-webkit-clip-path:inset(0 round var(--okie-rc-radius,26px));clip-path:inset(0 round var(--okie-rc-radius,26px));}',      // the Card shape setting sets the corner radius (okie-card.js _applyLook0): 26 / 29 / 32 / 40 px
     '.rc-cam{display:block;aspect-ratio:16/9;min-height:0;background:#14110f;}.rc-shot{position:absolute;inset:0;overflow:hidden;}',
     '.rc-shot-ph{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.3);}.rc-shot-ph svg{width:46px;height:46px;}',
     '.rc-shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .4s ease;}.rc-cam.has .rc-shot img{opacity:1;}',
     '.rc-shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.34),rgba(0,0,0,0) 36%,rgba(0,0,0,.66));}',
-    '.rc-chip{position:absolute;left:14px;top:12px;padding:4px 11px;border-radius:12px;font-size:12px;font-weight:700;background:rgba(0,0,0,.36);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#fff;}',
+    '.rc-chip{position:absolute;left:14px;top:12px;padding:4px 11px;border-radius:12px;font-size:12px;font-weight:700;background:rgba(0,0,0,.36);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.5),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.5),24px));color:#fff;}',
     '.rc-cap2{position:absolute;left:16px;right:118px;bottom:14px;display:flex;flex-direction:column;gap:2px;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.5);}.rc-cap2 .rc-name{font-size:19px;}.rc-cap2 .rc-sub{color:rgba(255,255,255,.8);}',
-    '.rc-live{position:absolute;right:12px;bottom:12px;display:flex;align-items:center;gap:8px;padding:10px 15px;border:0;border-radius:999px;background:rgba(255,255,255,.22);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#fff;font:inherit;font-size:14px;font-weight:700;}.rc-live svg{width:18px;height:18px;}',
+    '.rc-live{position:absolute;right:12px;bottom:12px;display:flex;align-items:center;gap:8px;padding:10px 15px;border:0;border-radius:999px;background:rgba(255,255,255,.22);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.5),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.5),24px));color:#fff;font:inherit;font-size:14px;font-weight:700;}.rc-live svg{width:18px;height:18px;}',
     '.rm-ren{display:none;align-items:center;gap:10px;align-self:flex-start;border:0;border-radius:999px;padding:11px 18px;background:rgba(255,255,255,.18);color:#fff;font:inherit;font-size:14px;font-weight:700;cursor:pointer;}.rm-ren svg{width:18px;height:18px;}.rm-list.editing .rm-ren{display:flex;}',
     '.rc-media{flex-direction:column;min-height:166px;}',
     // a speaker or music player (Spotify): one row - the cover, what is playing, play-pause and next
@@ -258,7 +258,7 @@
     '.rc-tr{flex:none;width:44px;height:44px;border-radius:50%;border:0;display:grid;place-items:center;background:transparent;color:#fff;}.rc-tr svg{width:26px;height:26px;}.rc-tr:disabled{opacity:.3;}.rc-tr:active{transform:scale(.92);}',
     // changing the order: every card gets an up and a down button, the card itself does nothing meanwhile
     '.rm-item{position:relative;}.rm-ord{display:none;}.rm-list.editing .rm-item>:first-child{pointer-events:none;}',
-    '.rm-list.editing .rm-ord{position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:0 12px;border-radius:26px;background:rgba(20,18,16,.66);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);z-index:3;}',
+    '.rm-list.editing .rm-ord{position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:0 12px;border-radius:26px;background:rgba(20,18,16,.66);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.4),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.4),24px));z-index:3;}',
     '.rm-ord b{margin-right:auto;font-size:13px;font-weight:700;letter-spacing:.04em;color:rgba(255,255,255,.8);text-transform:uppercase;}',
     '.rm-ord button{width:46px;height:46px;border-radius:50%;border:0;display:grid;place-items:center;background:rgba(255,255,255,.92);color:#1d1b19;}.rm-ord button svg{width:22px;height:22px;}.rm-ord button:disabled{opacity:.3;}',
     '.rm-ord .up svg{transform:rotate(180deg);}',
@@ -267,7 +267,7 @@
     '.rm-ord .grip{background:transparent;color:rgba(255,255,255,.85);width:32px;touch-action:none;cursor:grab;}.rm-ord .grip svg{width:22px;height:22px;}',
     '.rm-ord .rm-x{background:rgba(255,80,80,.92);color:#fff;}',
     // the same strip on the Start screen: over a room card of the Rooms tab and over a favorite
-    '.w1.editing .rm-wrap .rm-ord{position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:0 10px;border-radius:22px;background:rgba(20,18,16,.8);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);z-index:3;}',
+    '.w1.editing .rm-wrap .rm-ord{position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:0 10px;border-radius:22px;background:rgba(20,18,16,.8);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.4),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.4),24px));z-index:3;}',
     '.w1.editing .rm-wrap>.rm-card{pointer-events:none;}.rm-ord.hz .up svg{transform:rotate(90deg);}.rm-ord.hz .dn svg{transform:rotate(-90deg);}',
     '.w1.editing .rm-grid .rm-ord{flex-wrap:wrap;align-content:flex-end;justify-content:flex-end;padding:10px;}.w1.editing .rm-grid .rm-ord b{flex:1 0 100%;margin:0 0 auto;}',
     '.fv-sw .mv{flex:none;width:38px;height:38px;border-radius:50%;border:0;display:grid;place-items:center;background:rgba(255,255,255,.92);color:#1d1b19;}.fv-sw .mv svg{width:20px;height:20px;}.fv-sw .mv:disabled{opacity:.3;}',
@@ -277,7 +277,7 @@
     '.rm-ord .grip,.fv-sw .grip{flex:none;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;}.rm-ord .grip svg,.fv-sw .grip svg{width:24px;height:24px;}',
     '.fv-item,.rm-wrap{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}.fv-item.drag,.rm-wrap.drag{z-index:6;box-shadow:0 18px 40px rgba(0,0,0,.45);border-radius:26px;transition:none;will-change:transform;}',
     '.rm-item.drag{z-index:6;box-shadow:0 18px 40px rgba(0,0,0,.45);border-radius:26px;transition:none;}.rm-item.drag .rm-ord{background:rgba(20,18,16,.82);}',
-    '.fv-item{position:relative;}.fv-sw{display:none;position:absolute;inset:0;z-index:3;align-items:center;gap:10px;padding:0 14px;border-radius:26px;background:rgba(20,18,16,.66);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);}',
+    '.fv-item{position:relative;}.fv-sw{display:none;position:absolute;inset:0;z-index:3;align-items:center;gap:10px;padding:0 14px;border-radius:26px;background:rgba(20,18,16,.66);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.4),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.4),24px));}',
     '.w1.editing .fv-sw{display:flex;}.fv-item.sw-on>:first-child{pointer-events:none;}.w1.editing .fv-item>:first-child{pointer-events:none;}',
     '.fv-sw b{min-width:0;flex:1;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
     '.rm-seg{display:inline-flex;flex:none;padding:3px;gap:2px;border-radius:14px;background:rgba(255,255,255,.14);}.rm-seg button{white-space:nowrap;border:0;border-radius:11px;padding:8px 11px;background:transparent;color:rgba(255,255,255,.85);font:inherit;font-size:13px;font-weight:700;cursor:pointer;}.rm-seg button.on{background:#fff;color:#1d1b19;}',
@@ -533,7 +533,10 @@
     return seg;
   }
   /** A device's card for a list: the tall one when that is its type; richCard returns { el, update } or null for the usual row. */
-  function cardFor(ctx, item) { var st = styleOf(ctx, item); return st === 'tall' || st === 'large' ? richCard(ctx, item) : null; }
+  function cardFor(ctx, item) {
+    if (item.id === 'gadget.owlet' && g.OkieMotor.owlet && g.OkieMotor.owlet.favCard) return g.OkieMotor.owlet.favCard(ctx);      // the Owlet Sock is always its banner card
+    var st = styleOf(ctx, item); return st === 'tall' || st === 'large' ? richCard(ctx, item) : null;
+  }
   /**
    * The card of a device in the Favorites / Suggestions list, with what shows while the widget is being edited: the Row | Tall switch and (for the favorites) a button that takes it out.
    * opts: { onRemove }
@@ -594,6 +597,7 @@
       var hs = ctx.hass(), inList = {}; cfg.members().forEach(function (id) { inList[id] = true; });
       var words = query.toLowerCase().split(/\s+/).filter(Boolean), out = [];
       var GD = g.OkieMotor.gadgets, ids = Object.keys((hs && hs.states) || {});
+      var OWm = g.OkieMotor.owlet; if (OWm && OWm.owns) ids = ids.filter(function (id) { return !OWm.owns(id); });      // the Owlet Sock: its one item comes in with the gadgets below
       if (GD) ids = ids.filter(function (id) { return !GD.owns(id); }).concat(ctx.engine.all().filter(function (i) { return i.domain === 'gadget'; }).map(function (i) { return i.id; }));      // the Kindle and the AWTRIX: one entry each, not their entities
       ids.forEach(function (id) {
         var dom = id.split('.')[0], sensor = dom === 'sensor' || dom === 'binary_sensor';

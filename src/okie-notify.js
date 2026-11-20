@@ -134,6 +134,8 @@
       var c = cfg();
       var items = ctx.engine.all();
       derived = c.alerts ? deriveAlerts(items, ctx.hass().states, { lang: lang(), batteryThreshold: c.batteryThreshold, numericBattery: !!c.battery, isExcluded: function (it) { return ctx.engine.isExcluded(it) || (ctx.store.get('sensors.mute', null) || []).indexOf(it.id) >= 0; } }).filter(function (n) { return c.battery || n.source !== 'battery'; }) : [];
+      (g.OkieMotor && g.OkieMotor.alertSources || []).forEach(function (fn) { try { derived = derived.concat(fn(ctx) || []); } catch (e) { /* one source must not stop the others */ } });      // alerts a module works out itself (the Owlet's levels)
+      derived = sortNotes(derived);
       var s = all().map(function (n) { return n.id; }).join('|');
       if (s !== sig) { sig = s; ctx.bus.emit('notes', all()); }
     }

@@ -57,6 +57,7 @@ Pick one, details in [01-INSTALL-THE-CARD.md](01-INSTALL-THE-CARD.md):
 | iPhone or iPad with the **Okie Home** app (full screen, haptics, voice, widgets) | [06-OKIE-HOME-IOS-APP.md](06-OKIE-HOME-IOS-APP.md) |
 | iPhone home screen widgets without Xcode | [07-IOS-WIDGETS.md](07-IOS-WIDGETS.md) |
 | A tablet on the wall (iPad, Android, Fire tablet) | [08-WALL-TABLET-AND-FIRE-TABLET.md](08-WALL-TABLET-AND-FIRE-TABLET.md) |
+| An Owlet sock and camera | [10-OWLET.md](10-OWLET.md) |
 
 Every device shows the same favorites, rooms and look: the card keeps them in Home Assistant, in your user's storage.
 

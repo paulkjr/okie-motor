@@ -53,9 +53,9 @@
     if (pen) {
       var HK = 'app:' + (o.id || ''), heroPct = +((ctx.settings.get().heroW || {})[HK]) || 0, dragHero = false;      // each screen keeps its own width, in five steps
       var saveHero = function (pc) { var m = {}; m[HK] = pc; ctx.settings.set({ heroW: m }); };
-      var applyHero = function (pc) { root.style.gridTemplateColumns = pc > 0 ? pc + '% 1fr' : ''; };
+      var applyHero = function (pc) { if (pc > 0) root.style.setProperty('--hero-w', pc + '%'); else root.style.removeProperty('--hero-w'); };      // a variable, not an inline grid: on a phone the stacked layout must win (an iPad width once split the phone's Music screen in two)
       var placeGrip = function () { grip.style.left = Math.max(0, hero.offsetWidth - 16) + 'px'; };
-      var setEdit = function (on) { root.dataset.edit = on ? '1' : ''; pen.classList.toggle('ed', on); pen.setAttribute('aria-pressed', on ? 'true' : 'false'); if (on) placeGrip(); };
+      var setEdit = function (on) { root.dataset.edit = on ? '1' : ''; pen.classList.toggle('ed', on); pen.setAttribute('aria-pressed', on ? 'true' : 'false'); if (on) placeGrip(); if (own) own.refresh(); };
       var grip = h('div.dt-grip', { role: 'separator', 'aria-orientation': 'vertical', 'aria-label': t('dt.hero_hint'), title: t('dt.hero_hint') }, h('span'));
       var ebar = h('div.dt-ebar', null,
         h('button.dt-eb', { type: 'button', onclick: function () { heroPct = 0; applyHero(0); saveHero(0); setTimeout(placeGrip, 30); } }, t('dt.hero_reset')),
@@ -68,10 +68,14 @@
       root.style.position = 'relative'; root.appendChild(grip); root.appendChild(ebar); applyHero(heroPct);
     }
     var sb = UI.attachScrollbar(body, host);
-    var tabs = o.tabs || [], current = null;
+    var tabs = o.tabs || [], current = null, own = null;
+    var mainTab = o.startTab && tabs.some(function (x) { return x.id === o.startTab; }) ? o.startTab : (tabs[0] && tabs[0].id) || null;
+    // the user's own picture or video: one for the screen, and any page (tab) can have its own (the Calendar: Day / Week / Month / Year)
+    if (pen && o.heroMedia !== false) own = UI.heroOwn(ctx, { hero: hero, scope: 'app:' + (o.id || ''), mainPage: mainTab, page: function () { return current || mainTab; },
+      label: function (p) { var tb = tabs.filter(function (x) { return x.id === p; })[0]; return tb ? tb.label : p; }, t: t });
 
     function showTab(id) {
-      current = id;
+      current = id; if (own) own.refresh();
       Array.prototype.forEach.call(bar.children, function (b) { var on = b.dataset.tab === id; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
       body.innerHTML = ''; body.scrollTop = 0;
       if (o.onTab) o.onTab(id, body);
@@ -80,7 +84,7 @@
     function drawTabs() {
       bar.innerHTML = ''; bar.hidden = tabs.length < 2;
       tabs.forEach(function (tb) {
-        bar.appendChild(h('button.dt-tab' + (tb.icon ? '' : '.txt'), { role: 'tab', dataset: { tab: tb.id }, 'aria-label': tb.label, title: tb.label, onclick: function () { showTab(tb.id); } }, tb.icon ? h('span', { html: UI.icon(tb.icon, 20) }) : h('span', { style: { fontSize: '13px', fontWeight: 600 } }, tb.label)));
+        bar.appendChild(h('button.dt-tab' + (tb.icon ? '' : '.txt'), { role: 'tab', dataset: { tab: tb.id }, 'aria-label': tb.label, title: tb.label, onclick: function () { showTab(tb.id); } }, tb.icon ? h('span', { html: UI.icon(tb.icon, 20) }) : h('span.dt-tab-t', null, tb.label)));
       });
     }
     drawTabs();
@@ -95,7 +99,7 @@
       }, Promise.resolve(null))).then(function (url) { if (url) { vid.src = url; vid.addEventListener('canplay', function () { vid.classList.add('on'); }, { once: true }); } });
     }
 
-    if (tabs.length) showTab(o.startTab && tabs.some(function (x) { return x.id === o.startTab; }) ? o.startTab : tabs[0].id);
+    if (tabs.length) showTab(mainTab);
     else if (o.onTab) o.onTab(null, body);
 
     return {
@@ -109,7 +113,7 @@
     };
   }
 
-  var CSS = '.dt-acts{display:flex;gap:6px;}.dt-tab.txt{width:auto;min-width:44px;padding:0 14px;white-space:nowrap;flex:none;}.dt-main>.dt-bar.bottom{align-self:center;margin:12px 0 0;}.dt[data-bare]{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);background:linear-gradient(160deg,rgba(26,32,36,.94),rgba(40,52,50,.94));}.dt[data-bare] .dt-hero{background:none!important;overflow:visible;}.dt[data-bare] .dt-iconbg,.dt[data-bare] .dt-video,.dt[data-bare] .dt-hero::after{display:none;}.dt[data-bare] .dt-top{padding:12px 16px 0;}.dt[data-bare] .dt-main{padding:4px 12px 12px;}@media (max-width:640px){.dt[data-slim] .dt-iconbg{display:none;}.dt[data-slim] .dt-top{padding:12px 14px;}}';
+  var CSS = '.dt-acts{display:flex;gap:6px;}.dt-tab.txt{width:auto;min-width:44px;padding:0 14px;white-space:nowrap;flex:none;}.dt-tab-t{font-size:13px;font-weight:600;}.dt-main>.dt-bar.bottom{align-self:center;margin:12px 0 0;}.dt[data-bare]{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);background:linear-gradient(160deg,rgba(26,32,36,.94),rgba(40,52,50,.94));}.dt[data-bare] .dt-hero{background:none!important;overflow:visible;}.dt[data-bare] .dt-iconbg,.dt[data-bare] .dt-video,.dt[data-bare] .dt-hero::after{display:none;}.dt[data-bare] .dt-top{padding:12px 16px 0;}.dt[data-bare] .dt-main{padding:4px 12px 12px;}@media (max-width:640px){.dt[data-slim] .dt-iconbg{display:none;}.dt[data-slim] .dt-top{padding:12px 14px;}}';
   g.OkieMotor.extraCss = (g.OkieMotor.extraCss || []).concat([CSS]);
   g.OkieMotor.appshell = { create: create };
 })(typeof globalThis !== 'undefined' ? globalThis : window);

@@ -85,10 +85,10 @@
     '.carousel{display:flex;flex-direction:column;padding:14px 16px 0;box-sizing:border-box;overflow:hidden;}',
     '.w1-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:none;min-height:20px;padding:5px 5px 7px;border-bottom:1px solid rgba(255,255,255,.1);}',
     '.w1-tabs{display:flex;gap:8px;min-width:0;}',
-    '.w1-tab{display:inline-flex;align-items:center;letter-spacing:-.01em;gap:7px;padding:7px 14px;border-radius:16px;font-size:14px;font-weight:600;white-space:nowrap;background:rgba(24,22,20,.38);-webkit-backdrop-filter:blur(14px) saturate(160%);backdrop-filter:blur(14px) saturate(160%);color:rgba(255,255,255,.96);transition:background .25s,color .25s,transform .08s cubic-bezier(.16,1,.3,1);}',
+    '.w1-tab{display:inline-flex;align-items:center;letter-spacing:-.01em;gap:7px;padding:7px 14px;border-radius:16px;font-size:14px;font-weight:600;white-space:nowrap;background:rgba(24,22,20,.38);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px)) saturate(160%);backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px)) saturate(160%);color:rgba(255,255,255,.96);transition:background .25s,color .25s,transform .08s cubic-bezier(.16,1,.3,1);}',
     '.w1-tab:hover{background:rgba(255,255,255,.26);}.w1-tab:active{transform:scale(.96);}.w1-tab.on{background:rgba(255,255,255,.95);color:rgb(28,28,30);}',
     '.w1-tab .cnt{border-radius:8px;font-size:12px;font-weight:500;line-height:16px;min-width:18px;padding:0 5px;text-align:center;background:rgba(0,0,0,.14);}.w1-tab:not(.on) .cnt{background:rgba(255,255,255,.16);}',
-    '.w1-view{display:flex;gap:2px;padding:2px;border-radius:9px;background:rgba(24,22,20,.38);-webkit-backdrop-filter:blur(14px) saturate(160%);backdrop-filter:blur(14px) saturate(160%);flex:none;}',
+    '.w1-view{display:flex;gap:2px;padding:2px;border-radius:9px;background:rgba(24,22,20,.38);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px)) saturate(160%);backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px)) saturate(160%);flex:none;}',
     '.w1{position:relative;}',
     '.stage[data-w1grow="true"] .w1,.stage[data-w1grow="true"] .wright{align-self:start;height:calc(var(--fsc-grid-h,464px) + var(--okie-col-extra,0px));}',      // both columns get the same extra: whole cards, same length
     // a column height set with the handle (the list: bento.w1height, the right column: bento.wrheight) beats the automatic one
@@ -119,7 +119,7 @@
     '.w2-page{flex:0 0 100%;min-width:0;height:100%;box-sizing:border-box;padding:18px 18px 52px;display:flex;flex-direction:column;overflow:hidden;}',
     '.w2-foot{position:absolute;left:18px;bottom:14px;right:140px;display:flex;flex-direction:column;gap:1px;pointer-events:none;min-width:0;}',
     '.w2-foot .f1{font-size:11.5px;color:rgba(255,255,255,.7);}.w2-foot .f2{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
-    '.hero-slide-pager{position:absolute;right:14px;bottom:12px;display:flex;align-items:center;gap:6px;padding:7px 11px;border-radius:16px;background:rgba(0,0,0,.35);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);}',
+    '.hero-slide-pager{position:absolute;right:14px;bottom:12px;display:flex;align-items:center;gap:6px;padding:7px 11px;border-radius:16px;background:rgba(0,0,0,.35);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.5),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.5),24px));}',
     '.hsp-dot{position:relative;width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.4);overflow:hidden;transition:width .4s cubic-bezier(.34,1.18,.24,1),background .3s;}',
     '.hsp-dot.on{width:36px;background:rgba(255,255,255,.35);}',
     '.hsp-dot.on::after{content:"";position:absolute;inset:0;border-radius:inherit;background:#fff;transform-origin:left;animation:w2-prog var(--slide-ms,8000ms) linear forwards;}',
@@ -1142,11 +1142,13 @@
     var camCard = null, CMod = g.OkieMotor.cameras;
     if (c0.camerasCard !== false && CMod && CMod.buildCard && CMod.cameras(ctx, true).length) camCard = CMod.buildCard(ctx);
     var SNm = g.OkieMotor.sensors, sensCard = c0.sensorsCard !== false && SNm && SNm.buildCard && SNm.count(ctx) ? SNm.buildCard(ctx) : null;      // the sensors card: a page after the cameras
+    var OWm = g.OkieMotor.owlet, owletCard = c0.owletCard !== false && OWm && OWm.buildCard ? OWm.buildCard(ctx) : null;      // the Owlet Sock card: its own page, separate from the camera
     // the cameras card and, beside or under it, the Kindle, the AWTRIX and the home map
     var GDm = g.OkieMotor.gadgets, gcards = c0.gadgetCards !== false && GDm && GDm.buildCards ? GDm.buildCards(ctx) : [];
     // the cameras card, the sensors card, the Kindle, the AWTRIX and the home map are pages of the cards of the right column, like the weather and the tasks
     if (camCard) dAll.push({ id: 'cameras', label: t('b.cameras'), icon: 'camera', el: camCard.el });
     if (sensCard) dAll.push({ id: 'sensors', label: core.t('app.sensors', ctx.lang()), icon: 'door', el: sensCard.el });
+    if (owletCard) dAll.push({ id: 'owlet', label: core.t('owl.sock_title', ctx.lang()), icon: 'heart', el: owletCard.el });
     gcards.forEach(function (c) { var id = c.el.dataset.gadget; dAll.push({ id: id, label: c.el.getAttribute('aria-label') || id, icon: id === 'map' ? 'home' : 'gadget', el: c.el }); });
     var addWidgetsBtn = h('button.rm-add.wr-add', { type: 'button', html: UI.icon('plus', 22) + '<span>' + t('b.add_widgets') + '</span>', onclick: function () { openWidgets(); } });
     loadStacks(); rebuildSliders();
@@ -1190,11 +1192,11 @@
         sliders.forEach(function (sl) { sl.update(); });
         tiles.forEach(function (x) { if (x._upd) x._upd(); });
         drawW1(false);
-        if (camCard) camCard.update(); if (sensCard) sensCard.update(); gcards.forEach(function (c) { c.update(); }); if (feederCard) feederCard.update();
+        if (camCard) camCard.update(); if (sensCard) sensCard.update(); if (owletCard) owletCard.update(); gcards.forEach(function (c) { c.update(); }); if (feederCard) feederCard.update();
       },
       show: function () { drawW1(false); sliders.forEach(function (sl) { sl.show(); }); fadeSoon(); },      // back on the start screen: the list is redrawn only when something in it changed (settings and states keep it current while it is away)
       stagger: function () { root.classList.add('stagger'); setTimeout(function () { root.classList.remove('stagger'); }, 2000); },
-      dispose: function () { sliders.forEach(function (sl) { sl.dispose(); }); timers.forEach(clearInterval); if (camCard) camCard.dispose(); if (sensCard) sensCard.dispose(); if (feederCard) feederCard.dispose(); if (ro) ro.disconnect(); disposers.forEach(function (d) { d(); }); },
+      dispose: function () { sliders.forEach(function (sl) { sl.dispose(); }); timers.forEach(clearInterval); if (camCard) camCard.dispose(); if (sensCard) sensCard.dispose(); if (owletCard) owletCard.dispose(); if (feederCard) feederCard.dispose(); if (ro) ro.disconnect(); disposers.forEach(function (d) { d(); }); },
       _go: function (i) { if (sliders[0]) sliders[0].go(i); },
     };
   }

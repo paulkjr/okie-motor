@@ -183,6 +183,20 @@
     'mu.g_off_t': 'Spotify is not reachable', 'mu.g_off_b': 'Home Assistant cannot reach Spotify right now. If this stays, log in again.',
     'mu.g_sleep_t': 'Spotify went to sleep', 'mu.g_sleep_b': 'Open the Spotify app again; the library comes back by itself.', 'mu.dev_fail': 'That device did not answer. Open Spotify on it and try again.', 'mu.starting': 'Starting {d}…',
   });
+  core.registerStrings('en', {
+    'app.library': 'My Music', 'mu.src': 'Music source', 'mu.src_lib': 'My library', 'mu.browse_lib': 'Browse your library', 'mu.lib_nothing_sub': 'Pick a song or playlist from your library.', 'mu.lib_on': 'Plays on this screen', 'mu.lib_settings': 'Library settings', 'mu.lib_signout': 'Sign out of this library', 'mu.lib_play_err': 'This song could not be played.',
+    'mu.l_root': 'My library', 'mu.l_playlists': 'Playlists', 'mu.l_starred': 'Liked songs', 'mu.l_newest': 'Recently added', 'mu.l_frequent': 'Most played', 'mu.l_recent': 'Recently played', 'mu.l_albums': 'All albums', 'mu.l_artists': 'Artists', 'mu.l_random': 'Random mix',
+    'mu.lsetup_t': 'Connect your library', 'mu.lsetup_b': 'Your own music from your server. Type the address, your user name and your password once; the password is turned into a key on this device and not kept.', 'mu.lsetup_n': 'The server is your Navidrome. The address looks like https://your-name.duckdns.org:8451.',
+    'mu.back_spotify': 'Use Spotify instead', 'mu.f_url': 'Server address', 'mu.f_user': 'User name', 'mu.f_pass': 'Password', 'mu.f_connect': 'Connect', 'mu.f_connecting': 'Connecting…', 'mu.f_ok': 'Library connected',
+    'mu.f_bad_login': 'The user name or the password is not right.', 'mu.f_bad_net': 'The server cannot be reached. Check the address and that the port is open.', 'mu.f_bad_url': 'Type the server address first.', 'mu.f_bad_other': 'The server answered, but not with music. Is this the right address?',
+  });
+  core.registerStrings('de', {
+    'app.library': 'Meine Musik', 'mu.src': 'Musikquelle', 'mu.src_lib': 'Meine Bibliothek', 'mu.browse_lib': 'Bibliothek durchsuchen', 'mu.lib_nothing_sub': 'Wähle ein Lied oder eine Wiedergabeliste aus deiner Bibliothek.', 'mu.lib_on': 'Spielt auf diesem Bildschirm', 'mu.lib_settings': 'Bibliothek-Einstellungen', 'mu.lib_signout': 'Von dieser Bibliothek abmelden', 'mu.lib_play_err': 'Dieses Lied konnte nicht abgespielt werden.',
+    'mu.l_root': 'Meine Bibliothek', 'mu.l_playlists': 'Wiedergabelisten', 'mu.l_starred': 'Gelikte Lieder', 'mu.l_newest': 'Neu hinzugefügt', 'mu.l_frequent': 'Am häufigsten gespielt', 'mu.l_recent': 'Zuletzt gespielt', 'mu.l_albums': 'Alle Alben', 'mu.l_artists': 'Künstler', 'mu.l_random': 'Zufallsmix',
+    'mu.lsetup_t': 'Bibliothek verbinden', 'mu.lsetup_b': 'Deine eigene Musik von deinem Server. Gib Adresse, Benutzername und Passwort einmal ein; das Passwort wird auf diesem Gerät in einen Schlüssel umgewandelt und nicht gespeichert.', 'mu.lsetup_n': 'Der Server ist dein Navidrome. Die Adresse sieht so aus: https://dein-name.duckdns.org:8451.',
+    'mu.back_spotify': 'Stattdessen Spotify nutzen', 'mu.f_url': 'Serveradresse', 'mu.f_user': 'Benutzername', 'mu.f_pass': 'Passwort', 'mu.f_connect': 'Verbinden', 'mu.f_connecting': 'Verbinde…', 'mu.f_ok': 'Bibliothek verbunden',
+    'mu.f_bad_login': 'Benutzername oder Passwort stimmen nicht.', 'mu.f_bad_net': 'Der Server ist nicht erreichbar. Prüfe die Adresse und ob der Port offen ist.', 'mu.f_bad_url': 'Gib zuerst die Serveradresse ein.', 'mu.f_bad_other': 'Der Server antwortet, aber nicht mit Musik. Ist das die richtige Adresse?',
+  });
   core.registerStrings('de', {
     'app.music': 'Musik', 'mu.nothing': 'Es läuft nichts', 'mu.nothing_sub': 'Starte ein Lied in Spotify, dann erscheint es hier.', 'mu.devices': 'Wiedergabe auf', 'mu.volume': 'Lautstärke', 'mu.mute': 'Stumm', 'mu.more': 'Mehr', 'mu.shuffle': 'Zufall', 'mu.repeat': 'Wiederholen', 'mu.r_off': 'Aus', 'mu.r_all': 'Alle', 'mu.r_one': 'Eins',
     'mu.lyrics': 'Songtext', 'mu.lyrics_off': 'Zurück zum Bild', 'mu.ly_loading': 'Songtext wird gesucht…', 'mu.ly_none': 'Kein Songtext für dieses Lied gefunden.', 'mu.ly_instr': 'Instrumental', 'mu.ly_plain': 'Dieser Songtext ist nicht zeitlich abgestimmt.', 'mu.prev': 'Zurück', 'mu.next': 'Weiter', 'mu.play': 'Abspielen', 'mu.pause': 'Pause', 'mu.players': 'Player',
@@ -199,12 +213,17 @@
     'mu.g_sleep_t': 'Spotify ist eingeschlafen', 'mu.g_sleep_b': 'Öffne die Spotify-App noch einmal; die Bibliothek kommt von selbst zurück.', 'mu.dev_fail': 'Das Gerät hat nicht geantwortet. Öffne Spotify darauf und versuche es nochmal.', 'mu.starting': '{d} startet…',
   });
 
-  function renderMusic(container, ctx) {
+  function renderMusic(container, ctx, opts) {
+    opts = opts || {};
     var t = function (k, v) { return core.t(k, ctx.lang(), v); }, disposed = false, lyricsOn = false, playerId = pickPlayer(ctx.hass().states, ctx.store.get('music.player', null)), lastTrack = '', lyr = null, lyrKey = '', lyrToken = 0, activeLine = -2, tint = null, tintFor = '', dragging = false, bars = [], lf = null, np = null;
-    var shell = g.OkieMotor.appshell.create(container, ctx, { id: 'music', title: t('app.music'), subtitle: '', icon: 'music', gradient: ['#0f2a22', '#1db954'], slim: true, tabs: [], heroDomain: 'media_player', onTab: function () {}, actions: [{ icon: 'heart', label: t('dt.fav_add'), onClick: function () { if (!playerId) { ctx.toast('error', t('mu.nothing')); return; } ctx.favorites.toggle(playerId); paintHeart(); } }] });
+    // ---- the source: Spotify (a Home Assistant media_player) or My library (a Navidrome server, played by the card itself, see okie-library.js)
+    var Lib = g.OkieMotor.library, LIB_ID = 'okie.library', source = opts.source || ctx.store.get('music.source', 'spotify'), libPlayer = null, libOff = null, libErrOff = null;
+    if (source !== 'library' || !Lib) source = 'spotify';
+    if (source === 'library') playerId = LIB_ID;
+    var shell = g.OkieMotor.appshell.create(container, ctx, { id: opts.source ? 'library' : 'music', title: t(opts.source ? 'app.library' : 'app.music'), subtitle: '', icon: 'music', gradient: opts.source ? ['#2a0f0c', '#ff3a28'] : ['#0f2a22', '#1db954'], slim: true, tabs: [], heroDomain: 'media_player', onTab: function () {}, actions: [{ icon: 'heart', label: t('dt.fav_add'), onClick: function () { if (source === 'library') { likeSong(); return; } if (!playerId) { ctx.toast('error', t('mu.nothing')); return; } ctx.favorites.toggle(playerId); paintHeart(); } }] });
     var heart = shell.el.querySelector('.dt-acts .dt-circ.act');      // the heart pins the player to the favorites, like the heart in every device screen
-    function paintHeart() { if (!heart) return; var on = !!(playerId && ctx.favorites.has(playerId)); heart.classList.toggle('on', on); heart.setAttribute('aria-pressed', on ? 'true' : 'false'); }
-    var body = shell.body, root = h('div.mu'), call = function (svc, data) { return ctx.call('media_player', svc, Object.assign({ entity_id: playerId }, data || {})).catch(function () { ctx.toast('error', t('app.music')); }); };
+    function paintHeart() { if (!heart) return; var on = source === 'library' ? !!(libPlayer && libPlayer.isStarred()) : !!(playerId && ctx.favorites.has(playerId)); heart.classList.toggle('on', on); heart.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+    var body = shell.body, root = h('div.mu'), call = function (svc, data) { if (source === 'library') return (libPlayer ? libPlayer.call(svc, data) : Promise.resolve()).catch(function () { ctx.toast('error', t('app.music')); }); return ctx.call('media_player', svc, Object.assign({ entity_id: playerId }, data || {})).catch(function () { ctx.toast('error', t('app.music')); }); };
 
     // ---- a progress bar (the player has one, the full-screen lyrics another): tap or drag to seek
     function makeBar() {
@@ -224,7 +243,10 @@
     var volBtn = h('button.mu-pill-b', { type: 'button', 'aria-label': t('mu.volume'), onclick: openVolume, html: UI.icon('volume', 24) });
     var castBtn = h('button.mu-pill-b', { type: 'button', 'aria-label': t('mu.devices'), onclick: openDevices, html: UI.icon('cast', 24) });
     var libBtn = h('button.mu-pill-b', { type: 'button', 'aria-label': t('mu.library'), title: t('mu.library'), onclick: openLib, html: UI.icon('grid', 24), hidden: true });
-    var top = h('div.mu-top', null, devBtn, h('div.mu-pill', null, libBtn, castBtn, volBtn));
+    var srcSpot = h('button.mu-sg', { type: 'button', onclick: function () { setSource('spotify'); } }, 'Spotify'), srcLib = h('button.mu-sg', { type: 'button', onclick: function () { setSource('library'); } }, t('mu.src_lib'));
+    var srcChip = h('div.mu-src', { role: 'group', 'aria-label': t('mu.src') }, srcSpot, srcLib);
+    srcChip.hidden = !Lib;
+    var top = h('div.mu-top', null, devBtn, srcChip, h('div.mu-pill', null, libBtn, castBtn, volBtn));
     var art = h('div.mu-art'), artImg = h('img', { alt: '', decoding: 'async', draggable: false }), title = h('div.mu-t'), artist = h('div.mu-a'), moreBtn = h('button.mu-more', { type: 'button', 'aria-label': t('mu.more'), onclick: openMore, html: UI.icon('more', 20) });
     art.appendChild(artImg); art.appendChild(h('div.mu-frost'));
     art.appendChild(h('button.mu-cta', { type: 'button', onclick: openLib, html: UI.icon('grid', 20) + '<span>' + t('mu.browse') + '</span>' }));      // an empty player offers your Spotify instead of a blank picture
@@ -245,8 +267,9 @@
     function sizeStage() {
       var w = root.clientWidth; if (!w || disposed) return;
       root.style.setProperty('--u', (w / 629).toFixed(3) + 'px');
+      root.classList.toggle('narrow', w < 520);      // a phone: the picture starts under the top row, never under its buttons
       var sw = stage.clientWidth, sh = stage.clientHeight; if (!sw || !sh) return;
-      var wide = sw > 480, f = wide ? 0.66 + 0.24 * Math.max(0, Math.min(1, (sh / sw - 0.7) / 0.5)) : 0.97;      // a taller panel (a tablet) gets a bigger picture, not a small one floating in empty space
+      var wide = sw > 480, f = wide ? 0.66 + 0.24 * Math.max(0, Math.min(1, (sh / sw - 0.7) / 0.5)) : 0.9;      // a taller panel (a tablet) gets a bigger picture, not a small one floating in empty space
       var gap = 14 * (root.clientWidth / 629), ih = info.offsetHeight || 150 * (root.clientWidth / 629), room = Math.max(60, sh - ih - gap);      // the picture ends above the title, the bar and the 3 dots: nothing of it lies under them
       var aw = Math.min(sw * f, room * 0.96), ah = aw / 0.96;
       art.style.width = Math.round(aw) + 'px'; art.style.height = Math.round(ah) + 'px';
@@ -260,6 +283,7 @@
 
     var np = null;
     function setupView() {
+      if (source === 'library') { libSetupView(); return; }
       setup.innerHTML = '';
       setup.appendChild(h('div.mu-si', { html: UI.icon('music', 54) }));
       setup.appendChild(h('div.mu-st', null, t('mu.setup_t')));
@@ -309,6 +333,7 @@
         var sh = h('button.mu-row' + (np && np.shuffle ? '.on' : ''), { type: 'button', onclick: function () { call('shuffle_set', { shuffle: !(np && np.shuffle) }); close(); } }, h('span.mu-ri', { html: UI.icon('shuffle', 18) }), h('span', null, t('mu.shuffle')), h('span.dim', null, np && np.shuffle ? '✓' : ''));
         var rp = h('button.mu-row' + (np && np.repeat !== 'off' ? '.on' : ''), { type: 'button', onclick: function () { call('repeat_set', { repeat: repeatNext(np ? np.repeat : 'off') }); close(); } }, h('span.mu-ri', { html: UI.icon('repeat', 18) }), h('span', null, t('mu.repeat')), h('span.dim', null, t('mu.r_' + (np ? np.repeat : 'off'))));
         if (!np || np.can.shuffle) box.appendChild(sh); if (!np || np.can.repeat) box.appendChild(rp);
+        if (source === 'library') box.appendChild(h('button.mu-row', { type: 'button', onclick: function () { close(); openLibSettings(); } }, h('span.mu-ri', { html: UI.icon('list', 18) }), h('span', null, t('mu.lib_settings'))));
         if (!box.children.length) box.appendChild(h('div.note-l', null, '–'));
         return box;
       } });
@@ -381,6 +406,7 @@
     }
     function sleepBanner() { return h('div.mu-sleep', null, h('div.t', null, t('mu.g_sleep_t')), h('p', null, t('mu.g_sleep_b')), h('div.mu-gb', null, openSpotifyLink(), refreshBtn())); }
     function devStrip() {
+      if (source === 'library') return h('div.mu-ls', null, h('span.mu-lsb', null, t('mu.lib_on')), h('button.mu-chip', { type: 'button', onclick: openLibSettings }, t('mu.lib_settings')));
       var here = hereSource(np.sources, kindHere);
       return h('div.mu-ls', null, h('button.mu-lsb', { type: 'button', onclick: openDevices }, t('mu.playing_on', { d: np.source || '–' })), here && np.source !== here ? h('button.mu-chip', { type: 'button', onclick: function () { useDevice(here); } }, t('mu.play_here')) : null);
     }
@@ -431,6 +457,7 @@
     /** One level of the library: the answer is kept for as long as this screen is open. The id and the type go to Home Assistant exactly as it gave them. */
     function browseAt(id, type) {
       var key = type + '|' + id; if (libCache[key]) return Promise.resolve(libCache[key]);
+      if (source === 'library') return libPlayer.browse(id, libLabels()).then(function (raw) { var n = browseNode(raw); if (!n) throw new Error('empty'); libCache[key] = n; return n; });
       var msg = { type: 'media_player/browse_media', entity_id: playerId }; if (id) { msg.media_content_id = id; msg.media_content_type = type; }
       return ctx.callWS(msg).then(function (raw) { var n = browseNode(raw); if (!n) throw new Error('empty'); libCache[key] = n; return n; });
     }
@@ -458,10 +485,11 @@
     function playNode(c, shuffle) {
       if (!np || !np.browse) { libSync(true); return; }
       ctx.haptic(10);
-      var pre = shuffle != null && shuffle !== !!np.shuffle ? ctx.call('media_player', 'shuffle_set', { entity_id: playerId, shuffle: shuffle }) : Promise.resolve();
+      var mp = function (svc, d) { return source === 'library' ? libPlayer.call(svc, d) : ctx.call('media_player', svc, Object.assign({ entity_id: playerId }, d)); };
+      var pre = shuffle != null && shuffle !== !!np.shuffle ? mp('shuffle_set', { shuffle: shuffle }) : Promise.resolve();
       pre.then(function () {
         libPending = c.title; pendingFrom = [np.title, np.state, np.artist].join('|'); clearTimeout(pendingT); pendingT = setTimeout(function () { libPending = ''; paintLibLive(true); }, 6000); paintLibLive(true);
-        return ctx.call('media_player', 'play_media', { entity_id: playerId, media_content_id: c.id, media_content_type: c.type });
+        return mp('play_media', { media_content_id: c.id, media_content_type: c.type });
       }).catch(function () { libPending = ''; paintLibLive(true); ctx.toast('error', t('mu.err')); });
     }
 
@@ -566,24 +594,28 @@
     var lastPaintKey = '';
     function paint(force) {
       if (disposed) return;
+      var st;
+      if (source === 'library') st = libPlayer ? libPlayer.state() : null;
+      else {
       var states = ctx.hass().states; if (!playerId || !states[playerId] || states[playerId].state === 'unavailable') playerId = pickPlayer(states, ctx.store.get('music.player', null));
-      var st = playerId && states[playerId];
+      st = playerId && states[playerId];
       if (!st) { var any = Object.keys(states).filter(function (id) { return /^media_player\.spotify/.test(id); })[0]; if (any) st = states[any]; }      // Spotify is set up but not reachable right now: show the quiet player, not the set-up help
+      }
       np = st ? nowPlaying(st, Date.now()) : null;
       var empty = !np || (!np.title && np.state !== 'playing' && np.state !== 'paused');
       player.hidden = !np; setup.hidden = !!np; paintHeart(); if (!np) { closeLib(); return; }
       root.dataset.empty = empty ? '1' : '';
-      libBtn.hidden = !(playerId && /spotify/i.test(playerId)); if (libBtn.hidden && libEl) closeLib(); else libSync(false);      // checked on every update, not once: the two feature bits come and go with Spotify's active device
-      var url = np.art ? (ctx.hass().hassUrl ? ctx.hass().hassUrl(np.art) : np.art) : '';
+      libBtn.hidden = !(source === 'library' || (playerId && /spotify/i.test(playerId))); if (libBtn.hidden && libEl) closeLib(); else libSync(false);      // checked on every update, not once: the two feature bits come and go with Spotify's active device
+      var url = np.art ? (source !== 'library' && ctx.hass().hassUrl ? ctx.hass().hassUrl(np.art) : np.art) : '';
       var key = [np.title, np.artist, url, np.state, np.shuffle, np.repeat, np.volume, np.can.seek, np.sources.join(), np.source, np.phase].join('|');
       if (force || key !== lastPaintKey) {
         lastPaintKey = key;
-        title.textContent = np.title || t('mu.nothing'); artist.textContent = np.title ? np.artist : t('mu.nothing_sub');
+        title.textContent = np.title || t('mu.nothing'); artist.textContent = np.title ? np.artist : t(source === 'library' ? 'mu.lib_nothing_sub' : 'mu.nothing_sub');
         if (artImg.getAttribute('src') !== url) { if (url) artImg.setAttribute('src', url); else artImg.removeAttribute('src'); }
         art.classList.toggle('noimg', !url); paintTint(url); sizeStage();
         playBtn.innerHTML = UI.icon(np.playing ? 'pausefill' : 'playfill', 46); playBtn.setAttribute('aria-label', np.playing ? t('mu.pause') : t('mu.play'));
         prevBtn.disabled = !np.can.prev; nextBtn.disabled = !np.can.next; volBtn.disabled = !np.can.volume; volBtn.setAttribute('aria-label', t('mu.volume') + (np.volume != null ? ' ' + Math.round(np.volume * 100) + '%' : ''));
-        devBtn.hidden = !(np.sources.length || true);
+        devBtn.hidden = source === 'library'; castBtn.hidden = source === 'library';
         var track = np.artist + '|' + np.title; if (track !== lastTrack) { lastTrack = track; if (lyricsOn) loadLyrics(); }
         if (shell && shell.setSubtitle) shell.setSubtitle(np.playing ? np.artist : '');
         if (lf) lf.sync();
@@ -592,7 +624,7 @@
     }
     function tick() {
       if (disposed || !np) return;
-      var states = ctx.hass().states, st = playerId && states[playerId]; if (st) np = nowPlaying(st, Date.now());
+      var st = source === 'library' ? (libPlayer ? libPlayer.state() : null) : (playerId && ctx.hass().states[playerId]); if (st) np = nowPlaying(st, Date.now());
       var d = np.duration, p = np.position;
       bars.forEach(function (b) {
         if (!dragging) { b.fill.style.width = d ? (p / d * 100) + '%' : '0%'; b.knob.style.left = d ? (p / d * 100) + '%' : '0%'; b.tl.textContent = fmtClock(p); b.tr.textContent = d ? '−' + fmtClock(d - p) : ''; b.bar.setAttribute('aria-valuenow', String(Math.round(p))); b.bar.setAttribute('aria-valuemax', String(Math.round(d || 0))); }
@@ -600,20 +632,84 @@
       });
       if (lyricsOn || lf) markLine(false);
     }
+    // ---- the sources
+    function libLabels() { return { root: t('mu.l_root'), playlists: t('mu.l_playlists'), starred: t('mu.l_starred'), newest: t('mu.l_newest'), frequent: t('mu.l_frequent'), recent: t('mu.l_recent'), albums: t('mu.l_albums'), artists: t('mu.l_artists'), random: t('mu.l_random') }; }
+    function libConfig() { var c = ctx.store.get('music.lib', null); return Lib && Lib.validConfig(c) ? c : null; }
+    function libDetach() { if (libOff) { libOff(); libOff = null; } if (libErrOff) { libErrOff(); libErrOff = null; } }
+    /** Connect to the player of the saved login (one per page, so a song keeps playing when this screen closes). */
+    function libAttach() {
+      libDetach(); var cfg = libConfig(); if (!cfg) { libPlayer = null; return; }
+      libPlayer = Lib.playerFor(cfg);
+      libOff = libPlayer.onChange(function () { if (!disposed && source === 'library') paint(false); });
+      libErrOff = libPlayer.onError(function () { if (!disposed) ctx.toast('error', t('mu.lib_play_err')); });
+    }
+    function paintSrc() {
+      srcSpot.classList.toggle('on', source === 'spotify'); srcLib.classList.toggle('on', source === 'library');
+      srcSpot.setAttribute('aria-pressed', source === 'spotify' ? 'true' : 'false'); srcLib.setAttribute('aria-pressed', source === 'library' ? 'true' : 'false');
+      root.dataset.src = source;
+      var hero = shell.el.querySelector('.dt-hero'); if (hero) hero.style.background = 'linear-gradient(160deg,' + (source === 'library' ? '#2a0f0c,#ff3a28' : '#0f2a22,#1db954') + ')';      // the screen takes the colour of its source
+      var cs = art.querySelector('.mu-cta span'); if (cs) cs.textContent = t(source === 'library' ? 'mu.browse_lib' : 'mu.browse');
+    }
+    function setSource(s) {
+      if (s === source || (s === 'library' && !Lib)) return;
+      if (s !== 'library' && libPlayer) libPlayer.call('media_pause', {});      // leaving My library stops its song, so it does not play over Spotify
+      source = s; if (!opts.source) ctx.store.set('music.source', s);
+      closeLib(); libCache = {}; libStack = []; libState = null; lastTrack = ''; lastPaintKey = '';
+      if (s === 'library') { libAttach(); playerId = LIB_ID; } else { libDetach(); libPlayer = null; playerId = pickPlayer(ctx.hass().states, ctx.store.get('music.player', null)); }
+      paintSrc(); setupView(); paint(true);
+    }
+    function likeSong() {
+      if (!libPlayer || !libPlayer.current()) { ctx.toast('error', t('mu.nothing')); return; }
+      ctx.haptic(8); libPlayer.toggleStar().then(paintHeart, function () { ctx.toast('error', t('mu.err')); paintHeart(); });
+    }
+    /** The log-in page of My library: server address, user, password. The password becomes a token on this device and is thrown away. */
+    function libSetupView() {
+      setup.innerHTML = '';
+      var cur = ctx.store.get('music.lib', null) || {}, url = h('input.mu-in', { type: 'url', inputmode: 'url', autocapitalize: 'off', autocorrect: 'off', spellcheck: 'false', 'aria-label': t('mu.f_url'), placeholder: 'https://music.example.com', value: cur.url || '' });
+      var usr = h('input.mu-in', { type: 'text', autocapitalize: 'off', autocorrect: 'off', autocomplete: 'username', 'aria-label': t('mu.f_user'), placeholder: t('mu.f_user'), value: cur.u || '' });
+      var pw = h('input.mu-in', { type: 'password', autocomplete: 'current-password', 'aria-label': t('mu.f_pass'), placeholder: t('mu.f_pass') });
+      var msg = h('p.mu-msg', { hidden: true, role: 'alert' }), btn = h('button.act.primary', { type: 'button' }, t('mu.f_connect'));
+      function go() {
+        msg.hidden = true; btn.disabled = true; btn.textContent = t('mu.f_connecting');
+        Lib.connect(url.value, usr.value, pw.value).then(function (cfg) {
+          pw.value = ''; ctx.store.set('music.lib', cfg); Lib.dropPlayer(); libCache = {}; libAttach(); playerId = LIB_ID; lastPaintKey = ''; setupView(); paint(true); ctx.toast('success', t('mu.f_ok'));
+        }, function (e) {
+          msg.textContent = t(e && e.kind === 'login' ? 'mu.f_bad_login' : e && e.kind === 'net' ? 'mu.f_bad_net' : e && e.kind === 'url' ? 'mu.f_bad_url' : 'mu.f_bad_other'); msg.hidden = false;
+        }).then(function () { btn.disabled = false; btn.textContent = t('mu.f_connect'); });
+      }
+      btn.addEventListener('click', go); pw.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
+      setup.appendChild(h('div.mu-si', { html: UI.icon('music', 54) })); setup.appendChild(h('div.mu-st', null, t('mu.lsetup_t'))); setup.appendChild(h('p', null, t('mu.lsetup_b')));
+      setup.appendChild(url); setup.appendChild(usr); setup.appendChild(pw); setup.appendChild(msg); setup.appendChild(h('div.mu-sb', null, btn));
+      setup.appendChild(h('p.dim', null, t('mu.lsetup_n')));
+      setup.appendChild(h('button.mu-relog', { type: 'button', onclick: function () { setSource('spotify'); } }, t('mu.back_spotify')));      // the switch lives on the player, which is not drawn before you are logged in
+    }
+    function openLibSettings() {
+      ctx.sheet({ title: t('mu.lib_settings'), width: 'min(420px,100%)', content: function (close) {
+        var cfg = libConfig(), box = h('div.mu-dev');
+        if (cfg) box.appendChild(h('div.note-l', null, cfg.u + ' · ' + cfg.url.replace(/^https?:\/\//, '')));
+        box.appendChild(h('button.mu-row', { type: 'button', onclick: function () {
+          close(); Lib.dropPlayer(); ctx.store.set('music.lib', ''); libDetach(); libPlayer = null; closeLib(); libCache = {}; lastPaintKey = ''; setupView(); paint(true);
+        } }, h('span', null, t('mu.lib_signout'))));
+        return box;
+      } });
+    }
+    if (source === 'library') libAttach();
+    paintSrc(); setupView();
     paint(true);
     var timer = setInterval(tick, 250);
-    return { update: function () { paint(false); }, dispose: function () { disposed = true; closeLib(); closeLyricsFull(); clearInterval(timer); if (roSize) roSize.disconnect(); shell.dispose(); } };
+    return { update: function () { paint(false); }, dispose: function () { disposed = true; libDetach(); closeLib(); closeLyricsFull(); clearInterval(timer); if (roSize) roSize.disconnect(); shell.dispose(); } };
   }
 
   g.OkieMotor.apps.register({ id: 'music', nameKey: 'app.music', name: 'Music', icon: 'music', color: '#1db954', order: 45, category: 'system', render: renderMusic });
+  g.OkieMotor.apps.register({ id: 'library', nameKey: 'app.library', name: 'My Music', icon: 'music', color: '#ff3a28', order: 46, category: 'system', render: function (c, ctx) { return renderMusic(c, ctx, { source: 'library' }); } });
 
   var CSS = [
     '.mu{--u:1px;--mu-a:#42586d;--mu-b:#2d3d4b;position:relative;display:flex;flex-direction:column;height:100%;min-height:380px;border-radius:30px;overflow:hidden;background:linear-gradient(170deg,var(--mu-a),var(--mu-b));transition:background .6s ease;color:#fff;}',
     '.mu-player{position:relative;display:flex;flex-direction:column;flex:1;min-height:0;padding:calc(20*var(--u)) calc(17*var(--u)) calc(30*var(--u));}.mu-player[hidden]{display:none;}',
     '.mu-top{display:flex;align-items:center;justify-content:space-between;flex:none;position:relative;z-index:3;}',
-    '.mu-rb{width:max(42px,calc(50*var(--u)));height:max(42px,calc(50*var(--u)));border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.2);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;}.mu-rb[hidden]{display:none;}',
-    '.mu-pill{display:flex;align-items:center;height:max(42px,calc(50*var(--u)));border-radius:9999px;background:rgba(255,255,255,.2);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);}.mu-pill-b{display:grid;place-items:center;width:max(46px,calc(62*var(--u)));height:100%;border-radius:9999px;color:#fff;}.mu-pill-b:disabled{opacity:.4;}',
-    '.mu-stage{position:relative;flex:1;min-height:0;margin:calc(-12*var(--u)) 0 calc(18*var(--u));}',
+    '.mu-rb{width:max(42px,calc(50*var(--u)));height:max(42px,calc(50*var(--u)));border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.2);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));color:#fff;}.mu-rb[hidden]{display:none;}',
+    '.mu-pill{display:flex;align-items:center;height:max(42px,calc(50*var(--u)));border-radius:9999px;background:rgba(255,255,255,.2);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));}.mu-pill-b{display:grid;place-items:center;width:max(46px,calc(62*var(--u)));height:100%;border-radius:9999px;color:#fff;}.mu-pill-b:disabled{opacity:.4;}',
+    '.mu-stage{position:relative;flex:1;min-height:0;margin:calc(-12*var(--u)) 0 calc(18*var(--u));}.mu.narrow .mu-stage{margin-top:calc(22*var(--u));}',
     '.mu-art{position:absolute;left:50%;top:0;transform:translateX(-50%);border-radius:calc(30*var(--u));overflow:hidden;background:rgba(255,255,255,.12);box-shadow:0 calc(18*var(--u)) calc(44*var(--u)) rgba(0,0,0,.32);z-index:1;}.mu-art[hidden]{display:none;}.mu-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}.mu-art.noimg::before{content:"";position:absolute;inset:0;background:linear-gradient(150deg,rgba(255,255,255,.22),rgba(255,255,255,.05));}',
     '.mu-frost{display:none;position:absolute;left:0;right:0;bottom:0;height:46%;background:linear-gradient(to bottom,rgba(214,226,238,0),rgba(214,226,238,.42) 62%,rgba(214,226,238,.5));-webkit-backdrop-filter:blur(calc(14*var(--u))) saturate(1.1);backdrop-filter:blur(calc(14*var(--u))) saturate(1.1);-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 55%);mask-image:linear-gradient(to bottom,transparent 0,#000 55%);}',
     '.mu-info{position:absolute;left:calc(25*var(--u));right:calc(25*var(--u));bottom:calc(-6*var(--u));z-index:2;}',
@@ -632,13 +728,13 @@
     '.mu-lm{padding:24px 4px;font-size:17px;color:rgba(255,255,255,.7);}.mu-lm.small{padding:0 0 4px;font-size:13px;}',
     '.mu-setup{padding:26px 22px;display:flex;flex-direction:column;gap:12px;}.mu-setup[hidden]{display:none;}.mu-si{opacity:.7;}.mu-st{font-size:24px;font-weight:700;}.mu-setup p{margin:0;font-size:14px;line-height:1.5;color:rgba(255,255,255,.78);}.mu-setup ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:14px;line-height:1.45;color:rgba(255,255,255,.85);}.mu-sb{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px;}.mu-sb .act{text-decoration:none;}',
     '.mu-here-b{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:9999px;background:rgba(255,255,255,.22);font-style:normal;font-size:11px;font-weight:600;letter-spacing:.02em;vertical-align:1px;}.mu-here{margin-top:6px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.22);}.mu-here .t{font-size:14px;font-weight:700;margin-bottom:4px;}.mu-here p{margin:0 0 10px;font-size:12.5px;line-height:1.45;color:rgba(255,255,255,.75);}.mu-here .act{text-decoration:none;display:inline-block;}',
-    '.mu-lx{position:absolute;top:0;right:calc(25*var(--u));z-index:4;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.22);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;}.mu-lx[hidden]{display:none;}',
+    '.mu-lx{position:absolute;top:0;right:calc(25*var(--u));z-index:4;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.22);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));color:#fff;}.mu-lx[hidden]{display:none;}',
     '.mu-lf{--u:1px;position:fixed;inset:0;z-index:10001;display:flex;flex-direction:column;background:linear-gradient(170deg,var(--mu-a,#42586d),var(--mu-b,#2d3d4b));color:#fff;overflow:hidden;--lf:clamp(26px,5.4vmin,62px);-webkit-user-select:none;user-select:none;}.mu-lf[data-ui="0"]{cursor:none;}',
     '.mu-lfs{position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:calc(max(env(safe-area-inset-top,0px),18px) + 92px) max(7vw,26px) 0;-webkit-mask-image:linear-gradient(transparent 0,#000 12%,#000 82%,transparent 100%);mask-image:linear-gradient(transparent 0,#000 12%,#000 82%,transparent 100%);}.mu-lfs::-webkit-scrollbar{display:none;}',
     '.mu-lfl{display:flex;flex-direction:column;gap:calc(var(--lf)*.55);max-width:1100px;margin:0 auto;padding-bottom:55vh;}.mu-lf .mu-l{font-size:var(--lf);line-height:1.16;color:rgba(255,255,255,.34);}.mu-lf .mu-l.on{color:#fff;}.mu-lf .mu-l.past{color:rgba(255,255,255,.26);}.mu-lf .mu-l.gap{font-size:calc(var(--lf)*.6);}.mu-lf .mu-lm{font-size:calc(var(--lf)*.6);padding:0;}.mu-lf .mu-lm.small{font-size:calc(var(--lf)*.42);}',
     '.mu-lftop,.mu-lfui{position:absolute;left:0;right:0;z-index:2;transition:opacity .4s ease,transform .4s ease;}.mu-lftop{top:0;display:flex;align-items:center;gap:14px;padding:calc(max(env(safe-area-inset-top,0px),18px) + 4px) max(5vw,22px) 26px;background:linear-gradient(rgba(0,0,0,.28),transparent);}',
     '.mu-lftop img{width:52px;height:52px;border-radius:10px;object-fit:cover;flex:none;box-shadow:0 4px 14px rgba(0,0,0,.3);}.mu-lftop img[hidden]{display:none;}.mu-lftx{flex:1;min-width:0;}.mu-lt1{font-size:18px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.mu-lt2{font-size:14px;color:rgba(255,255,255,.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}',
-    '.mu-lfb{flex:none;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.22);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;}',
+    '.mu-lfb{flex:none;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.22);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));color:#fff;}',
     '.mu-lfui{bottom:0;padding:34px max(7vw,26px) calc(max(env(safe-area-inset-bottom,0px),18px) + 12px);background:linear-gradient(transparent,rgba(0,0,0,.34));}.mu-lfui .mu-tm{font-size:13px;}.mu-lfk{display:flex;align-items:center;justify-content:center;gap:clamp(20px,6vw,64px);margin-top:4px;}',
     '.mu-lf[data-ui="0"] .mu-lftop{opacity:0;transform:translateY(-14px);pointer-events:none;}.mu-lf[data-ui="0"] .mu-lfui{opacity:0;transform:translateY(14px);pointer-events:none;}',
     '.mu-dev{display:flex;flex-direction:column;gap:8px;}.mu-row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:13px 16px;border-radius:16px;background:rgba(255,255,255,.08);text-align:left;font-size:15px;}.mu-row.on{background:rgba(255,255,255,.2);font-weight:600;}.mu-ri{display:grid;margin-right:4px;}.mu-vol{padding:6px 4px 10px;}',
@@ -652,7 +748,10 @@
     '.mu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:16px 12px;}.mu-tile{cursor:pointer;min-width:0;}.mu-tc{position:relative;aspect-ratio:1;border-radius:14px;overflow:hidden;background:rgba(255,255,255,.12);display:grid;place-items:center;}.mu-tc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}.mu-tn{margin-top:6px;font-size:13px;font-weight:600;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}',
     '.mu-tp{position:absolute;right:8px;bottom:8px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#1db954;color:#06210f;box-shadow:0 3px 10px rgba(0,0,0,.4);}',
     '.mu-list{display:flex;flex-direction:column;gap:6px;}.mu-lr{justify-content:flex-start;gap:12px;padding:8px 10px;cursor:pointer;min-height:56px;}.mu-rc{position:relative;flex:none;width:44px;height:44px;border-radius:8px;overflow:hidden;display:grid;place-items:center;background:rgba(255,255,255,.12);}.mu-rc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}.mu-rt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px;}.mu-lr .mu-tp{position:static;width:38px;height:38px;flex:none;}.mu-chev{flex:none;opacity:.6;display:grid;}.mu-ph{display:grid;place-items:center;color:rgba(255,255,255,.7);}',
-    '.mu-mini{flex:none;display:flex;align-items:center;gap:12px;margin:0 12px 12px;padding:8px 10px;border-radius:18px;background:rgba(0,0,0,.28);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);cursor:pointer;}.mu-mini>img,.mu-mini>.mu-ph{flex:none;width:44px;height:44px;border-radius:8px;object-fit:cover;background:rgba(255,255,255,.12);}.mu-mt{flex:1;min-width:0;}.mu-mt b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.mu-mt span{display:block;font-size:12px;color:rgba(255,255,255,.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.mu-mini .mu-k{flex:none;width:48px;height:48px;}',
+    '.mu-mini{flex:none;display:flex;align-items:center;gap:12px;margin:0 12px 12px;padding:8px 10px;border-radius:18px;background:rgba(0,0,0,.28);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));cursor:pointer;}.mu-mini>img,.mu-mini>.mu-ph{flex:none;width:44px;height:44px;border-radius:8px;object-fit:cover;background:rgba(255,255,255,.12);}.mu-mt{flex:1;min-width:0;}.mu-mt b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.mu-mt span{display:block;font-size:12px;color:rgba(255,255,255,.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.mu-mini .mu-k{flex:none;width:48px;height:48px;}',
+    '.mu-src{display:flex;align-items:center;flex:none;height:max(42px,calc(50*var(--u)));padding:3px;border-radius:9999px;background:rgba(255,255,255,.2);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));}.mu-src[hidden]{display:none;}.mu-sg{height:100%;padding:0 max(11px,calc(17*var(--u)));border-radius:9999px;color:#fff;font-size:max(12px,calc(19*var(--u)));font-weight:600;white-space:nowrap;}.mu-sg.on{background:#fff;color:#14301f;}',
+    '.mu[data-src="library"] .mu-cta,.mu[data-src="library"] .mu-tp{background:#ff3a28;color:#fff;}',
+    '.mu-in{width:100%;box-sizing:border-box;padding:13px 14px;border-radius:14px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:16px;}.mu-in::placeholder{color:rgba(255,255,255,.5);}.mu-msg{margin:0;color:#ffb4a8;font-size:13.5px;}.mu-msg[hidden]{display:none;}',
     '.mu-lib>.mu-gate{flex:1;min-height:0;}.mu-gate,.mu-sleep{padding:18px 18px 22px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;}.mu-sleep{flex:none;margin:0 14px 8px;padding:14px 16px;border-radius:16px;background:rgba(0,0,0,.28);gap:6px;}.mu-gate .t,.mu-sleep .t{font-size:22px;font-weight:700;}.mu-sleep .t{font-size:16px;}.mu-gate p,.mu-sleep p{margin:0;font-size:14px;line-height:1.5;color:rgba(255,255,255,.8);}.mu-gb{display:flex;flex-wrap:wrap;gap:10px;margin-top:2px;}.mu-gb .act{text-decoration:none;}.mu-relog{align-self:flex-start;font-size:13px;color:rgba(255,255,255,.75);text-decoration:underline;padding:6px 0;}',
   ].join('\n');
   g.OkieMotor.extraCss = (g.OkieMotor.extraCss || []).concat([CSS]);

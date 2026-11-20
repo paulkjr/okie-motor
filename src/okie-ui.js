@@ -136,6 +136,10 @@
     next: S('<path d="M6 5l9 7-9 7zM18 5v14"/>'),
     prev: S('<path d="M18 5l-9 7 9 7zM6 5v14"/>'),
     volume: S('<path d="M4 9v6h4l5 4V5L8 9H4zM16.5 8.5a5 5 0 0 1 0 7"/>'),
+    owl: S('<circle cx="12" cy="12" r="9"/><path d="M7.5 6.2l1.6 2M16.5 6.2l-1.6 2"/><circle cx="9.3" cy="11.4" r="2.1"/><circle cx="14.7" cy="11.4" r="2.1"/><path d="M11.2 14.6l.8 1 .8-1M8.5 17.2c2.2 1.2 4.8 1.2 7 0"/>'),
+    photo: S('<path d="M4 8.5h3.2L8.8 6h6.4l1.6 2.5H20V19H4z"/><circle cx="12" cy="13.5" r="3.3"/>'),
+    scan: S('<path d="M4 8.5V5h3.5M16.5 5H20v3.5M20 15.5V19h-3.5M7.5 19H4v-3.5"/>'),
+    'volume-off': S('<path d="M4 9v6h4l5 4V5L8 9H4zM16 9.5l5 5M21 9.5l-5 5"/>'),
     mic: S('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'),
     flame: S('<path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/>'),
     snow: S('<path d="M12 3v18M4 7.5l16 9M4 16.5l16-9"/>'),
@@ -144,6 +148,13 @@
     door: S('<rect x="6" y="3" width="12" height="18" rx="1.5"/><circle cx="15" cy="12.5" r=".8"/>'),
     window: S('<rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M12 3v18M4 12h16"/>'),
     battery: S('<rect x="3" y="8" width="16" height="9" rx="2"/><path d="M21 11v3"/>'),
+    thermo: S('<path d="M10 14.5V5a2 2 0 0 1 4 0v9.5a4 4 0 1 1-4 0z"/><path d="M12 10v6"/>'),
+    wifi: S('<path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 16a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r=".9"/>'),
+    signal: S('<circle cx="12" cy="12" r="1.6"/><path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8"/>'),
+    lungs: S('<path d="M12 3v8M12 11l-2.2 1.6v3M12 11l2.2 1.6v3M9.8 9.5V7.2c0-1-.8-1.4-1.6-.9C5.5 8 4 12 4 16c0 2.6 1.5 3.6 3.5 2.8l2.3-1M14.2 9.5V7.2c0-1 .8-1.4 1.6-.9C18.5 8 20 12 20 16c0 2.6-1.5 3.6-3.5 2.8l-2.3-1"/>'),
+    bed: S('<path d="M3 19V6M3 15h18v4M21 15v-3a3 3 0 0 0-3-3h-7v6"/><circle cx="7" cy="11" r="2"/>'),
+    link: S('<path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.2 1.2"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2"/>'),
+    steps: S('<path d="M7 4c1.7 0 2.5 1.8 2.5 4S8.7 12 7 12 4.5 10.2 4.5 8 5.3 4 7 4zM5.5 14.5h3v1.5a1.5 1.5 0 0 1-3 0zM17 8c1.7 0 2.5 1.8 2.5 4s-.8 4-2.5 4-2.5-1.8-2.5-4 .8-4 2.5-4zM15.5 18.5h3V20a1.5 1.5 0 0 1-3 0z"/>'),
     gauge: S('<path d="M4 17a8 8 0 1 1 16 0M12 17l4-5"/>'),
     chart: S('<path d="M4 20V4M4 20h16M8 15l3-4 3 2 4-6"/>'),
     sliders: S('<path d="M5 4v16M12 4v16M19 4v16"/><circle cx="5" cy="14" r="2"/><circle cx="12" cy="8" r="2"/><circle cx="19" cy="16" r="2"/>'),
@@ -230,6 +241,12 @@
     ' --okie-accent:#007aff;',
     ' --okie-danger:#ff3b30;',
     ' --okie-warn:#ff9f0a;',
+    ' --okie-ok:#34c759;',      // shared status colours (One Motor): ok / warn / danger / info, also as r,g,b for rgba(var(--okie-x-rgb), a)
+    ' --okie-info:#0a84ff;',
+    ' --okie-ok-rgb:52,199,89;',
+    ' --okie-warn-rgb:255,159,10;',
+    ' --okie-danger-rgb:255,59,48;',
+    ' --okie-info-rgb:10,132,255;',
     ' --okie-line:rgba(255,255,255,.1);',
     ' --okie-radius:35px;',
     ' --okie-tile-radius:24px;',
@@ -259,7 +276,102 @@
     '.eb{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:14px 16px;border-radius:18px;background:rgba(239,77,58,.16);font-size:14px;}.eb.c{padding:8px 10px;font-size:12px;border-radius:14px;}',
     '.eb-retry{padding:6px 14px;border-radius:9999px;background:#fff;color:#1d1b19;font-weight:600;font-size:13px;flex:none;}',
     '.okie-sb>i{position:absolute;left:0;width:100%;border-radius:2px;background:var(--hemma-scrollbar-thumb,rgba(255,255,255,.45));}',
+    // the Motor's one battery (UI.battery): a cell filled to the level, the % in the same colour, the green bolt while it charges.
+    // Sized in em so it follows the text it sits in (and Text size); colours from the shared status tokens.
+    '.okie-batt{--bt-c:#fff;display:inline-flex;align-items:center;gap:.5em;font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap;}',
+    '.okie-batt.good{--bt-c:color-mix(in srgb,var(--okie-ok) 53%,#fff);}.okie-batt.mid{--bt-c:color-mix(in srgb,var(--okie-warn) 63%,#fff);}.okie-batt.low{--bt-c:color-mix(in srgb,var(--okie-danger) 69%,#fff);}',
+    '.okie-batt-cell{position:relative;width:2em;height:1em;border-radius:.28em;background:rgba(255,255,255,.2);overflow:hidden;flex:none;}',
+    '.okie-batt-cell i{position:absolute;left:0;top:0;bottom:0;width:var(--lv,0%);background:var(--bt-c);}.okie-batt.good .okie-batt-cell i{background:color-mix(in srgb,var(--okie-ok) 67%,#fff);}',
+    '.okie-batt-pct{color:var(--bt-c);}',
+    '.okie-batt-bolt{display:grid;color:color-mix(in srgb,var(--okie-ok) 53%,#fff);}.okie-batt-bolt svg{width:1em;height:1em;}',
   ].join('\n');
+
+  /** The picture of a screen's hero, chosen by the user (the pencil of every device and app screen).
+   *  heroOwn(ctx, { hero, scope: 'dev:<id>' | 'app:<id>', mainPage, page(), label(page), t })
+   *  - settings.heroMedia[scope] = the screen's main picture (every page uses it), heroMedia[scope + '|' + page] = one page's own.
+   *    Each is { id: media-source id, kind: 'image' | 'video' } or null (= the default again).
+   *  - The file goes into Home Assistant's Media folder (media/okie-hero) through HA's own uploader (admin only, 20 MB, images and videos).
+   *  - In edit mode the hero greys out and shows Upload / Change and Revert to default for the page that is open.
+   *  Returns { refresh() }: call it when the page changes or edit mode turns on. */
+  var heroUrls = {};
+  function heroResolve(ctx, mid) {
+    var c = heroUrls[mid]; if (c && Date.now() - c.at < 20 * 3600e3) return c.p;
+    var p = Promise.resolve(ctx.callWS({ type: 'media_source/resolve_media', media_content_id: mid, expires: 24 * 3600 })).then(function (res) {
+      var u = res && res.url, hs = ctx.hass(); return u ? (hs && hs.hassUrl && /^\//.test(u) ? hs.hassUrl(u) : u) : '';
+    }, function () { delete heroUrls[mid]; return ''; });
+    heroUrls[mid] = { at: Date.now(), p: p }; return p;
+  }
+  /** mediaUpload(ctx, file, folder, base) -> Promise<{ id, kind }>: a picture or video into Home Assistant's Media (media/<folder>) through HA's own
+   *  uploader (admin only, 20 MB). Rejects with 'type', 'size', 'admin' or 'failed'. Used by the hero pictures and the Owlet profile photo. */
+  function mediaUpload(ctx, f, folder, base) {
+    var kind = /^video\//.test(f.type) ? 'video' : /^image\//.test(f.type) ? 'image' : /^audio\//.test(f.type) ? 'audio' : null;      // audio: the Owlet lullabies and voice clips
+    if (!kind) return Promise.reject('type');
+    if (f.size > 20 * 1024 * 1024) return Promise.reject('size');
+    var hs = ctx.hass(); if (!hs || !hs.fetchWithAuth) return Promise.reject('failed');
+    var ext = (/\.([a-z0-9]{2,5})$/i.exec(f.name || '') || [, kind === 'video' ? 'mp4' : kind === 'audio' ? 'm4a' : 'jpg'])[1].toLowerCase();
+    var name = (String(base).replace(/[^a-z0-9]+/gi, '-') + '-' + Date.now() + '.' + ext).toLowerCase();
+    var fd = new FormData(); fd.append('media_content_id', 'media-source://media_source/local/' + folder); fd.append('file', f, name);
+    return Promise.resolve(hs.fetchWithAuth('/api/media_source/local_source/upload', { method: 'POST', body: fd })).then(function (r) {
+      if (!r.ok) throw (r.status === 401 || r.status === 403 ? 'admin' : 'failed');
+      return r.json();
+    }).then(function (j) { return { id: j.media_content_id, kind: kind }; }, function (e) { throw (e === 'admin' ? 'admin' : 'failed'); });
+  }
+  function heroOwn(ctx, o) {
+    var T = o.t, hero = o.hero;
+    var layer = h('div.dt-own'); hero.insertBefore(layer, hero.querySelector('.dt-top'));
+    hero.classList.add('hv');      // only a hero that can change greys out in edit mode (the weather's sky does not)
+    var tag = h('div.dt-hv-tag'), upTxt = h('span'), busy = false;
+    var file = h('input', { type: 'file', accept: 'image/*,video/*', hidden: true, onchange: function () { var f = file.files && file.files[0]; file.value = ''; if (f) upload(f); } });
+    var up = h('button.dt-eb.pri', { type: 'button', onclick: function () { if (!busy) file.click(); } }, h('span', { html: icon('image', 16) }), upTxt);
+    var rev = h('button.dt-eb', { type: 'button', onclick: function () { save(null); } }, h('span', { html: icon('back', 16) }), h('span', null, T('dt.hero_revert')));
+    hero.appendChild(h('div.dt-hv', null, tag, h('div.dt-hv-row', null, up, rev), h('div.dt-hv-hint', null, T('dt.hero_files')), file));
+    function keyOf(p) { return p === o.mainPage || p == null ? o.scope : o.scope + '|' + p; }
+    function rec(k) { var m = (ctx.settings.get().heroMedia || {})[k]; return m && m.id ? m : null; }
+    var shown = null;
+    function show(m) {
+      var want = m ? m.id : '';
+      if (want === shown) return; shown = want;
+      layer.innerHTML = ''; hero.classList.toggle('own', !!m);
+      if (!m) return;
+      heroResolve(ctx, m.id).then(function (url) {
+        if (shown !== want || !url) return;
+        if (m.kind === 'video') { var v = h('video', { muted: true, loop: true, autoplay: true, playsInline: true }); v.muted = true; v.src = url; layer.appendChild(v); try { v.play(); } catch (e) { /* autoplay may wait for a tap */ } }
+        else layer.appendChild(h('div.dt-own-img', { style: { backgroundImage: 'url("' + url + '")' } }));
+      });
+    }
+    function refresh() {
+      var p = o.page(), isMain = keyOf(p) === o.scope, own = rec(keyOf(p));
+      show(own || rec(o.scope));
+      tag.textContent = isMain ? T(own ? 'dt.hero_main_own' : 'dt.hero_main_def') : T(own ? 'dt.hero_page_own' : 'dt.hero_page_main', { p: o.label(p) });
+      upTxt.textContent = busy ? T('dt.hero_uploading') : own ? T('dt.hero_change') : isMain ? T('dt.hero_upload') : T('dt.hero_upload_page');
+      up.disabled = busy; rev.hidden = !own;
+    }
+    function save(v) { var m = {}; m[keyOf(o.page())] = v; ctx.settings.set({ heroMedia: m }); refresh(); }
+    function upload(f) {
+      var page = o.page(); busy = true; refresh();
+      mediaUpload(ctx, f, 'okie-hero', keyOf(page)).then(function (m) {
+        busy = false;
+        var v = {}; v[keyOf(page)] = m; ctx.settings.set({ heroMedia: v }); refresh();
+      }, function (e) {
+        busy = false; refresh();
+        ctx.toast('error', T(e === 'type' ? 'dt.hero_bad_type' : e === 'size' ? 'dt.hero_too_big' : e === 'admin' ? 'dt.hero_admin' : 'dt.hero_failed'));
+      });
+    }
+    refresh();
+    return { refresh: refresh };
+  }
+
+  /** The Motor's one battery: battery(pct, charging, chargingLabel) -> <span.okie-batt> (cell + % + bolt while charging).
+   *  Green above 50, amber to 21, red at 20 and below (as the robot always did). Used by every screen that shows a battery. */
+  function batteryTone(pct) { return pct == null ? 'none' : pct <= 20 ? 'low' : pct <= 50 ? 'mid' : 'good'; }
+  function battery(pct, charging, chargingLabel) {
+    var p = pct == null || isNaN(pct) ? null : Math.max(0, Math.min(100, Math.round(pct)));
+    var el = h('span.okie-batt.' + batteryTone(p));
+    el.appendChild(h('span.okie-batt-cell', { style: { '--lv': (p == null ? 0 : p) + '%' } }, h('i')));
+    el.appendChild(h('span.okie-batt-pct', null, p == null ? '--' : p + '%'));
+    if (charging) el.appendChild(h('span.okie-batt-bolt', { html: icon('bolt', 16), 'aria-label': chargingLabel || 'Charging', title: chargingLabel || 'Charging' }));
+    return el;
+  }
 
   // ---------------------------------------------------- scrollbar ----
   /**
@@ -467,7 +579,7 @@
 
   var api = {
     pullPill: pullPill, pullProgress: pullProgress, pullOpens: pullOpens,
-    tick: tick, h: h, icon: icon, iconEl: iconEl, ICONS: ICONS, domainIcon: domainIcon, BASE_CSS: BASE_CSS,
+    tick: tick, h: h, icon: icon, iconEl: iconEl, ICONS: ICONS, domainIcon: domainIcon, BASE_CSS: BASE_CSS, battery: battery, batteryTone: batteryTone, heroOwn: heroOwn, mediaUpload: mediaUpload, mediaUrl: heroResolve,
     attachScrollbar: attachScrollbar, onTapOrHold: onTapOrHold, debounce: debounce, rafBatch: rafBatch, guard: guard,
     snapHero: function (pc) { var S = [30, 36, 42, 52, 62], b = S[0]; S.forEach(function (v) { if (Math.abs(v - pc) < Math.abs(b - pc)) b = v; }); return b === 42 ? 0 : b; },      // the picture of a screen snaps to five widths; 0 is the normal one
     screenRect: screenRect, reportsUnzoomed: reportsUnzoomed,

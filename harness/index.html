@@ -40,6 +40,7 @@
 <script src="../src/okie-vacuum.js"></script>
 <script src="../src/okie-icons.js"></script>
 <script src="../src/okie-weather.js"></script>
+<script src="../src/okie-hist.js"></script>
 <script src="../src/okie-detail.js"></script>
 <script src="../src/okie-thermo-sched.js"></script>
 <script src="../src/okie-vac-sched.js"></script>
@@ -65,6 +66,7 @@
 <script src="../src/okie-settings.js"></script>
 <script src="../src/okie-apps.js"></script>
 <script src="../src/okie-server.js"></script>
+<script src="../src/okie-library.js"></script>
 <script src="../src/okie-music.js"></script>
 <script src="../src/okie-sensors-art.js"></script>
 <script src="../src/okie-sensors.js"></script>
@@ -99,7 +101,9 @@
     splash: q.get('splash') || 'none',
     power_entity: 'sensor.house_power',
     videos: { enabled: true, path: '/okie-videos' },
-    weather_entity: 'weather.home'
+    weather_entity: 'weather.home',
+    cameras: { owlet: { entity: 'camera.nursery_owlet' } },
+    owlet: { babyName: 'Jesus' }
   }, plain));
   applyDemoParams(q, card, m);
   card.hass = m.hass;

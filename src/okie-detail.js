@@ -3,7 +3,7 @@
  * video with FSC's six-step fallback, falling back to an icon on a gradient.
  *
  * Contract used by okie-card:
- *   OkieMotor.detail.render(container, ctx, id)       -> { update(), dispose() }
+ *   OkieMotor.detail.render(container, ctx, id, opts) -> { update(), dispose() }   opts: { tab, item }
  *   OkieMotor.detail.renderCompact(el, ctx, id)       -> { update(), dispose() }
  *   OkieMotor.detail.prefetch(ctx, id)
  *   OkieMotor.detail.sparkline(ctx, id, container)
@@ -19,6 +19,9 @@
     'dt.controls': 'Controls', 'dt.context': 'Context', 'dt.history': 'History', 'dt.schedule': 'Schedule', 'dt.settings': 'Settings',
     'dt.related': 'Related', 'dt.same_area': 'In this room', 'dt.nothing_related': 'No scene, script or automation uses this device yet.', 'dt.nothing_related_hint': 'This tab lists the ones that do, and the scenes and scripts of its room, each with a Run button. Add one in Home Assistant that uses this device and it shows up here.', 'dt.run': 'Run', 'dt.running': 'Started',
     'dt.edit': 'Edit this screen', 'dt.rename': 'Rename', 'dt.rename_orig': 'Original name', 'dt.rename_save': 'Save', 'dt.hero_hint': 'Drag to resize the picture', 'dt.hero_reset': 'Reset size', 'dt.done': 'Done',
+    'dt.hero_upload': 'Upload photo or video', 'dt.hero_upload_page': 'Upload for this page', 'dt.hero_change': 'Change photo or video', 'dt.hero_revert': 'Revert to default', 'dt.hero_uploading': 'Uploading…', 'dt.hero_files': 'JPG, PNG, MP4 or MOV, up to 20 MB',
+    'dt.hero_main_def': 'Main picture · the default', 'dt.hero_main_own': 'Main picture · every page uses it', 'dt.hero_page_main': '{p} page · uses the main picture', 'dt.hero_page_own': '{p} page · its own picture',
+    'dt.hero_bad_type': 'Pick a photo or a video', 'dt.hero_too_big': 'That file is over 20 MB', 'dt.hero_admin': 'Only a Home Assistant admin can upload pictures', 'dt.hero_failed': 'The upload did not work',
     'dt.24h': '24 hours', 'dt.7d': '7 days', 'dt.30d': '30 days', 'dt.changes': 'Changes', 'dt.avg_run': 'Avg. on-time', 'dt.active': 'Active', 'dt.min': 'Min', 'dt.max': 'Max', 'dt.avg': 'Avg',
     'dt.by_hour': 'Time of day', 'dt.durations': 'Time in each state', 'dt.loading': 'Loading history…', 'dt.no_history': 'No history for this period.', 'dt.history_failed': 'Could not load history.',
     'dt.sched_none': 'No schedules for this device yet.', 'dt.sched_add': 'New schedule', 'dt.sched_time': 'Time', 'dt.sched_days': 'Days', 'dt.sched_action': 'Action', 'dt.sched_save': 'Save schedule',
@@ -33,6 +36,9 @@
     'dt.controls': 'Steuerung', 'dt.context': 'Kontext', 'dt.history': 'Verlauf', 'dt.schedule': 'Zeitplan', 'dt.settings': 'Einstellungen',
     'dt.related': 'Zugehörig', 'dt.same_area': 'In diesem Raum', 'dt.nothing_related': 'Noch keine Szene, kein Skript und keine Automation nutzt dieses Gerät.', 'dt.nothing_related_hint': 'Dieser Tab zeigt die, die es nutzen, und die Szenen und Skripte seines Raums, jeweils mit einem Ausführen-Knopf. Lege in Home Assistant eine an, die dieses Gerät nutzt, und sie erscheint hier.', 'dt.run': 'Ausführen', 'dt.running': 'Gestartet',
     'dt.edit': 'Diesen Bildschirm bearbeiten', 'dt.rename': 'Umbenennen', 'dt.rename_orig': 'Originalname', 'dt.rename_save': 'Speichern', 'dt.hero_hint': 'Ziehen, um das Bild zu verändern', 'dt.hero_reset': 'Größe zurücksetzen', 'dt.done': 'Fertig',
+    'dt.hero_upload': 'Foto oder Video hochladen', 'dt.hero_upload_page': 'Für diese Seite hochladen', 'dt.hero_change': 'Foto oder Video ändern', 'dt.hero_revert': 'Standard wiederherstellen', 'dt.hero_uploading': 'Wird hochgeladen…', 'dt.hero_files': 'JPG, PNG, MP4 oder MOV, bis 20 MB',
+    'dt.hero_main_def': 'Hauptbild · Standard', 'dt.hero_main_own': 'Hauptbild · alle Seiten nutzen es', 'dt.hero_page_main': 'Seite {p} · nutzt das Hauptbild', 'dt.hero_page_own': 'Seite {p} · eigenes Bild',
+    'dt.hero_bad_type': 'Bitte ein Foto oder Video wählen', 'dt.hero_too_big': 'Die Datei ist größer als 20 MB', 'dt.hero_admin': 'Nur ein Home-Assistant-Admin kann Bilder hochladen', 'dt.hero_failed': 'Das Hochladen hat nicht geklappt',
     'dt.24h': '24 Stunden', 'dt.7d': '7 Tage', 'dt.30d': '30 Tage', 'dt.changes': 'Wechsel', 'dt.avg_run': 'Ø Einschaltdauer', 'dt.active': 'Aktiv', 'dt.min': 'Min', 'dt.max': 'Max', 'dt.avg': 'Ø',
     'dt.by_hour': 'Tageszeit', 'dt.durations': 'Zeit je Zustand', 'dt.loading': 'Verlauf wird geladen…', 'dt.no_history': 'Kein Verlauf in diesem Zeitraum.', 'dt.history_failed': 'Verlauf konnte nicht geladen werden.',
     'dt.sched_none': 'Noch keine Zeitpläne für dieses Gerät.', 'dt.sched_add': 'Neuer Zeitplan', 'dt.sched_time': 'Uhrzeit', 'dt.sched_days': 'Tage', 'dt.sched_action': 'Aktion', 'dt.sched_save': 'Zeitplan speichern',
@@ -379,8 +385,9 @@
   // ------------------------------------------------------------- render ----
   var TABS = [{ id: 'controls', icon: 'sliders' }, { id: 'context', icon: 'spark' }, { id: 'history', icon: 'chart' }, { id: 'schedule', icon: 'clock' }, { id: 'settings', icon: 'gear' }];
 
-  function render(container, ctx, id) {
-    var item = ctx.engine.getItem(id);
+  function render(container, ctx, id, opts) {
+    opts = opts || {};
+    var item = opts.item || ctx.engine.getItem(id);      // opts.item: a sensor folded into a device (the Owlet sock's), opened from that device's screen
     var t = function (k, v) { return core.t(k, ctx.lang(), v); };
     var st = ctx.state(id) || { state: item.state, attributes: {} };
     var grad = DOMAIN_GRADIENT[item.domain] || ['#26282c', '#4a4f58'];
@@ -400,7 +407,9 @@
     hero.appendChild(h('div.dt-top', null, back, h('div.dt-head', null, title, sub), h('div.dt-acts', null, pen, heart)));      // the pencil next to the heart: the size of the picture and the name
     var wx = null;      // the weather screen has two pages: the first fills the hero, the second is the Controls tab (okie-weather)
     if (item.domain === 'weather' && g.OkieMotor.weather && g.OkieMotor.weather.create) { try { wx = g.OkieMotor.weather.create(ctx, item); hero.insertBefore(wx.sky, hero.firstChild); hero.appendChild(wx.hero); } catch (e) { wx = null; } }
-    iconBg.innerHTML = UI.icon(UI.domainIcon(item.domain, item.deviceClass, st.state), 170);
+    var vital = opts.item && g.OkieMotor.hist ? g.OkieMotor.hist.lookOf(item, st) : null;      // a sock's vital: its own icon (heart, lungs) in its colour
+    function heroIcon(s2) { iconBg.innerHTML = UI.icon(vital ? vital.icon : UI.domainIcon(item.domain, (s2.attributes || {}).device_class || item.deviceClass, s2.state), 170); }
+    heroIcon(st); if (vital) iconBg.style.color = vital.iconColor;
 
     var bar = h('div.dt-bar', { role: 'tablist' });
     // on a phone the five tabs sit behind a round bubble (it shows the open tab); a tap opens it into the row, a choice or a tap elsewhere closes it
@@ -418,9 +427,10 @@
     // ---- the pencil: drag the handle to give the picture more or less room, rename the card, put the size back
     var heroPct = +((ctx.settings.get().heroW || {})['dev:' + id]) || 0, dragHero = false;      // each device screen keeps its own width, in five steps
     function saveHero(pc) { var m = {}; m['dev:' + id] = pc; ctx.settings.set({ heroW: m }); }
-    function applyHero(pc) { root.style.gridTemplateColumns = pc > 0 ? pc + '% 1fr' : ''; }
+    function applyHero(pc) { if (pc > 0) root.style.setProperty('--hero-w', pc + '%'); else root.style.removeProperty('--hero-w'); }      // a variable, not an inline grid: the phone's stacked layout must win
     function placeGrip() { grip.style.left = Math.max(0, hero.offsetWidth - 16) + 'px'; }
-    function setEdit(on) { root.dataset.edit = on ? '1' : ''; pen.classList.toggle('ed', on); pen.setAttribute('aria-pressed', on ? 'true' : 'false'); if (on) placeGrip(); }
+    function setEdit(on) { root.dataset.edit = on ? '1' : ''; pen.classList.toggle('ed', on); pen.setAttribute('aria-pressed', on ? 'true' : 'false'); if (on) placeGrip(); if (own) own.refresh(); }
+    var own = null;      // the user's own picture or video, per page (UI.heroOwn); the weather's sky cannot be changed
     var grip = h('div.dt-grip', { role: 'separator', 'aria-orientation': 'vertical', 'aria-label': t('dt.hero_hint'), title: t('dt.hero_hint') }, h('span'));
     function openRename() {
       var own = ctx.settings.get().deviceNames || {}, orig = (ctx.state(id) && ctx.state(id).attributes && ctx.state(id).attributes.friendly_name) || item.name, input = h('input.rm-q', { type: 'text', value: item.name, maxlength: '60', 'aria-label': t('dt.rename'), autocomplete: 'off' }), sheet = null;
@@ -444,7 +454,7 @@
     if (wx) { container.appendChild(wx.dots); wx.watch(root); }
     var sbar = UI.attachScrollbar(body, bodyHost);
 
-    var tab = 'controls', active = null, control = null, leaving = 0;   // always open on the controls; a tap on a light should not land on last week's history
+    var tab = opts.tab && TABS.some(function (x) { return x.id === opts.tab; }) ? opts.tab : 'controls', active = null, control = null, leaving = 0;   // open on the controls (a tap on a light should not land on last week's history), unless the caller asks for a tab (a vital's card opens its chart)
     root.addEventListener('pointerdown', function (e) { if (menu.classList.contains('open') && !(e.composedPath ? e.composedPath() : [e.target]).some(function (n) { return n === menu; })) closeMenu(); });
     function markTab(id2) {
       Array.prototype.forEach.call(bar.children, function (b) { var on = b.dataset.tab === id2; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
@@ -460,7 +470,7 @@
       showTab(id2);
     }
     function showTab(id2) {
-      tab = id2; leaving = 0; root.dataset.tab = id2;      // the thermostat's dial runs edge to edge only on its controls; every other tab keeps the usual padding
+      tab = id2; leaving = 0; root.dataset.tab = id2; if (own) own.refresh();      // the thermostat's dial runs edge to edge only on its controls; every other tab keeps the usual padding
       if (active && active.dispose) active.dispose();
       control = null; body.innerHTML = ''; body.scrollTop = 0;
       markTab(id2);
@@ -473,7 +483,9 @@
         }, { label: 'controls ' + item.domain, text: t('dt.control_broke'), retry: t('dt.retry') }));
         active = { dispose: function () { if (control && control.dispose) control.dispose(); }, update: function () { if (control) control.update(ctx.state(id) || st); } };
       } else if (id2 === 'context') active = renderContext(ctx, item, wrap);
-      else if (id2 === 'history') active = (item.domain === 'binary_sensor' && g.OkieMotor.sensors && g.OkieMotor.sensors.historyView) ? g.OkieMotor.sensors.historyView(ctx, item, wrap) : renderHistory(ctx, item, wrap);      // a sensor lists its events instead of charts
+      else if (id2 === 'history') active = (item.domain === 'binary_sensor' && g.OkieMotor.sensors && g.OkieMotor.sensors.historyView) ? g.OkieMotor.sensors.historyView(ctx, item, wrap)      // a sensor lists its events instead of charts
+        : (g.OkieMotor.hist && g.OkieMotor.hist.isNumber(item, ctx.state(id))) ? g.OkieMotor.hist.renderSensor(ctx, item, wrap)      // a number: the History look of the Owlet pages, any day, week or month
+        : renderHistory(ctx, item, wrap);
       else if (id2 === 'schedule') active = renderSchedule(ctx, item, wrap);
       else active = renderSettings(ctx, item, wrap);
       requestAnimationFrame(function () { sbar.update(); });
@@ -481,6 +493,7 @@
     TABS.forEach(function (tb) {
       bar.appendChild(h('button.dt-tab', { role: 'tab', dataset: { tab: tb.id }, 'aria-label': t('dt.' + tb.id), title: t('dt.' + tb.id), onclick: function () { ctx.haptic(10); closeMenu(); selectTab(tb.id); } }, h('span', { html: UI.icon(tb.icon, 20) })));
     });
+    if (!wx) own = UI.heroOwn(ctx, { hero: hero, scope: 'dev:' + id, mainPage: 'controls', page: function () { return tab; }, label: function (p) { return t('dt.' + p); }, t: t });
     showTab(tab);
 
     // ---- video background, swapped when the normalised state changes ----
@@ -506,7 +519,7 @@
     function update() {
       var s = ctx.state(id); if (!s) return;
       sub.textContent = [item.area, L.describeState(item.domain, s, ctx.lang())].filter(Boolean).join(' · ');
-      iconBg.innerHTML = UI.icon(UI.domainIcon(item.domain, s.attributes.device_class || item.deviceClass, s.state), 170);
+      heroIcon(s);
       if (wx) wx.update();
       if (control) control.update(s);
       else if (active && active.update && tab !== 'controls') active.update();
@@ -527,12 +540,16 @@
   }
 
   var CSS = [
-    '.dt{display:grid;grid-template-columns:minmax(260px,42%) 1fr;height:100%;min-height:0;}',
+    '.dt{display:grid;grid-template-columns:var(--hero-w,minmax(260px,42%)) 1fr;height:100%;min-height:0;}',
     '.dt-hero{position:relative;overflow:hidden;display:flex;flex-direction:column;}',
     '.dt-photo{position:absolute;inset:0;background-size:cover;background-position:center;}',
-    '.dt{position:relative;}.dt-top .dt-acts{display:flex;gap:6px;}.dt-circ.ed{background:#fff;color:#14161a;}',
+    '.dt{position:relative;}.dt-top .dt-acts{display:flex;gap:6px;margin-left:auto;}',      // pencil and heart always top-right, even when a screen hides its title (the weather) - the user's rule
+    '.dt-own{position:absolute;inset:0;pointer-events:none;}.dt-own-img,.dt-own video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background-size:cover;background-position:center;}.dt-hero.own .dt-iconbg{display:none;}',
+    '.dt-hv{display:none;position:absolute;inset:0;background:rgba(20,20,22,.5);flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;text-align:center;}.dt[data-edit="1"] .dt-hv{display:flex;}.dt[data-edit="1"] .dt-hero.hv>:not(.dt-top):not(.dt-hv){filter:grayscale(1);}',
+    '.dt-hv-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}.dt-hv-row [hidden]{display:none;}.dt-hv-tag{font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.14);}.dt-hv-hint{font-size:13px;color:var(--okie-text-dim);}.dt-hv .dt-eb span{display:inline-flex;}.dt-hv .dt-eb[disabled]{opacity:.6;}',
+    '.dt-circ.ed{background:#fff;color:#14161a;}',
     '.dt-grip{display:none;position:absolute;top:0;bottom:0;width:32px;z-index:7;align-items:center;justify-content:center;cursor:col-resize;touch-action:none;}.dt[data-edit="1"] .dt-grip{display:flex;}.dt-grip span{width:6px;height:68px;border-radius:3px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.45);}',
-    '.dt-ebar{display:none;position:absolute;left:16px;bottom:16px;z-index:7;gap:8px;}.dt[data-edit="1"] .dt-ebar{display:flex;}.dt-eb{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 16px;border-radius:9999px;background:rgba(20,22,26,.62);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;font-size:14px;font-weight:600;}.dt-eb.pri{background:#fff;color:#14161a;}',
+    '.dt-ebar{display:none;position:absolute;left:16px;bottom:16px;z-index:7;gap:8px;}.dt[data-edit="1"] .dt-ebar{display:flex;}.dt-eb{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 16px;border-radius:9999px;background:rgba(20,22,26,.62);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));color:#fff;font-size:14px;font-weight:600;}.dt-eb.pri{background:#fff;color:#14161a;}',
     '@media (max-width:640px){.dt-grip{display:none!important;}}',
     '.dt-iconbg{position:absolute;inset:0;display:grid;place-items:center;opacity:.22;}',
     '.dt[data-domain="vacuum"] .dt-iconbg{display:none;}',                                    // the robot of the vacuum screen is the picture
@@ -541,7 +558,7 @@
     '.dt-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.35),transparent 30%,transparent 70%,rgba(0,0,0,.25));pointer-events:none;}',
     '.dt-top{position:relative;z-index:2;display:flex;align-items:center;gap:12px;padding:18px;}',
     '.dt-head{flex:1;text-align:center;min-width:0;}.dt-title{font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.dt-sub{font-size:13px;color:rgba(255,255,255,.75);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
-    '.dt-circ{width:40px;height:40px;padding:0;box-sizing:border-box;border-radius:50%;background:rgba(20,18,16,.55);display:grid;place-items:center;flex:none;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}',
+    '.dt-circ{width:40px;height:40px;padding:0;box-sizing:border-box;border-radius:50%;background:rgba(20,18,16,.55);display:grid;place-items:center;flex:none;-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.6),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.6),24px));}',
     '.dt-circ.on{background:#fff;color:#e0492f;}',
     '.dt-main{display:flex;flex-direction:column;min-width:0;min-height:0;padding:18px 20px 12px;}',
     '.dt-menu{align-self:flex-end;margin-bottom:16px;}.dt-bubble{display:none;}.dt-bar{display:flex;gap:4px;padding:5px;border-radius:9999px;background:rgba(255,255,255,.1);}.dt-main>.dt-bar{align-self:flex-end;margin-bottom:16px;}',      // a bare tab bar (Settings and the other apps) is a normal pill; only a device's detail view wraps it in the bubble menu on phones

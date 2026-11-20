@@ -287,7 +287,7 @@
     '.wxd-mini{position:relative;width:32px;height:32px;color:#fff;}',
     // the bottom bar of the screen: a round "+" at the left (places), and on a phone the two dots in the middle
     '.wxd-dots{position:absolute;left:0;right:0;bottom:12px;height:44px;pointer-events:none;z-index:5;}',
-    '.wxd-plus{position:absolute;left:calc(max(260px,42%) + 18px);bottom:0;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:0;padding:0;color:#fff;background:rgba(255,255,255,.18);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22);pointer-events:auto;cursor:pointer;}',
+    '.wxd-plus{position:absolute;left:calc(max(260px,42%) + 18px);bottom:0;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:0;padding:0;color:#fff;background:rgba(255,255,255,.18);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px));box-shadow:inset 0 0 0 1px rgba(255,255,255,.22);pointer-events:auto;cursor:pointer;}',
     '.wxd-pl{display:flex;flex-direction:column;gap:6px;margin-top:10px;}.wxd-p{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.08);border:0;color:inherit;font:inherit;text-align:left;width:100%;}.wxd-p b{flex:1;font-weight:600;}.wxd-p em{font-style:normal;font-size:13px;opacity:.65;}',
     '.wxd-note{font-size:14px;line-height:1.45;opacity:.75;margin-top:12px;}',
     '.wxd-arrow{display:inline-grid;place-items:center;}.wxd-arrow svg{opacity:.95!important;}',

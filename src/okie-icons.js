@@ -19,7 +19,7 @@
     switch (domain) {
       case 'switch': case 'input_boolean': return deviceClass === 'outlet' ? 'outlet' : 'toggle';
       case 'light': return 'light';
-      case 'gadget': return deviceClass === 'light' ? 'light' : 'tv';
+      case 'gadget': return deviceClass === 'light' ? 'light' : deviceClass === 'owlet' ? 'heart' : 'tv';
       case 'media_player': return deviceClass === 'speaker' || deviceClass === 'receiver' ? 'speaker' : 'tv';
       case 'climate': return (state === 'cool') ? 'snow' : (state === 'heat' ? 'flame' : 'thermo');
       case 'cover': return deviceClass === 'garage' || deviceClass === 'gate' ? 'garage' : 'blinds';

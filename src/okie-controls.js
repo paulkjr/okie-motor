@@ -285,7 +285,7 @@
     '.dial-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;gap:4px;}',
     '.dial-val{font-size:54px;font-weight:300;letter-spacing:-.03em;line-height:1;}',
     '.dial-lbl{font-size:13px;color:var(--okie-text-dim);text-transform:uppercase;letter-spacing:.08em;}',
-    '.slider{position:relative;height:56px;border-radius:9999px;background:rgba(120,120,128,.3);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);overflow:hidden;touch-action:none;cursor:pointer;flex:1;}',
+    '.slider{position:relative;height:56px;border-radius:9999px;background:rgba(120,120,128,.3);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*1.2),24px)) saturate(1.4);backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*1.2),24px)) saturate(1.4);overflow:hidden;touch-action:none;cursor:pointer;flex:1;}',
     '.slider.v{width:64px;height:220px;flex:none;}',
     '.sl-fill{position:absolute;left:0;bottom:0;background:var(--sl,#fff);height:100%;width:0;}',      // iOS style: the fill is the track cut straight, no handle, no glow
     '.sl-glow{display:none;position:absolute;left:0;bottom:0;background:linear-gradient(90deg,var(--sl,#fff) 0,var(--sl,#fff) calc(100% - var(--gf,0px)),transparent 100%);height:100%;width:0;pointer-events:none;}',      // light that spills from the filled part into the track (the dial look)

@@ -25,6 +25,47 @@ companion app, in the **Okie Home** iOS app, and on a wall tablet.
 </tr>
 </table>
 
+## What's new in 0.59.0
+
+**The Owlet becomes a baby monitor app**, and every number sensor gets a History tab. The full list is in [CHANGELOG.md](CHANGELOG.md); how to set it up is in [docs/guides/10-OWLET.md](docs/guides/10-OWLET.md).
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/owlet-camera.jpg" alt="The Owlet camera full screen with heart rate, oxygen, skin temperature and signal on glass cards"></td>
+<td width="50%"><img src="docs/screenshots/owlet-lullabies.jpg" alt="The Lullabies panel over the Owlet camera"></td>
+</tr>
+<tr>
+<td align="center"><b>The camera screen.</b> The sock's readings over the picture; the buttons fade after 3 seconds.</td>
+<td align="center"><b>Lullabies.</b> The camera's sounds and your own songs, loop, timer, volume, hold to talk.</td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/owlet-overview.jpg" alt="The Owlet app overview: heart rate, oxygen, sleep and daily progress"></td>
+<td><img src="docs/screenshots/owlet-sleep.jpg" alt="The Owlet app sleep page: total sleep, score, stages and cycle timeline"></td>
+</tr>
+<tr>
+<td align="center"><b>Overview.</b> The night at a glance.</td>
+<td align="center"><b>Sleep.</b> Stages, cycles and wakings.</td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/owlet-history.jpg" alt="The Owlet app history page with day, week and month"></td>
+<td><img src="docs/screenshots/owlet-settings.jpg" alt="The Owlet app settings with monitoring, alerts and baby monitor mode"></td>
+</tr>
+<tr>
+<td align="center"><b>History.</b> Day, week or month, compared with the week before.</td>
+<td align="center"><b>Settings.</b> Alerts, profile and Baby monitor mode for a wall tablet.</td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/sensor-history.jpg" alt="The History tab of a temperature sensor"></td>
+<td align="center"><img src="docs/screenshots/phone-music.jpg" alt="The Music app on a phone" width="60%"></td>
+</tr>
+<tr>
+<td align="center"><b>History for every sensor.</b> Lowest, average and highest of the day.</td>
+<td align="center"><b>Music on a phone.</b> Spotify or your own library.</td>
+</tr>
+</table>
+
+The demo baby and the picture are made up. The speaker, recorder and wall-tablet parts need small server helpers that are not in this repository; see the guide.
+
 ## See it in your home
 
 <table>

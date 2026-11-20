@@ -642,7 +642,7 @@
     await resetNav(); const id = 'vacuum.robo', was = card.hass.states[id];
     card._openDetail(id); await sleep(1300);
     const vc = sr.querySelector('.dctl.vc'); if (!vc) return { vc: false };
-    const docked = vc.dataset.state === 'docked' && /Docked/.test(vc.querySelector('.vc-state').textContent) && /100%/.test(vc.querySelector('.vc-bat').textContent) && !!vc.querySelector('.vc-bat .vc-bolt') && !!vc.querySelector('.vc-art svg .vc-dock');
+    const docked = vc.dataset.state === 'docked' && /Docked/.test(vc.querySelector('.vc-state').textContent) && /100%/.test(vc.querySelector('.vc-bat').textContent) && !!vc.querySelector('.vc-bat .okie-batt-bolt') && !!vc.querySelector('.vc-art svg .vc-dock');
     const keys = [...vc.querySelectorAll('.vc-btn')].map(b => b.dataset.act + (b.disabled ? '!' : '')).join();
     const tiles = [...vc.querySelectorAll('.vc-tile .vc-tl')].map(e => e.textContent.toLowerCase()).join();
     const mis = vc.querySelector('.vc-mis').textContent, stats = /420 missions/.test(mis) && /Successful 273/.test(mis) && /Cancelled 66/.test(mis) && /Failed 80/.test(mis) && /Averagemission7h/.test(mis.replace(/\s+/g, '')) && /Scrubs/.test(mis);

@@ -90,7 +90,7 @@
   }
 
   var CSS = [
-    '.pr-ind{position:absolute;left:50%;top:calc(var(--okie-top,0px) + 10px);transform:translate(-50%,calc(-100% - 10px));display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:9999px;border:1px solid rgba(255,255,255,.14);background:linear-gradient(150deg,rgba(255,255,255,.16),rgba(255,255,255,.05));-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);color:rgba(255,255,255,.85);font-size:13px;font-weight:600;white-space:nowrap;opacity:0;pointer-events:none;z-index:950;box-shadow:0 6px 16px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.2);}',
+    '.pr-ind{position:absolute;left:50%;top:calc(var(--okie-top,0px) + 10px);transform:translate(-50%,calc(-100% - 10px));display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:9999px;border:1px solid rgba(255,255,255,.14);background:linear-gradient(150deg,rgba(255,255,255,.16),rgba(255,255,255,.05));-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px)) saturate(1.3);backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.7),24px)) saturate(1.3);color:rgba(255,255,255,.85);font-size:13px;font-weight:600;white-space:nowrap;opacity:0;pointer-events:none;z-index:950;box-shadow:0 6px 16px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.2);}',
     '.pr-ind.on{opacity:calc(var(--pr-p,0) * .4 + .6);transform:translate(-50%,calc(-100% + (10px + 100%) * var(--pr-p,0) - 10px));}',
     '.pr-ind.snap{transition:transform .26s cubic-bezier(.23,1,.32,1),opacity .26s ease;}',
     '.pr-ind.go{opacity:1;transform:translate(-50%,10px);}',

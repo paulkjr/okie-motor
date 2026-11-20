@@ -11,6 +11,9 @@ import pathlib
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 bundle = (ROOT / "dist/okie-motor.js").read_text()
 mock = (ROOT / "harness/mock-hass.js").read_text()
+# the demo is one file: the Owlet camera's picture goes inside it
+_cam = base64.b64encode((ROOT / "harness/assets/nursery-cam.jpg").read_bytes()).decode("ascii")
+mock = mock.replace("'assets/nursery-cam.jpg'", "'data:image/jpeg;base64," + _cam + "'")
 img = base64.b64encode((ROOT / "harness/assets/room.jpg").read_bytes()).decode("ascii")
 song = base64.b64encode((ROOT / "harness/assets/demo-song.m4a").read_bytes()).decode("ascii")      # tools/make-demo-song.py
 song_info = (ROOT / "harness/assets/demo-song.json").read_text()
@@ -34,7 +37,7 @@ var q = new URLSearchParams(location.search); window.__lang = q.get('lang') || '
 if (q.get('fresh') === '1') { try { Object.keys(localStorage).filter(function (k) { return k.indexOf('okie:') === 0; }).forEach(function (k) { localStorage.removeItem(k); }); } catch (e) {} }   // your settings stay between visits and versions; ?fresh=1 starts clean
 var card = document.getElementById('card');
 var m = makeMockHass(function (h) { card.hass = h; });
-card.setConfig({ squircle: q.get('squircle') || 'none', start: q.get('start') || 'bento', zen: { enabled: q.get('zen') !== '0' }, language: window.__lang, splash: q.get('splash') || 'none', power_entity: 'sensor.house_power', weather_entity: 'weather.home', videos: { enabled: false } });
+card.setConfig({ squircle: q.get('squircle') || 'none', start: q.get('start') || 'bento', zen: { enabled: q.get('zen') !== '0' }, language: window.__lang, splash: q.get('splash') || 'none', power_entity: 'sensor.house_power', weather_entity: 'weather.home', videos: { enabled: false }, cameras: { owlet: { entity: 'camera.nursery_owlet' } }, owlet: { babyName: 'Jesus' } });
 // in the demo every light dims, so the brightness bars and the drag on the lamps work on all of them
 Object.keys(m.hass.states).forEach(function (id) { var e = m.hass.states[id]; if (id.indexOf('light.') !== 0 || !e || !e.attributes) return; var a = e.attributes; if (!a.supported_color_modes) a.supported_color_modes = ['brightness']; if (e.state === 'on' && !a.brightness) a.brightness = 200; });
 // the demo's own song (public-domain Greensleeves, played by a pretend music box) with its words: the music card plays real sound and the lyrics view runs in time

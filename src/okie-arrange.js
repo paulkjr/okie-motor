@@ -55,7 +55,7 @@
   core.registerStrings('de', { 'ar.reset': 'Zurücksetzen', 'ar.done': 'Fertig', 'ar.hint': 'Zum Ordnen ziehen', 'ar.reset_note': 'Zurück auf den Stand vor dem Bearbeiten' });
 
   var CSS = [
-    '.w1-editbar{display:none;position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:2999;align-items:center;gap:6px;padding:5px;border-radius:999px;background:rgba(28,26,24,.72);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),0 8px 24px rgba(0,0,0,.28);}',
+    '.w1-editbar{display:none;position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:2999;align-items:center;gap:6px;padding:5px;border-radius:999px;background:rgba(28,26,24,.72);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.9),24px)) saturate(1.6);backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.9),24px)) saturate(1.6);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),0 8px 24px rgba(0,0,0,.28);}',
     '.w1-editbar.on{display:flex;animation:ar-in .22s cubic-bezier(.23,1,.32,1) both;}.stage[data-mobile="true"] .w1-editbar{bottom:calc(98px + env(safe-area-inset-bottom,0px));}@keyframes ar-in{from{opacity:0;transform:translateX(-50%) translateY(8px) scale(.96);}to{opacity:1;transform:translateX(-50%);}}',
     '.w1-editbar .ar-hint{padding:0 8px 0 12px;font-size:13px;color:rgba(255,255,255,.7);white-space:nowrap;}',
     '.w1-editbar button{border:0;border-radius:999px;padding:9px 16px;font:inherit;font-size:14px;font-weight:600;color:#fff;background:rgba(255,255,255,.14);cursor:pointer;}',

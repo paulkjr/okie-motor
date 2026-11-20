@@ -123,7 +123,19 @@
     ent('binary_sensor.patio_motion', 'Patio Motion', 'on', { device_class: 'motion' }, { area_id: 'garden' }),
     ent('event.patio_motion', 'Patio Motion Event', new Date(Date.now() - 35 * 60000).toISOString(), { device_class: 'motion', event_type: 'motion' }, { area_id: 'garden' }),
     ent('event.patio_ding', 'Patio Doorbell Event', new Date(Date.now() - 4 * 3600000).toISOString(), { device_class: 'doorbell', event_type: 'ring' }, { area_id: 'garden' }),
-    ent('camera.nursery_owlet', 'Nursery Owlet', 'idle', { entity_picture: 'assets/room.jpg' }, { area_id: 'nursery' }),
+    ent('camera.nursery_owlet', 'Nursery Owlet', 'idle', { entity_picture: 'assets/nursery-cam.jpg' }, { area_id: 'nursery' }),
+    // a healthy baby asleep: the Owlet Dream Sock's sensors (names as the owlet integration makes them)
+    ent('sensor.nursery_owlet_sock_heart_rate', 'Owlet Sock Heart rate', '125', { unit_of_measurement: 'bpm' }, { area_id: 'nursery' }),
+    ent('sensor.nursery_owlet_sock_o2_saturation', 'Owlet Sock O2 saturation', '99', { unit_of_measurement: '%' }, { area_id: 'nursery' }),
+    ent('sensor.nursery_owlet_sock_o2_saturation_10_minute_average', 'Owlet Sock O2 10 min avg', '98', { unit_of_measurement: '%' }, { area_id: 'nursery' }),
+    ent('sensor.nursery_owlet_sock_skin_temperature', 'Owlet Sock Skin temperature', '97.5', { unit_of_measurement: '°F' }, { area_id: 'nursery' }),
+    ent('sensor.nursery_owlet_sock_signal_strength', 'Owlet Sock Signal strength', '-52', { unit_of_measurement: 'dBm', device_class: 'signal_strength' }, { area_id: 'nursery' }),
+    ent('sensor.nursery_owlet_sock_battery_percentage', 'Owlet Sock Battery', '94', { unit_of_measurement: '%' }, { area_id: 'nursery' }),
+    ent('sensor.nursery_owlet_sock_sleep_state', 'Owlet Sock Sleep state', 'deep_sleep', {}, { area_id: 'nursery' }),
+    ent('binary_sensor.nursery_owlet_sock_awake', 'Owlet Sock Awake', 'off', {}, { area_id: 'nursery' }),
+    ent('binary_sensor.nursery_owlet_sock_charging', 'Owlet Sock Charging', 'off', {}, { area_id: 'nursery' }),
+    ent('binary_sensor.nursery_owlet_sock_sock_off', 'Owlet Sock Sock off', 'off', {}, { area_id: 'nursery' }),
+    ent('binary_sensor.nursery_owlet_sock_data_stale', 'Owlet Sock Data stale', 'off', {}, { area_id: 'nursery' }),
     ent('sensor.nursery_owlet_temperature', 'Nursery Owlet Temperature', '71', { device_class: 'temperature', unit_of_measurement: '°F' }, { area_id: 'nursery' }),
     ent('sensor.nursery_owlet_humidity', 'Nursery Owlet Humidity', '52', { device_class: 'humidity', unit_of_measurement: '%' }, { area_id: 'nursery' }),
     ent('switch.nursery_owlet_recording', 'Nursery Owlet Recording', 'off', {}, { area_id: 'nursery' }),
@@ -373,7 +385,17 @@
         }
         return Promise.resolve([rows]);
       },
+      // HA's media uploader (the hero picture of a screen): keeps the file in this page as a blob URL
+      fetchWithAuth: function (path, init) {
+        if (path === '/api/media_source/local_source/upload' && init && init.body && init.body.get) {
+          var f = init.body.get('file'), id = init.body.get('media_content_id') + '/' + (f.name || 'upload');
+          (window.__okieUploads = window.__okieUploads || {})[id] = URL.createObjectURL(f);
+          return Promise.resolve({ ok: true, status: 200, json: function () { return Promise.resolve({ media_content_id: id }); } });
+        }
+        return Promise.resolve({ ok: false, status: 404, json: function () { return Promise.resolve({}); } });
+      },
       callWS: function (msg) {
+        if (msg.type === 'media_source/resolve_media' && window.__okieUploads && window.__okieUploads[msg.media_content_id]) return Promise.resolve({ url: window.__okieUploads[msg.media_content_id] });
         if (msg.type === 'media_player/browse_media') {
           (g.__browseCalls = g.__browseCalls || []).push([msg.media_content_id || null, msg.media_content_type || null]);
           var bst = hass.states[msg.entity_id];
@@ -399,6 +421,21 @@
         }
         if (msg.type === 'energy/get_prefs') return Promise.resolve({ energy_sources: [{ type: 'grid', flow_from: [{ stat_energy_from: 'sensor.grid_in' }], flow_to: [{ stat_energy_to: 'sensor.grid_out' }] }, { type: 'solar', stat_energy_from: 'sensor.solar' }], device_consumption: [] });
         if (msg.type === 'recorder/statistics_during_period') {
+          if (msg.statistic_ids.some(function (id) { return /owlet_sock_(heart_rate|o2_saturation)$/.test(id); })) {      // the sock's long-term statistics: mean/min/max per 5 minutes, hour or day
+            var oo = {}, s0 = Date.parse(msg.start_time), e0 = Math.min(Date.now(), msg.end_time ? Date.parse(msg.end_time) : Date.now()), st = msg.period === '5minute' ? 3e5 : msg.period === 'hour' ? 36e5 : 864e5;
+            msg.statistic_ids.forEach(function (id) { var hq = /heart/.test(id); oo[id] = [];
+              for (var tq = s0; tq < e0; tq += st) { var mq = (Date.now() - tq) / 60000, dq = Math.floor(mq / 1440), vq = hq ? 122 + 6 * Math.sin(mq / 37) + 5 * Math.sin(mq / 11) + 3 * Math.sin(dq * 1.7) : 98.4 + .5 * Math.sin(mq / 29) + .3 * Math.sin(mq / 7) + .2 * Math.sin(dq * 2.3), sp = st === 3e5 ? 1 : st === 36e5 ? 4 : 9;
+                oo[id].push({ start: tq, end: tq + st, mean: Math.round(vq * 10) / 10, min: Math.round((vq - (hq ? sp * 1.6 : sp * .3)) * 10) / 10, max: Math.min(hq ? 999 : 100, Math.round((vq + (hq ? sp * 1.6 : sp * .3)) * 10) / 10) }); } });
+            return Promise.resolve(oo);
+          }
+          if ((msg.types || []).indexOf('mean') >= 0) {      // a measurement sensor (temperature, humidity ...): mean / min / max around its value now, a daily rhythm
+            var om = {}, sm = Date.parse(msg.start_time), em = Math.min(Date.now(), msg.end_time ? Date.parse(msg.end_time) : Date.now()), stm = msg.period === '5minute' ? 3e5 : msg.period === 'hour' ? 36e5 : 864e5;
+            msg.statistic_ids.forEach(function (id) { var base = parseFloat((hass.states[id] || {}).state); om[id] = []; if (!isFinite(base)) return;
+              var amp = Math.max(0.6, Math.abs(base) * 0.06);
+              for (var tm = sm; tm < em; tm += stm) { var hm = new Date(tm).getHours() + new Date(tm).getMinutes() / 60, dm = Math.floor((Date.now() - tm) / 864e5), vm = base + amp * Math.sin((hm - 9) / 24 * 2 * Math.PI) + amp * 0.3 * Math.sin(dm * 1.3), sp2 = stm === 864e5 ? amp * 0.9 : amp * 0.12;
+                om[id].push({ start: tm, end: tm + stm, mean: Math.round(vm * 10) / 10, min: Math.round((vm - sp2) * 10) / 10, max: Math.round((vm + sp2) * 10) / 10 }); } });
+            return Promise.resolve(om);
+          }
           var out = {}, start = Date.parse(msg.start_time), end = msg.end_time ? Date.parse(msg.end_time) : Date.now(), stepMs = msg.period === 'hour' ? 3600e3 : 86400e3;
           msg.statistic_ids.forEach(function (id) { out[id] = []; for (var t0 = start; t0 < end; t0 += stepMs) { var hr = new Date(t0).getHours(), sun = msg.period === 'hour' ? Math.max(0, Math.sin((hr - 6) / 12 * Math.PI)) : 1, v = id === 'sensor.solar' ? 2.2 * sun * (msg.period === 'hour' ? 1 : 8) : id === 'sensor.grid_out' ? 0.4 * sun * (msg.period === 'hour' ? 1 : 3) : (0.3 + 0.2 * Math.abs(Math.sin(hr / 3))) * (msg.period === 'hour' ? 1 : 12); out[id].push({ start: t0, end: t0 + stepMs, change: Math.round(v * 100) / 100 }); } });
           return Promise.resolve(out);
@@ -426,6 +463,16 @@
             else if (id === 'event.patio_ding') res[id] = [ago(240), ago(1700)].reverse().map(row);
             else if (id === 'binary_sensor.patio_motion') res[id] = [{ s: 'on', lu: ago(35) / 1000 + 1.5 }, { s: 'off', lu: ago(34) / 1000 }];       // the sensor and the event of the same motion: one entry
             else if (id === 'vacuum.robo') res[id] = [{ s: 'docked', lu: ago(3000) / 1000 }, { s: 'cleaning', lu: ago(2900) / 1000 }, { s: 'returning', lu: ago(2880) / 1000 }, { s: 'docked', lu: ago(2870) / 1000 }, { s: 'cleaning', lu: ago(130) / 1000 }, { s: 'returning', lu: ago(124) / 1000 }, { s: 'docked', lu: ago(121) / 1000 }];
+            else if (/owlet_sock_(heart_rate|o2_saturation|skin_temperature|signal_strength)$/.test(id)) {      // a night of readings every 5 minutes, smooth like the sock's
+              var hrq = /heart/.test(id), skq = /skin/.test(id), sgq = /signal/.test(id), out = [];
+              for (var m = 24 * 60; m >= 0; m -= 5) { var tt = ago(m), v = skq ? 97.5 + .3 * Math.sin(m / 50) : sgq ? -52 + 4 * Math.sin(m / 13) : hrq ? 122 + 6 * Math.sin(m / 37) + 5 * Math.sin(m / 11) : 98.4 + .5 * Math.sin(m / 29) + .3 * Math.sin(m / 7); out.push({ s: String(Math.round(v * 10) / 10), lu: tt / 1000 }); }
+              res[id] = out;
+            } else if (/owlet_sock_sleep_state$/.test(id)) {      // asleep since 6 h 24 min ago: light and deep cycles with one short waking
+              var st0 = 384, seq = [['awake', 600], ['light_sleep', st0], ['deep_sleep', st0 - 40], ['light_sleep', st0 - 95], ['awake', st0 - 140], ['light_sleep', st0 - 148], ['deep_sleep', st0 - 175], ['light_sleep', st0 - 240], ['deep_sleep', st0 - 270], ['light_sleep', st0 - 330]];
+              var past = [], fromMs = Date.parse(msg.start_time) || 0;      // the nights before: the same rhythm, a little shorter or longer each night
+              for (var dn = 9; dn >= 1; dn--) { var off = dn * 1440, ln = 520 + 40 * Math.sin(dn * 1.9); past.push(['awake', off + 900], ['light_sleep', off + ln], ['deep_sleep', off + ln - 45], ['light_sleep', off + ln - 120], ['awake', off + ln - 200], ['light_sleep', off + ln - 210], ['deep_sleep', off + ln - 260], ['light_sleep', off + ln - 380], ['awake', off + 60]); }
+              res[id] = past.concat(seq).filter(function (x) { return ago(x[1]) >= fromMs - 864e5; }).map(function (x) { return { s: x[0], lu: ago(x[1]) / 1000 }; });
+            }
             else res[id] = [];
           });
           return Promise.resolve(res);

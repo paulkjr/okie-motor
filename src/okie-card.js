@@ -33,7 +33,7 @@
     topCategory: 'devices', chip: 'all', layout: 'grid',
     squircle: 'none',
     quickEnabled: true, quickControl: L.DEFAULT_QUICK,
-    favorites: [], detailHero: 0, heroW: {}, tvApps: {}, deviceNames: {}, rooms: [], roomOrder: {}, roomsOrder: [], roomEdits: {}, cardStyle: {}, roomsExtra: [], roomsHidden: [], roomNames: {}, learning: 'normal',
+    favorites: [], detailHero: 0, heroW: {}, heroMedia: {}, owlet: { soundNames: {}, babyName: '', birthDate: '', sleepGoalH: 10, photo: null, schedule: { from: '20:00', to: '07:00' }, track: { hr: true, o2: true, sleep: true }, alerts: { lowHr: { on: true, v: 80 }, highHr: { on: true, v: 180 }, lowO2: { on: true, v: 92 }, sockOff: { on: true } } }, tvApps: {}, deviceNames: {}, rooms: [], roomOrder: {}, roomsOrder: [], roomEdits: {}, cardStyle: {}, roomsExtra: [], roomsHidden: [], roomNames: {}, learning: 'normal',
     visibility: { hidden: false, disabled: false, diagnostic: false },
     excluded: ['switch.schedule_*'],     // the Scheduler component's helper switches belong to the Schedules app, not the device list
     limits: { max: 0, areaOnly: true, hideUnavailable: true },
@@ -48,7 +48,7 @@
     zen: { enabled: true, text: 'auto', name: '', quoteEntity: 'sensor.quote_of_the_day', keepOpen: true },
     search: { filterBy: 'categories', columns: 5, recent: 'standard', typewriter: true, context: true, chips: true, filterButton: true, count: true, timeSort: true, ai: true },
     island: { show: true, fold: true, toCapsuleSec: 30, toButtonSec: 60, liveShow: true, live: { timers: true, vacuums: true, covers: true, media: true, scripts: true, climate: false, lights: false, switches: false } },
-    bento: { enabled: true, deckPages: null, swap: false, w1: true, w2: true, w3: 'todos', w4: 'news', w1mode: 'favorites', w1layout: 'list', pages: ['weather', 'todos', 'news', 'calendar', 'tips'], slideSec: 8, news_entity: '', w1height: 0, camerasCard: true, sensorsCard: true, stacks: null, feederCard: true, feederDesign: 'compact', feeder: 'auto', leftWidgets: [], rightCards: [], rightOrder: null, wrheight: 0, oneWidget: true, pagesVer: 0 },
+    bento: { enabled: true, deckPages: null, swap: false, w1: true, w2: true, w3: 'todos', w4: 'news', w1mode: 'favorites', w1layout: 'list', pages: ['weather', 'todos', 'news', 'calendar', 'tips'], slideSec: 8, news_entity: '', w1height: 0, camerasCard: true, sensorsCard: true, owletCard: true, stacks: null, feederCard: true, feederDesign: 'compact', feeder: 'auto', leftWidgets: [], rightCards: [], rightOrder: null, wrheight: 0, oneWidget: true, pagesVer: 0 },
     suggest: { enabled: true, max: 10 },
     mobile: { autoOpen: false }, haptic: true, sound: false,
     height: 'auto', top_offset: 0,
@@ -122,7 +122,7 @@
     // fallback detail
     '.fd{display:flex;flex-direction:column;gap:16px;padding:22px;height:100%;}',
     '.fd-top{display:flex;align-items:center;gap:12px;}',
-    '.fd-back{width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.5);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:grid;place-items:center;}',
+    '.fd-back{width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.5);-webkit-backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.5),24px));backdrop-filter:blur(clamp(6px,calc(var(--glass-blur-amount,20px)*0.5),24px));display:grid;place-items:center;}',
     '.fd-title{font-size:20px;font-weight:600;}.fd-sub{font-size:13px;color:var(--okie-text-dim);}',
     '.fd-state{font-size:56px;font-weight:300;letter-spacing:-.02em;margin-top:12px;}',
     '.fd-btn{align-self:flex-start;padding:12px 22px;border-radius:9999px;background:#fff;color:#1d1b19;font-weight:600;}',
@@ -189,9 +189,25 @@
     }
 
     // ---------------------------------------------------------- setup ----
+    /** The Kindle's baby monitor (2026-11-20): the Kindle Deck opens this dashboard with ?okie=baby; the card then keeps the Owlet camera
+     *  screen open full screen (and its live picture never pauses). Ordinary visits are untouched. */
+    _babyKiosk() {
+      var q; try { q = new URLSearchParams(location.search).get('okie'); } catch (e) { q = null; }
+      if (q !== 'baby' || this._babyT) return;
+      g.__okieKiosk = true;
+      var self = this, tryOpen = function () {
+        if (document.querySelector('[data-okie-cam-full]') || !self._ctx) return;
+        if (self._locked) self._setLocked(false, true);      // the lock page (clock and quote) would sit over the camera
+        var OW = g.OkieMotor.owlet, cam = OW && OW.babyCam ? OW.babyCam(self._ctx) : null; if (!cam) return;
+        if (!(self._nav && self._nav.mode === 'detail' && self._nav.itemId === cam)) self._openDetail(cam);
+        setTimeout(function () { var root = self.shadowRoot || self._root, p = root && root.querySelector('.cam-player:not(.holder)'); if (p && !document.querySelector('[data-okie-cam-full]')) p.click(); }, 1500);
+      };
+      this._babyT = setInterval(tryOpen, 4000); setTimeout(tryOpen, 1500);
+    }
     _maybeInit() {
       if (this._ready || !this._config || !this._hass) return;
       this._ready = true;
+      this._babyKiosk();
       var defaults = Object.assign({}, DEFAULTS, g.OkieMotor.defaults || {});
       this._store = core.createStore({ prefix: 'okie:' });
       this._settings = core.createSettings({ store: this._store, defaults: defaults, config: this._config });
@@ -239,7 +255,7 @@
       this._disposers.push(() => this.removeEventListener('keydown', onKey));
       requestAnimationFrame(() => this._measure());
       var s = this._settings.get();
-      var wantLock = !!(s.zen && s.zen.enabled && s.start !== 'browse') && !(s.zen.keepOpen !== false && this._recentlyOpen());
+      var wantLock = !!(s.zen && s.zen.enabled && s.start !== 'browse') && !(s.zen.keepOpen !== false && this._recentlyOpen()) && !g.__okieKiosk;      // the Kindle's baby monitor never starts on the lock page
       this._show('start', {}, true);
       this._setLocked(wantLock, true);
       this._restoreNav();
@@ -373,7 +389,7 @@
         sheet: function (o) { return self._overlay.sheet(o); },
         morph: function (o) { return self._overlay.morph(o); },
         defer: function (label, fn, onUndo) { return self._overlay.defer(label, fn, onUndo); },
-        openDetail: function (id, origin) { self._openDetail(id, origin); },
+        openDetail: function (id, origin, tab) { self._openDetail(id, origin, false, tab); },
         weatherId: function () { var w = self._weatherEntity(); return w ? w.entity_id : null; },
         openApp: function (id, o) { self._openApp(id, false, !!(o && o.push)); },
         openStart: function () { self._show('start'); },
@@ -590,6 +606,7 @@
       this.style.setProperty('--okie-fs', String(L.textScale(s.textScale)));
       this.style.setProperty('--okie-tile-clip', SQ.clipPath(s.squircle));
       this.style.setProperty('--card-clip-path', SQ.clipPath(s.squircle));
+      this.style.setProperty('--okie-rc-radius', ({ soft: 29, standard: 32, strong: 40 }[s.squircle] || 26) + 'px');      // rich cards (.rc, okie-rooms.js): Card shape sets only how soft their corners are (the user's values: none 26, standard 32, strong 40; soft between). The percentage squircle polygons stretch on wide cards, so they are not used there
       this.style.setProperty('--glass-blur-amount', (gl.blur == null ? 20 : gl.blur) + 'px');
       var local = !!s.wallpaper && !g.OkieMotor.wallpaperInView;      // inside Home Assistant the whole view carries the wallpaper
       var bright = (gl.brightness == null ? 100 : gl.brightness) + '%', sat = gl.saturation == null ? 100 : gl.saturation;
@@ -687,6 +704,9 @@
       var items = S.buildCollection(hs, { includeHidden: s.visibility.hidden, includeDisabled: s.visibility.disabled, includeDiagnostic: s.visibility.diagnostic });
       items = items.filter(function (i) { var st = hs.states[i.id]; return !(st && st.attributes && Array.isArray(st.attributes.entries)); });   // news feed sensors belong to the News app
       if (g.OkieMotor.gadgets) items = g.OkieMotor.gadgets.apply(items, hs.states, hs.areas);      // the Kindle and the AWTRIX: one tile each instead of dozens of entities
+      var folded = {}; if (g.OkieMotor.owlet && g.OkieMotor.owlet.owns) items.forEach(function (i) { if (g.OkieMotor.owlet.owns(i.id)) folded[i.id] = i; });
+      this._folded = folded;      // the sock's own sensors stay out of search and lists, but their screens still open from the Owlet pages (a vital's chart)
+      if (g.OkieMotor.owlet && g.OkieMotor.owlet.fold) items = g.OkieMotor.owlet.fold(items, hs.states, hs.areas);      // the Owlet Sock: one item (gadget.owlet) instead of thirty sensors
       if (g.OkieMotor.lights) items = items.concat([{ id: 'gadget.lights', domain: 'gadget', deviceClass: 'light', name: ctx_lang_is_de(this) ? 'Lichter' : 'Lights', areaId: 'okie_apps', area: '', labels: [], state: '', unit: null, icon: null, category: null }]);      // the Lights screen: a tile you can pin with its heart
       if (s.limits && s.limits.max > 0) items = items.slice(0, s.limits.max);
       var dn = s.deviceNames || {}; items.forEach(function (it) { if (dn[it.id]) it.name = dn[it.id]; });      // the names you gave your devices (the pencil of a device screen)
@@ -875,7 +895,7 @@
     }
     _onRest(e) {
       if (!e) return;
-      if (e.phase === 'saver' || e.phase === 'deep') this._setLocked(true, true);
+      if ((e.phase === 'saver' || e.phase === 'deep') && !g.__okieKiosk) this._setLocked(true, true);      // the Kindle's baby monitor never rests into the lock page
       var hr = new Date().getHours();
       this._stage.dataset.nacht = hr >= 22 || hr < 6 ? 'ja' : 'nein';
       if (e.phase === 'deep') this._stage.dataset.ambient = 'tief'; else delete this._stage.dataset.ambient;
@@ -911,10 +931,12 @@
       this._renderDock();
       this._bus.emit('nav', this._nav);
     }
-    _openDetail(id, origin, restoring) {
-      var item = this._engine.getItem(id);
+    _openDetail(id, origin, restoring, tab) {
+      var item = this._engine.getItem(id), hidden = !item && this._folded && this._folded[id];
+      if (hidden) item = hidden;
       if (!item) return;
       if (id === 'gadget.lights') return this._openApp('lights');
+      if (id === 'gadget.owlet' && g.OkieMotor.apps.get('owlet')) return this._openApp('owlet');
       if (item.domain === 'gadget' && g.OkieMotor.apps.get('gadget-' + id.slice(7))) return this._openApp('gadget-' + id.slice(7));
       if (item.domain === 'todo' && g.OkieMotor.apps.get('tasks')) return this._openApp('tasks');
       if (item.domain === 'calendar' && g.OkieMotor.apps.get('calendar')) return this._openApp('calendar');
@@ -927,7 +949,7 @@
       this._nav = { mode: 'detail', itemId: id, appId: null };
       this._stage.dataset.detail = 'open'; this._measure();
       var d = g.OkieMotor.detail, self = this;
-      this._detailView = this._boundary(this._vOver, function () { return (d && d.render) ? d.render(self._vOver, self._ctx, id) : self._fallbackDetail(id); }, 'detail ' + id);
+      this._detailView = this._boundary(this._vOver, function () { return (d && d.render) ? d.render(self._vOver, self._ctx, id, { tab: tab, item: hidden || null }) : self._fallbackDetail(id); }, 'detail ' + id);
       this._animateIn(this._vOver);
       this._renderDock();
       this._bus.emit('nav', this._nav);

@@ -2,6 +2,21 @@
 
 The same entries are shown inside the card (dock > What's new). Newest first.
 
+## 0.59.0 (2026-11-20)
+
+**What's new since 0.58.0: the Owlet becomes a full app, a real camera screen, and History for every sensor.**
+- The Owlet Dream Sock is one item: a Favorites card with a status light (green = all good, yellow = check the sock, red = alarm, blue = charging) and a right-column card
+- The Owlet app has five pages: Overview, Live, Sleep, History and Settings, with your baby's name, photo and age
+- Every number sensor has a History tab: a day, a week or a month as a chart, with the low, the high and the average
+- The Owlet camera opens full screen like a baby monitor: heart rate, oxygen, skin temperature and signal on glass cards over the picture, the buttons fade after 3 seconds and come back with a tap; on a phone held upright the picture fills the screen and you can move it around
+- Full-screen cameras: pinch to zoom, sound with a volume slider (live WebRTC on your home network), turn the picture, snapshot with a flash and a click, record a clip and tap again to stop it
+- Lullabies: the camera's own sounds and your own songs, loop, a sleep timer and the volume; rename any sound with the pencil; hold the mic to talk to the room
+- Baby monitor mode: a switch under Settings > Monitoring for a wall tablet that should show only the baby camera
+- Every screen can have its own hero picture, and the hero width you pick is kept per screen
+- Music: your own library from a Navidrome (Subsonic) server ("My library"), and the Music app fits a phone
+- One design system everywhere: one battery look, shared colours, and the glass, tint and text size settings reach every card
+- Note: the nursery speaker (lullabies, talk), the clip recorder and the wall-tablet switch need small server helpers that are not part of this repository. Without them the card says these parts are not set up yet; everything else works on its own. See docs/guides/10-OWLET.md
+
 ## 0.58.0 (2026-11-17)
 
 **An Owlet camera gets its own view, like LensLink.**
